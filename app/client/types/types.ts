@@ -23,6 +23,10 @@ export type TimerResetSchema = {
   resetTime: boolean;
 };
 
+export type CanvasSchema = {
+  canvas: boolean
+}
+
 export type AlertProps = {
   alertTitle: string;
   alertDescription: string;
@@ -50,6 +54,7 @@ export type SidebarProps = {
   setCurrentRoute: React.Dispatch<React.SetStateAction<string>>
 }
 
+
 export type SidebarNavProps = {
   profilePic: string,
   firstName: string
@@ -60,4 +65,51 @@ export type onGoingCoursesProps = {
   courseName: string,
   currentTopic: string,
   progress: number,
+}
+
+export type NewCourseCardProps = {
+  category: string,
+  title: string,
+  description: string,
+  courseImg: string,
+  instructorImg: string,
+  instructorName: string,
+  dateOfCreation: string,
+}
+
+export type LatestUpdateProps = {
+  updateUrl: string,
+  updateCategory: string,
+  updateTitle: string,
+  updateDesc: string,
+}
+
+export type NotificationCardProps = {
+  senderURL: string,
+  sendersName: string,
+  dateSent: string,
+  descriptionOfWhatWasSent: string,
+}
+
+export type MyCoursesCardProps = {
+  imgUrl: string,
+  category: string,
+  title: string,
+  desc: string,
+  instructorImg: string,
+  progress: number,
+  instructorsName: string,
+  continueCourse: (id: string) => void,
+  topic: string,
+}
+
+export type CourseCard = {
+  imageUrl: string;
+  title: string;
+  description: string;
+  creator: {
+    name: string;
+    imageUrl?: string;
+  };
+  topics: string[];
 }

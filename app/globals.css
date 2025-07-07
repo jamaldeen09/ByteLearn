@@ -60,10 +60,10 @@
   --breakpoint-iphone:200px; 
   --breakpoint-sm:480px;
   --breakpoint-md:768px;
-  --breakpoint-lg:1300px;
+  --breakpoint-lg:1400px;
   --breakpoint-max-lg:1024px;
   --breakpoint-max-sm:350px;
-
+  /* --breakpoint-lg:1300px; */
 }
 
 @theme inline {

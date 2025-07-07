@@ -9,7 +9,6 @@ const Sidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
 
     return (
         <>
-         {/* Desktop Sidebar */}
             <div className="col-span-1 max-lg:col-span-3 py-4 hidden md:flex flex-col">
                 {/* Routes */}
                 <div className="min-h-96 flex flex-col space-y-4">
@@ -69,7 +68,6 @@ const Sidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
                     </ul>
                 </div>
             </div>
-            {/* Mobile SideBar */}
         </>
     )
 }
