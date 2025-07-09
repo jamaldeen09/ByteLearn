@@ -5,13 +5,21 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import axios from "../../../utils/config/axios"
+import QuizComponent from './QuizComponent';
 
 const SkillContent = ({ skillId }: { skillId: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
-  
+
   const currentTab = searchParams.get('tab') || 'my-courses';
+
+  const quiz = searchParams.get('quiz');
+  const topicId = searchParams.get('topicId');
+
+  if (quiz === "true" && topicId) {
+    return <QuizComponent topicId={topicId} />
+  }
 
   // Get all skills from all topics
   const topics = useAppSelector(state => state.singleCourse.topics) || [];
@@ -39,7 +47,19 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
     if (currentIndex < totalSkills - 1) {
       const nextSkillId = allSkills[currentIndex + 1]._id;
       router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&skillId=${nextSkillId}`);
-    } else { router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}`); }
+    } else {
+
+      const parentTopic = topics.find(topic =>
+        topic.skills.some(skill => skill._id === skillId)
+      );
+      const topicId = parentTopic?._id;
+      
+      if (topicId) {
+        router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&topicId=${topicId}&quiz=true`);
+      } else {
+        toast.error("Topic not found for quiz routing");
+      }
+    }
   };
 
   const goToPrevSkill = () => {
@@ -54,36 +74,38 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
   };
 
   const [completed, setCompleted] = useState(false);
-  
+
   // make api fetch request to the endpoint
   const markSkillCompleted = async () => {
     axios.post("/api/mark-skill-as-completed", {
       courseId: courseId,
       skillId: skillId
     }, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
-    .then((res) => {
-      setCompleted(true);
-    }).catch((err) => {
-      console.error(err)
-      if (err.response.status === 401) {
-        toast.error("Unauthorized")
-        return;
-      } else if (err.response.status === 404) {
-        toast.error(err.response.data.msg)
-        return;
-      } else if (err.response.status === 409){
-        return;
-      } else {
-        toast.error("Network error")
-        return;
-      }
-    })
+      .then((res) => {
+        setCompleted(true);
+      }).catch((err) => {
+        console.error(err)
+        if (err.response.status === 401) {
+          toast.error("Unauthorized")
+          return;
+        } else if (err.response.status === 404) {
+          toast.error(err.response.data.msg)
+          return;
+        } else if (err.response.status === 409) {
+          return;
+        } else {
+          toast.error("Network error")
+          return;
+        }
+      })
   };
 
   const handleComplete = async () => {
     await markSkillCompleted();
     setCompleted(true);
   };
+
+ 
   return (
     <div className="col-span-14 h-[90vh] flex justify-center py-6">
       <div className="w-full max-w-5xl flex flex-col gap-10">

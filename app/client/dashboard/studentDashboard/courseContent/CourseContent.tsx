@@ -1,5 +1,5 @@
 "use client"
-import { MyCoursesProp } from "@/app/client/types/types"
+import { courseSchema, MyCoursesProp, singleCourseSchema } from "@/app/client/types/types"
 import axios from "../../../utils/config/axios"
 import { useEffect, useState } from "react"
 import { useRedirect } from "@/app/client/utils/utils"
@@ -12,20 +12,12 @@ import { ArrowRightIcon } from "@radix-ui/react-icons"
 import TopicContentDisplay from "@/app/client/components/reusableComponents/TopicContentDisplay"
 import { useSearchParams } from "next/navigation"
 import SkillContent from "./SkillContent"
+import QuizResult from "./QuizResult"
+import { getCompletedSkills } from "@/app/redux/coursesSlices/completedSkillsSlice"
+import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
 
 
 const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
-
-  const [progress, setProgress] = useState<number>(10)
-  // Ensure progress is between 0-100
-  const clampedProgress = Math.min(100, Math.max(0, progress));
-
-  // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
-  const progressColor = clampedProgress >= 70
-    ? "bg-green-500"
-    : clampedProgress >= 40
-      ? "bg-yellow-500"
-      : "bg-red-500";
 
   if (!courseId) {
     return (
@@ -40,6 +32,20 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
       </div>
     )
   }
+  
+  const [progress, setProgress] = useState<number>(10)
+
+  // Ensure progress is between 0-100
+  const clampedProgress = Math.min(100, Math.max(0, progress));
+
+  // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
+  const progressColor = clampedProgress >= 70
+    ? "bg-green-500"
+    : clampedProgress >= 40
+      ? "bg-yellow-500"
+      : "bg-red-500";
+
+  
 
   // fetch course details with courseId
   const { redirectTo } = useRedirect()
@@ -69,10 +75,73 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   }, [])
   // http://localhost:3000/client/dashboard/studentDashboard?tab=my-courses&courseId=686e4da8449a3a5a46fe0c0d
 
-  // global state managing course information
+  useEffect(() => {
+    axios.get("/api/courses").then((res) => {
+      dispatch(getCourses(res.data.courses));
+
+    }).catch((err) => {
+      console.error(err);
+    })
+  }, [])
+
+  const completedSkillsContainer = useAppSelector(state => state.completedSkills.completedSkills) // ["0000"]
+  const courses = useAppSelector(state => state.coursesSlice.courses)
+  const skills = courses.map((course) => course.topics.map((topic) => topic.skills))
+
+  console.log(courses)
+  useEffect(() => {
+    // completedSkills
+    axios.get(`/api/completed-skills/${courseId}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
+      dispatch(getCompletedSkills(res.data.completedSkills))
+  
+    }).catch((err) => {
+      if (err.response.status === 401 || err.response.status === 404) {
+        toast.error(err.response.data.msg)
+      } else {
+        toast.error("Network error")
+      }
+    })
+  }, []) 
   const singleCourseInformation = useAppSelector((state) => state.singleCourse)
   const searchParams = useSearchParams();
   const skillId = searchParams.get("skillId");
+
+
+  
+  // Calculate progress whenever course or completed skills change
+  useEffect(() => {
+    if (singleCourseInformation && singleCourseInformation.topics && completedSkillsContainer) {
+      const calculatedProgress = calculateCourseProgress(
+        singleCourseInformation, 
+        completedSkillsContainer.map(skill => skill._id.toString())
+      );
+      setProgress(calculatedProgress);
+    }
+  }, [singleCourseInformation, completedSkillsContainer]);
+
+  // ... rest of your component ...
+
+  const calculateCourseProgress = (course: singleCourseSchema, completedSkills: string[]) => {
+    // Convert completed skills to Set for O(1) lookups
+    const completedSet = new Set(completedSkills);
+    let totalSkills = 0;
+    let completedCount = 0;
+  
+    course.topics.forEach(topic => {
+      topic.skills.forEach(skill => {
+        totalSkills++;
+        if (completedSet.has(skill._id.toString())) {
+          completedCount++;
+        }
+      });
+    });
+  
+    return totalSkills > 0 ? Math.round((completedCount / totalSkills) * 100) : 0;
+  };
+
+  // global state managing course information
+ 
+
 
   if (loadingFetch) {
     return (
@@ -84,9 +153,17 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
     )
   }
 
-  if (skillId) {
-    return <SkillContent skillId={skillId}/>
+  const quiz = searchParams.get("quiz");
+  const topicId = searchParams.get("topicId");
+  const quizResults = searchParams.get("quizResults");
+
+  if (skillId || (quiz === "true" && topicId)) {
+    return <SkillContent skillId={skillId ?? ""} />
   }
+  if (quizResults) {
+    return <QuizResult />
+  }
+
   return (
     <div
       className="col-span-14 min-h-[90vh]"
@@ -101,8 +178,6 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         </div>
 
         {/* Course details + topics showcase */}
-
-
         <div
           className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10
          max-lg:border-black flex-col max-lg:flex-row "
@@ -162,14 +237,14 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           flex flex-col space-y-4">
 
             {singleCourseInformation.topics.map((topic, index: number) => {
-            
+
               return (
 
                 <TopicContentDisplay
                   key={index}
                   topicTitle={topic.title}
                   topicsSkillsTitle={topic.skills}
-                  selectedSkillId={skillId} 
+                  selectedSkillId={skillId}
                 />
               )
             })}

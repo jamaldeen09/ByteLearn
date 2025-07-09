@@ -4,6 +4,7 @@ import userInformaionSlice from "./informationSlices/usersInformationSlice"
 import canvasSlice from "./triggers/canvasTriggerSlice"
 import courseSlice from "./coursesSlices/courseSlice"
 import singleCourseSlice from "./coursesSlices/singleCourseSlice"
+import completedSkillsSlice from "./coursesSlices/completedSkillsSlice"
 
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     canvasTrigger: canvasSlice,
     coursesSlice: courseSlice,
     singleCourse: singleCourseSlice,
+    completedSkills: completedSkillsSlice
   }
 })
 

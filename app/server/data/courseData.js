@@ -599,3 +599,229 @@ body {
   dateCreated: new Date(),
   isPublished: true
 };
+
+
+export const pythonCourse = {
+  title: "Python Programming Mastery",
+  description: "Learn Python from fundamentals to advanced concepts, including OOP, data structures, and popular frameworks for building robust applications.",
+  category: "Programming",
+  imageUrl: "https://miro.medium.com/v2/resize:fit:1400/1*RJMxLdTHqVBSijKmOO5MAg.jpeg",
+  topics: [
+    {
+      title: "Python Fundamentals",
+      skills: [
+        {
+          skillTitle: "Variables and Data Structures",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Python Variables</h2>
+              <p class="mb-4">Python uses dynamic typing and has several basic data types:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Variable examples
+name = "Alice"          # String
+age = 30                # Integer
+price = 19.99           # Float
+is_active = True        # Boolean
+fruits = ["apple", "banana"]  # List</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Core Data Structures</h2>
+              <p class="mb-4">Python has several built-in data structures:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li><strong>Lists</strong>: Mutable ordered sequences <code>[1, 2, 3]</code></li>
+                <li><strong>Tuples</strong>: Immutable ordered sequences <code>(1, 2, 3)</code></li>
+                <li><strong>Dictionaries</strong>: Key-value pairs <code>{"name": "Alice", "age": 30}</code></li>
+                <li><strong>Sets</strong>: Unordered unique elements <code>{"apple", "banana"}</code></li>
+              </ul>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Type Conversion</h2>
+              <p class="mb-4">Python provides built-in functions for type conversion:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Type conversion examples
+num_str = "42"
+num_int = int(num_str)   # Convert to integer
+num_float = float(num_str) # Convert to float
+str_num = str(42)        # Convert to string</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Best Practices</h2>
+              <p class="mb-4">Python style guidelines (PEP 8) recommend:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li>Use snake_case for variable names</li>
+                <li>Use 4 spaces per indentation level</li>
+                <li>Keep lines under 79 characters</li>
+                <li>Use descriptive variable names</li>
+              </ul>
+            </section>
+          `
+        },
+        {
+          skillTitle: "Control Flow and Functions",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Conditional Statements</h2>
+              <p class="mb-4">Python uses indentation to define code blocks:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># If-elif-else example
+age = 18
+if age < 13:
+    print("Child")
+elif age < 18:
+    print("Teen")
+else:
+    print("Adult")</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Loops</h2>
+              <p class="mb-4">Python has two main loop types:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># For loop
+for fruit in ["apple", "banana"]:
+    print(fruit)
+
+# While loop
+count = 0
+while count < 5:
+    print(count)
+    count += 1</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Functions</h2>
+              <p class="mb-4">Functions are defined with the <code>def</code> keyword:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Function definition
+def greet(name):
+    return f"Hello, {name}!"
+
+# Function with default parameter
+def power(base, exponent=2):
+    return base ** exponent</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Lambda Functions</h2>
+              <p class="mb-4">Anonymous functions for simple operations:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Lambda example
+square = lambda x: x * x
+numbers = [1, 2, 3]
+squared = list(map(lambda x: x**2, numbers))</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "Which data structure is immutable?",
+          options: ["List", "Dictionary", "Tuple", "Set"],
+          correctAnswer: "Tuple"
+        },
+        {
+          question: "What is the correct way to define a function?",
+          options: [
+            "function greet():",
+            "def greet():",
+            "greet = function():",
+            "define greet():"
+          ],
+          correctAnswer: "def greet():"
+        }
+      ]
+    },
+    {
+      title: "Object-Oriented Programming in Python",
+      skills: [
+        {
+          skillTitle: "Classes and Objects",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Class Definition</h2>
+              <p class="mb-4">Classes are defined using the <code>class</code> keyword:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Simple class example
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def greet(self):
+        return f"Hello, my name is {self.name}"
+
+# Create instance
+alice = Person("Alice", 30)
+print(alice.greet())</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Inheritance</h2>
+              <p class="mb-4">Python supports single and multiple inheritance:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># Inheritance example
+class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        raise NotImplementedError
+
+class Dog(Animal):
+    def speak(self):
+        return "Woof!"
+
+class Cat(Animal):
+    def speak(self):
+        return "Meow!"</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Magic Methods</h2>
+              <p class="mb-4">Special methods that start and end with double underscores:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code># __str__ example
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+    
+    def __str__(self):
+        return f"{self.title} by {self.author}"
+
+book = Book("Python 101", "John Doe")
+print(book)  # Calls __str__ automatically</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Properties</h2>
+              <p class="mb-4">Using getters and setters with the <code>@property</code> decorator:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+    
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value):
+        if value > 0:
+            self._radius = value
+        else:
+            raise ValueError("Radius must be positive")</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "Which method is called when creating an object?",
+          options: ["__init__", "__new__", "__create__", "__start__"],
+          correctAnswer: "__init__"
+        },
+        {
+          question: "What does the @property decorator do?",
+          options: [
+            "Marks a method as static",
+            "Creates a getter method",
+            "Makes a method private",
+            "Converts a method to a class method"
+          ],
+          correctAnswer: "Creates a getter method"
+        }
+      ]
+    }
+  ],
+  creator: new mongoose.Types.ObjectId("686d3622b95602004ffbba14"),
+  dateCreated: new Date(),
+  isPublished: true
+};

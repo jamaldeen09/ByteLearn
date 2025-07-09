@@ -130,9 +130,8 @@ export type singleCourseSchema = {
   isPublished: Boolean,
 }
 
-
-
 export type topicSchema = {
+  _id: string,
   title: string,
   skills: SkillsSchema[]
   quiz: quizSchema[]
@@ -148,6 +147,10 @@ export type SkillsSchema = {
   skillTitle: string,
   content: string,
   _id: string,
+}
+
+export type CompletedSkillsSchema<T> = {
+  completedSkills: T[]
 }
 
 export type courseSchema = {
@@ -182,4 +185,17 @@ export type  TopicContentDisplaySchema  = {
 
 export type SkillContentProps = {
   skillId: string
+}
+
+export type quizComponentprops = {
+  topicId: string,
+}
+
+export type QuizItemProps = {
+  option: string,
+  isCorrect: boolean,
+  clickAnswer: (id: string) => void,
+  id: string,
+  isSelected?: boolean,
+  showResult?: boolean,
 }

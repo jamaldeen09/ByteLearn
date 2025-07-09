@@ -5,7 +5,8 @@ const progressSchema = new mongoose.Schema({
     course: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Course" },
     completedSkills: [
         { type: mongoose.Schema.Types.ObjectId, required: true },
-    ]
+    ],
+    lastVisitedSkill: { type: mongoose.Schema.Types.ObjectId, default: null},
 })
 
 export default mongoose.model("Progress", progressSchema)

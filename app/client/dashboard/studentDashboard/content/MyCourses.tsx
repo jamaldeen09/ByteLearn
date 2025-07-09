@@ -6,11 +6,14 @@ import { MyCoursesProp } from "@/app/client/types/types"
 import CourseContent from "../courseContent/CourseContent"
 
 
+
 const MyCourses = ({ courseId }: MyCoursesProp) => {
+ 
 
     if (courseId) {
         return <CourseContent courseId={courseId}/>
     }
+   
     return (
         <div
             className="lg:col-span-16 overflow-y-auto  h-full

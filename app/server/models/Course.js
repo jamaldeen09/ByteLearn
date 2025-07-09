@@ -6,7 +6,7 @@ const quizSchema = new mongoose.Schema({
   correctAnswer: { type: String, required: true },
 });
 
-const skillSchema = new mongoose.Schema({
+export const skillSchema = new mongoose.Schema({
   skillTitle: { type: String, required: true },
   content: { type: String, required: true }
 })

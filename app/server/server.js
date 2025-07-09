@@ -8,7 +8,7 @@ import cors from "cors"
 import { authRouter } from "./routes/authRouter.js"
 import "./config/passport.js";
 import Course from "./models/Course.js"
-import { exampleCourse,  cssMasteryCourse } from "./data/courseData.js"
+import { exampleCourse,  cssMasteryCourse, pythonCourse } from "./data/courseData.js"
 import { courseRouter } from "./routes/courseRouter.js"
 
 
@@ -25,19 +25,26 @@ const io = new Server(server, {
 app.use(express.json())
 app.use(passport.initialize());
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: "http://localhost:3000"  
 }))
 app.use(authRouter)
 app.use(courseRouter)
 
 mongoose.connect(URL ? URL : "").then(async () => {
     // const title = "Mastering JavaScript for Web Development"
-    // const deleteCourse = await Course.findOneAndDelete({ title })
+    // const otherTitle = "Mastering Modern CSS Development"
+    // const deleteCourse = await Course.findOneAndDelete({$and: [{title: title}, {title: otherTitle} ]})
+
     // console.log(deleteCourse, "has been deleted")
 
     // await Course.insertOne(cssMasteryCourse)
+    // await Course.insertOne(pythonCourse)
+
+    // await Course.insertOne(exampleCourse)
+    // const deleted = await Course.findOneAndDelete({ title: "Mastering JavaScript for Web Development" })
+    // console.log(deleted)
     // console.log("Added new course")
     server.listen(PORT, () => console.log(`Server is running on port http://localhost:${PORT}`));
-}).catch((err) => {
+}).catch((err) => {     
     console.error(err)
-})
+})    

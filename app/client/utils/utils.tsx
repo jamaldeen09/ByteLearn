@@ -127,12 +127,6 @@ export const sidebarlinks: SidebarLinkSchema[] = [
     isActive: false,
   },
   {
-    routeName: "Achievements",
-    icon: starIcon,
-    value: "e",
-    isActive: false,
-  },
-  {
     routeName: "Profile",
     icon: profileIcon,
     value: "f",
