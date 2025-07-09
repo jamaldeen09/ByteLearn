@@ -171,11 +171,15 @@ export type MyCoursesProp = {
   courseId: string | null
 }
 
-export type TopicContentDisplaySchema = {
-  topicTitle: string,
-  skillsMastered: number,
-  topicsSkillsTitle: SkillsSchema[],
-  isCompleted: boolean,
-  showSkillContent: (id: string[]) => void,
-  id: string[],
+
+export type  TopicContentDisplaySchema  = {
+  topicTitle: string;
+  skillsMastered: number;
+  topicsSkillsTitle: SkillsSchema[]; 
+  isCompleted: boolean;
+  selectedSkillId?: string | null;
+}
+
+export type SkillContentProps = {
+  skillId: string
 }

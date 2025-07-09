@@ -2,398 +2,600 @@ import mongoose from "mongoose";
 
 export const exampleCourse = {
   title: "Mastering JavaScript for Web Development",
-  description:
-    "Dive deep into JavaScript fundamentals and advanced concepts, enabling you to build dynamic, interactive web applications with confidence.",
+  description: "Dive deep into JavaScript fundamentals and advanced concepts, enabling you to build dynamic, interactive web applications with confidence.",
   category: "Web Development",
-  imageUrl:
-    "https://miro.medium.com/v2/resize:fit:1200/1*LyZcwuLWv2FArOumCxobpA.png",
+  imageUrl: "https://miro.medium.com/v2/resize:fit:1200/1*LyZcwuLWv2FArOumCxobpA.png",
   topics: [
     {
       title: "JavaScript Fundamentals",
       skills: [
         {
-          skillTitle: "Introduction to JavaScript",
+          skillTitle: "Variables and Data Types",
           content: `
-<p>
-JavaScript is a versatile, high-level programming language that forms the backbone of interactive web experiences. As the language of the browser, it enables developers to create dynamic and responsive websites that engage users effectively. Unlike HTML and CSS, which provide structure and styling, JavaScript adds behavior, interactivity, and the ability to manipulate the Document Object Model (DOM) to your websites.
-</p>
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Understanding Variables in JavaScript</h2>
+              <p class="mb-4">Variables are the fundamental building blocks of any programming language. In JavaScript, we have three ways to declare variables: <code>var</code>, <code>let</code>, and <code>const</code>. Each has distinct characteristics that affect how your code behaves.</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Variable declaration examples
+var oldSchool = "function scoped";
+let modernVar = "block scoped"; 
+const constantVar = "cannot be reassigned";</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Variable Scoping and Hoisting</h2>
+              <p class="mb-4">JavaScript has function-level scoping with <code>var</code> and block-level scoping with <code>let</code>/<code>const</code>. Hoisting is JavaScript's behavior of moving declarations to the top of their containing scope.</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>console.log(hoistedVar); // undefined (var is hoisted)
+var hoistedVar = "value";
 
-<p>
-Originally developed by Brendan Eich in 1995, JavaScript has evolved significantly, transforming from a simple scripting language to a powerful tool used in full-stack development, mobile applications, and even game development. It supports object-oriented, imperative, and functional programming styles, allowing developers flexibility in how they approach problem-solving.
-</p>
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JavaScript Logo" style="width:50%;margin:auto;display:block;">
-
-<p>
-JavaScript's integration with HTML and CSS enables developers to build visually appealing and interactive user interfaces. The language is executed within the browser's JavaScript engine, allowing code to run on the client side without requiring server interactions for every action, leading to faster and smoother user experiences. By mastering JavaScript, you will gain the ability to create modern web applications, manipulate page content in real-time, and handle asynchronous operations, which are essential skills in the tech industry.
-</p>
-
-<p>
-JavaScript is also essential for building complex web applications using frameworks like React, Vue, and Angular. These frameworks rely heavily on JavaScript to manage application state, handle user interactions, and render dynamic content efficiently. As a developer, understanding JavaScript fundamentals will give you a strong foundation for exploring these advanced frameworks and libraries.
-</p>
-
-<p>
-In this module, you will gain a thorough understanding of JavaScript's syntax, data types, and control flow, as well as learn how to write and structure your code effectively. By the end of this section, you will have the confidence to start building simple web applications and interactive components that enhance the user experience on your websites.
-</p>
-          `,
+console.log(letVar); // ReferenceError (let isn't hoisted)
+let letVar = "value";</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Primitive Data Types</h2>
+              <p class="mb-4">JavaScript has seven primitive data types that are immutable (cannot be changed):</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li><strong>String</strong>: Textual data ("hello")</li>
+                <li><strong>Number</strong>: Both integers and floats (42, 3.14)</li>
+                <li><strong>Boolean</strong>: true/false values</li>
+                <li><strong>Null</strong>: Intentional absence of value</li>
+                <li><strong>Undefined</strong>: Variable declared but not assigned</li>
+                <li><strong>Symbol</strong>: Unique, immutable identifiers</li>
+                <li><strong>BigInt</strong>: Arbitrary precision integers</li>
+              </ul>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Type Coercion and Conversion</h2>
+              <p class="mb-4">JavaScript is dynamically typed, which means type coercion happens automatically in certain contexts:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Type coercion examples
+console.log(8 + "2"); // "82" (number to string)
+console.log("5" == 5); // true (loose equality)
+console.log("5" === 5); // false (strict equality)</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Best Practices</h2>
+              <p class="mb-4">Modern JavaScript development recommends:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li>Always use <code>const</code> by default</li>
+                <li>Use <code>let</code> when you need to reassign</li>
+                <li>Avoid <code>var</code> in new code</li>
+                <li>Use strict equality (<code>===</code>)</li>
+                <li>Be explicit with type conversions</li>
+              </ul>
+            </section>
+          `
         },
         {
-          skillTitle: "Understanding Variables",
+          skillTitle: "Functions and Scope",
           content: `
-<p>
-Variables in JavaScript act as containers for storing data values. They allow you to label data with a descriptive name, making your code more readable and maintainable. You can declare variables using <code>var</code>, <code>let</code>, or <code>const</code>, each with its own scoping rules and use cases. Understanding how to use variables effectively is critical for managing the state and logic of your applications.
-</p>
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Function Declarations vs Expressions</h2>
+              <p class="mb-4">Functions in JavaScript can be declared in several ways, each with subtle differences in behavior:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Function declaration (hoisted)
+function greet(name) {
+  return \`Hello, \${name}\`;
+}
 
-<p>
-The <code>var</code> keyword, which has been around since the inception of JavaScript, is function-scoped and can lead to issues like hoisting, where variables are moved to the top of their scope before code execution. To avoid these pitfalls, it is recommended to use <code>let</code> and <code>const</code>, introduced with ES6, which are block-scoped and provide better control over variable declarations.
-</p>
+// Function expression (not hoisted)
+const square = function(x) {
+  return x * x;
+};
 
-<p>
-<code>let</code> is used when you need to reassign values to a variable, while <code>const</code> is used for values that should remain constant throughout the program. For example:
-</p>
-<pre><code>let count = 0;
-count = 5;
+// Arrow function (ES6+)
+const add = (a, b) => a + b;</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Understanding Scope</h2>
+              <p class="mb-4">Scope determines where variables are accessible in your code. JavaScript has three types of scope:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li><strong>Global scope</strong>: Accessible everywhere</li>
+                <li><strong>Function scope</strong>: Variables declared with <code>var</code></li>
+                <li><strong>Block scope</strong>: Variables declared with <code>let</code>/<code>const</code></li>
+              </ul>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Closures</h2>
+              <p class="mb-4">A closure is a function that remembers its outer variables and can access them. This powerful feature enables patterns like data privacy and function factories.</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>function createCounter() {
+  let count = 0;
+  return function() {
+    count++;
+    return count;
+  };
+}
 
-const API_KEY = "12345"; // This cannot be reassigned
-</code></pre>
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Immediately Invoked Function Expressions (IIFE)</h2>
+              <p class="mb-4">IIFEs allow you to execute functions immediately while creating private scope:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>(function() {
+  const privateVar = "secret";
+  console.log(privateVar); // "secret"
+})();
 
-<p>
-JavaScript is dynamically typed, meaning you don't need to specify the data type of a variable when declaring it. The type is determined automatically at runtime based on the value assigned to it. This flexibility allows you to write code quickly but also requires careful management to avoid unexpected behaviors during execution.
-</p>
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Javascript-shield.svg/1200px-Javascript-shield.svg.png" alt="JavaScript Variables" style="width:60%;margin:auto;display:block;">
-
-<p>
-As you build more complex programs, understanding the nuances of variable scoping, hoisting, and best practices will help you write cleaner and more efficient code. This skill will also prepare you for advanced JavaScript concepts such as closures and module patterns.
-</p>
-          `,
-        },
-        {
-          skillTitle: "Data Types in JavaScript",
-          content: `
-<p>
-JavaScript supports several data types, including primitive types and reference types, which are essential for handling and processing data in your applications. The primitive types include <strong>String</strong>, <strong>Number</strong>, <strong>Boolean</strong>, <strong>Null</strong>, <strong>Undefined</strong>, and <strong>Symbol</strong>, while reference types include <strong>Objects</strong> and <strong>Arrays</strong>.
-</p>
-
-<p>
-Strings represent text and are defined using single or double quotes. Numbers include integers and floating-point values, and JavaScript does not differentiate between different numeric types. Booleans represent logical values of <code>true</code> and <code>false</code>, while <code>null</code> signifies the intentional absence of any object value, and <code>undefined</code> indicates a variable that has been declared but not assigned a value.
-</p>
-
-<img src="https://www.tutorialsteacher.com/Content/images/js/js-data-types.png" alt="Data Types" style="width:60%;margin:auto;display:block;">
-
-<p>
-Objects are collections of key-value pairs, allowing you to store and access related data efficiently. Arrays are ordered collections of values, which can be accessed using index numbers starting from zero. Both objects and arrays form the backbone of data management in JavaScript applications.
-</p>
-
-<p>
-Understanding data types in JavaScript is crucial for writing effective code. It allows you to choose the appropriate data structures for your applications, perform type conversions when necessary, and debug issues related to unexpected data types during execution.
-</p>
-          `,
-        },
-        {
-          skillTitle: "Control Flow and Logical Operations",
-          content: `
-<p>
-Control flow in JavaScript determines the order in which statements are executed in your program. By using conditional statements and loops, you can control the execution based on conditions and perform repetitive tasks efficiently.
-</p>
-
-<p>
-Conditional statements include <code>if</code>, <code>else if</code>, and <code>else</code>, which allow you to execute specific blocks of code based on the evaluation of expressions. The <code>switch</code> statement provides an alternative way to handle multiple conditions more cleanly.
-</p>
-
-<p>
-Loops, including <code>for</code>, <code>while</code>, and <code>do...while</code>, allow you to execute blocks of code repeatedly based on specified conditions. This is useful for tasks such as iterating over arrays, processing data, and performing repetitive actions.
-</p>
-
-<img src="https://www.w3schools.com/js/js_loop_for.png" alt="JavaScript Loops" style="width:60%;margin:auto;display:block;">
-
-<p>
-Logical operators like <code>&&</code> (AND), <code>||</code> (OR), and <code>!</code> (NOT) enable you to create complex conditions for decision-making in your programs. Understanding these control structures and logical operations will allow you to write more powerful and flexible code in your applications.
-</p>
-          `,
-        },
+console.log(privateVar); // ReferenceError</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Arrow Functions vs Regular Functions</h2>
+              <p class="mb-4">Arrow functions (introduced in ES6) have several key differences:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li>No <code>this</code> binding (lexical <code>this</code>)</li>
+                <li>Can't be used as constructors</li>
+                <li>No <code>arguments</code> object</li>
+                <li>Shorter syntax</li>
+              </ul>
+            </section>
+          `
+        }
       ],
       quiz: [
         {
-          question:
-            "Which keyword should you use for block-scoped variable declarations?",
+          question: "Which variable declaration is block-scoped?",
           options: ["var", "let", "const", "Both let and const"],
-          correctAnswer: "Both let and const",
+          correctAnswer: "Both let and const"
         },
         {
-          question:
-            "Which of the following is NOT a JavaScript primitive type?",
-          options: ["String", "Object", "Boolean", "Undefined"],
-          correctAnswer: "Object",
+          question: "What is the value of typeof null?",
+          options: ["null", "object", "undefined", "string"],
+          correctAnswer: "object"
         },
-      ],
+        {
+          question: "Which function type has its own this binding?",
+          options: ["Arrow functions", "Regular functions", "Both", "Neither"],
+          correctAnswer: "Regular functions"
+        }
+      ]
     },
+    {
+      title: "Functional Programming in JavaScript",
+      skills: [
+        {
+          skillTitle: "Functional Programming Paradigm",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Core Principles</h2>
+              <p class="mb-4">Functional programming (FP) emphasizes pure functions, immutability, and function composition. While JavaScript isn't purely functional, it supports FP patterns well.</p>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Pure Functions</h2>
+              <p class="mb-4">Pure functions always return the same output for the same inputs and have no side effects:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Pure
+function add(a, b) {
+  return a + b;
+}
 
-    {
-      title: "Functions and Scope in JavaScript",
-      skills: [
-        {
-          skillTitle: "Understanding Functions",
-          content: `
-    <p>
-    Functions are reusable blocks of code designed to perform specific tasks in your programs. They allow you to write modular, organized, and reusable code, significantly improving maintainability and scalability. In JavaScript, functions are first-class citizens, meaning they can be assigned to variables, passed as arguments to other functions, and returned from functions.
-    </p>
-    
-    <p>
-    A basic function is declared using the <code>function</code> keyword:
-    </p>
-    <pre><code>
-    function greet(name) {
-      console.log("Hello, " + name);
-    }
-    greet("Alice");
-    </code></pre>
-    
-    <p>
-    Functions help you break complex problems into smaller, manageable tasks. They can accept parameters, which act as placeholders for the values passed during the function call, and return values to the caller using the <code>return</code> statement.
-    </p>
-    
-    <img src="https://cdn.educba.com/academy/wp-content/uploads/2019/12/Functions-in-JavaScript.jpg" alt="Functions in JavaScript" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    You will learn how to use named functions, anonymous functions, and arrow functions effectively, enabling you to write clean and concise code.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Arrow Functions",
-          content: `
-    <p>
-    Introduced in ES6, arrow functions provide a shorter syntax for writing functions in JavaScript. They are especially useful for writing concise callback functions and for maintaining the lexical scope of the <code>this</code> keyword.
-    </p>
-    
-    <p>
-    The syntax is:
-    </p>
-    <pre><code>
-    const add = (a, b) => a + b;
-    </code></pre>
-    
-    <p>
-    Arrow functions do not have their own <code>this</code> binding, which makes them ideal for situations where you need to preserve the context of <code>this</code> in methods and callbacks.
-    </p>
-    
-    <img src="https://miro.medium.com/v2/resize:fit:1200/1*FzMUVUosb8cdQz0jNm4gTg.png" alt="Arrow Functions" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    In this section, you will practice using arrow functions in various scenarios to understand their behavior and advantages.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Understanding Scope",
-          content: `
-    <p>
-    Scope determines the accessibility of variables and functions in different parts of your code. In JavaScript, there are three types of scope: global, function, and block scope.
-    </p>
-    
-    <p>
-    Variables declared outside of any function or block are globally scoped and accessible throughout your code. Variables declared inside functions are function-scoped, meaning they are only accessible within that function. Variables declared with <code>let</code> or <code>const</code> within a block (like inside an <code>if</code> statement) are block-scoped.
-    </p>
-    
-    <img src="https://www.digitalocean.com/_next/image?url=https%3A%2F%2Fdigitalocean.com%2Fstatic%2F91ab6e6f79b51fc3f6eb63b9d34658f6%2F61aa6%2Fjavascript_scope_diagram.png&w=3840&q=75" alt="JavaScript Scope" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    Understanding scope is essential for managing data flow in your applications, avoiding variable collisions, and writing bug-free code.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Closures in JavaScript",
-          content: `
-    <p>
-    A closure is a function that has access to its own scope, the outer function's scope, and the global scope. Closures are created every time a function is created and are a powerful feature of JavaScript that allows for data encapsulation and the creation of private variables.
-    </p>
-    
-    <p>
-    Example:
-    </p>
-    <pre><code>
-    function outer() {
-      let count = 0;
-      return function inner() {
-        count++;
-        console.log(count);
-      }
-    }
-    const counter = outer();
-    counter(); // 1
-    counter(); // 2
-    </code></pre>
-    
-    <img src="https://cdn.programiz.com/sites/tutorial2program/files/javascript-closure.png" alt="JavaScript Closures" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    Closures allow you to create factory functions, manage asynchronous operations effectively, and implement module patterns for encapsulation.
-    </p>
-          `,
-        },
+// Impure (relies on external state)
+let taxRate = 0.1;
+function calculateTax(amount) {
+  return amount * taxRate;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Immutability</h2>
+              <p class="mb-4">Treating data as immutable leads to more predictable code. Modern JavaScript helps with:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Arrays
+const original = [1, 2, 3];
+const updated = [...original, 4]; // Not original.push(4)
+
+// Objects
+const user = { name: 'Alice' };
+const updatedUser = { ...user, age: 30 };</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Higher-Order Functions</h2>
+              <p class="mb-4">Functions that operate on other functions (taking them as arguments or returning them):</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// HOF that takes a function
+function repeat(n, action) {
+  for (let i = 0; i < n; i++) {
+    action(i);
+  }
+}
+
+// HOF that returns a function
+function multiplier(factor) {
+  return x => x * factor;
+}
+const double = multiplier(2);</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Array Operations</h2>
+              <p class="mb-4">FP shines with array transformations:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>const numbers = [1, 2, 3, 4];
+
+// Map (transform)
+const squared = numbers.map(x => x * x);
+
+// Filter (select)
+const evens = numbers.filter(x => x % 2 === 0);
+
+// Reduce (accumulate)
+const sum = numbers.reduce((acc, x) => acc + x, 0);</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Function Composition</h2>
+              <p class="mb-4">Building complex operations by combining simple functions:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>const compose = (...fns) => 
+  x => fns.reduceRight((v, f) => f(v), x);
+
+const add5 = x => x + 5;
+const multiply3 = x => x * 3;
+const format = x => \`\${x.toFixed(2)}\`;
+
+const process = compose(format, multiply3, add5);
+console.log(process(10)); // "45.00"</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Currying</h2>
+              <p class="mb-4">Transforming multi-argument functions into sequences of single-argument functions:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Regular function
+function add(a, b) {
+  return a + b;
+}
+
+// Curried version
+function curryAdd(a) {
+  return function(b) {
+    return a + b;
+  }
+}
+const add5 = curryAdd(5);
+console.log(add5(3)); // 8</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Recursion</h2>
+              <p class="mb-4">FP favors recursion over loops for iteration:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>function factorial(n) {
+  if (n <= 1) return 1;
+  return n * factorial(n - 1);
+}
+
+// Tail-call optimized version
+function factorial(n, acc = 1) {
+  if (n <= 1) return acc;
+  return factorial(n - 1, n * acc);
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Libraries & Practical FP</h2>
+              <p class="mb-4">Popular FP libraries include Ramda and Lodash/fp. Key practical applications:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li>Redux reducers must be pure functions</li>
+                <li>React components benefit from purity</li>
+                <li>Data transformation pipelines</li>
+                <li>Immutable state management</li>
+              </ul>
+            </section>
+          `
+        }
       ],
       quiz: [
         {
-          question: "Which keyword is used to define a function in JavaScript?",
-          options: ["function", "func", "define", "fn"],
-          correctAnswer: "function",
+          question: "Which array method is used for transformation?",
+          options: ["filter", "map", "reduce", "forEach"],
+          correctAnswer: "map"
         },
         {
-          question: "Arrow functions do not have their own ____ context.",
-          options: ["scope", "this", "variable", "function"],
-          correctAnswer: "this",
-        },
-      ],
-    }, 
-    
-    {
-      title: "Asynchronous JavaScript and APIs",
-      skills: [
-        {
-          skillTitle: "Understanding Synchronous vs Asynchronous JavaScript",
-          content: `
-    <p>
-    JavaScript is single-threaded, executing one operation at a time in a synchronous manner. However, many operations in web development, such as network requests or file reading, take time to complete. Waiting for these operations synchronously would block the main thread, making your web application unresponsive.
-    </p>
-    
-    <p>
-    Asynchronous programming allows JavaScript to handle long-running operations without blocking the execution of other code. This is achieved through mechanisms like callbacks, promises, and the <code>async/await</code> syntax introduced in ES8.
-    </p>
-    
-    <img src="https://www.syncfusion.com/blogs/wp-content/uploads/2022/08/Synchronous-vs-Asynchronous-in-JavaScript.png" alt="Synchronous vs Asynchronous JavaScript" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    In this section, you will learn the differences between synchronous and asynchronous execution and understand why asynchronous programming is critical for building responsive web applications.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Using Callbacks",
-          content: `
-    <p>
-    Callbacks are functions passed as arguments to other functions, to be executed once an asynchronous operation completes. They are the foundation of asynchronous programming in JavaScript but can lead to deeply nested structures, commonly referred to as "callback hell."
-    </p>
-    
-    <pre><code>
-    function fetchData(callback) {
-      setTimeout(() => {
-        callback("Data received");
-      }, 1000);
+          question: "What is a pure function?",
+          options: [
+            "A function with no parameters",
+            "A function that doesn't return anything",
+            "A function with no side effects",
+            "A function that only works with arrays"
+          ],
+          correctAnswer: "A function with no side effects"
+        }
+      ]
     }
-    fetchData((data) => {
-      console.log(data);
-    });
-    </code></pre>
-    
-    <img src="https://miro.medium.com/v2/resize:fit:1200/1*Zq8-GBQ1hUvA1Xj9CIRIAg.png" alt="Callback Hell" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    You will practice writing callback-based asynchronous functions and understand their limitations in larger applications.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Working with Promises",
-          content: `
-    <p>
-    Promises provide a cleaner alternative to callbacks for handling asynchronous operations. A promise represents a value that may be available now, in the future, or never, with three states: <strong>pending</strong>, <strong>fulfilled</strong>, and <strong>rejected</strong>.
-    </p>
-    
-    <pre><code>
-    const fetchData = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve("Data received");
-      }, 1000);
-    });
-    fetchData.then(data => console.log(data)).catch(err => console.error(err));
-    </code></pre>
-    
-    <p>
-    Promises allow chaining asynchronous operations and error handling using <code>then</code> and <code>catch</code>, improving code readability and maintainability.
-    </p>
-    
-    <img src="https://blog.logrocket.com/wp-content/uploads/2020/12/Promises-in-JavaScript.png" alt="Promises in JavaScript" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    By mastering promises, you will be able to write clearer, more structured asynchronous code.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Using Async/Await",
-          content: `
-    <p>
-    The <code>async/await</code> syntax simplifies working with promises by allowing you to write asynchronous code in a synchronous style. Functions declared with <code>async</code> return a promise, and within them, you can use <code>await</code> to pause execution until a promise resolves.
-    </p>
-    
-    <pre><code>
-    async function fetchData() {
-      try {
-        const data = await getData();
-        console.log(data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    </code></pre>
-    
-    <p>
-    This syntax makes your code easier to read and debug, reducing complexity when handling multiple asynchronous operations.
-    </p>
-    
-    <img src="https://cdn.educba.com/academy/wp-content/uploads/2020/02/Async-Await-in-JavaScript.png" alt="Async Await in JavaScript" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    You will practice using <code>async/await</code> for network requests and asynchronous logic within your projects.
-    </p>
-          `,
-        },
-        {
-          skillTitle: "Fetching Data from APIs",
-          content: `
-    <p>
-    APIs (Application Programming Interfaces) allow your applications to communicate with other services to fetch or send data. The <code>fetch</code> API in JavaScript is a modern, promise-based way to make network requests.
-    </p>
-    
-    <pre><code>
-    async function fetchUser() {
-      const response = await fetch("https://jsonplaceholder.typicode.com/users/1");
-      const user = await response.json();
-      console.log(user);
-    }
-    fetchUser();
-    </code></pre>
-    
-    <p>
-    By learning to work with APIs, you will be able to build data-driven applications that can interact with servers, fetch dynamic content, and submit user data securely.
-    </p>
-    
-    <img src="https://www.codementor.io/blog/async-await-fetch-17k8vj3sgx" alt="Fetching Data from APIs" style="width:60%;margin:auto;display:block;">
-    
-    <p>
-    You will also learn about handling API errors, displaying loading indicators, and updating your UI based on data fetched from APIs in real-time.
-    </p>
-          `,
-        },
-      ],
-      quiz: [
-        {
-          question: "Which keyword is used to pause execution until a promise is resolved?",
-          options: ["pause", "await", "stop", "yield"],
-          correctAnswer: "await",
-        },
-        {
-          question: "Which of these is NOT a state of a Promise?",
-          options: ["fulfilled", "pending", "completed", "rejected"],
-          correctAnswer: "completed",
-        },
-      ],
-    },
   ],
   creator: new mongoose.Types.ObjectId("686d3622b95602004ffbba14"),
   dateCreated: new Date(),
-  isPublished: true,
+  isPublished: true
 };
 
+
+export const cssMasteryCourse = {
+  title: "Mastering Modern CSS Development",
+  description: "Go from CSS basics to advanced layout techniques including Flexbox, Grid, animations and responsive design principles.",
+  category: "Web Development",
+  imageUrl: "https://miro.medium.com/v2/resize:fit:1200/1*OFsc0SD55jhi8cjo7aCA4w.jpeg",
+  topics: [
+    {
+      title: "CSS Fundamentals",
+      skills: [
+        {
+          skillTitle: "Selectors and Specificity",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">CSS Selectors Deep Dive</h2>
+              <p class="mb-4">CSS selectors are patterns used to select the elements you want to style. Understanding them is crucial for writing efficient CSS.</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>/* Basic selectors */
+.element { }          /* Class selector */
+#element { }          /* ID selector */
+div { }               /* Element selector */
+[attribute] { }       /* Attribute selector */
+
+/* Combinators */
+div > p { }           /* Child selector */
+div + p { }           /* Adjacent sibling */
+div ~ p { }           /* General sibling */
+
+/* Pseudo-classes */
+a:hover { }
+input:focus { }
+li:nth-child(2n) { }</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Specificity Hierarchy</h2>
+              <p class="mb-4">When multiple rules apply, specificity determines which styles get applied:</p>
+              
+              <ol class="list-decimal pl-6 mb-4">
+                <li>Inline styles (1000 points)</li>
+                <li>IDs (100 points)</li>
+                <li>Classes, attributes, pseudo-classes (10 points)</li>
+                <li>Elements, pseudo-elements (1 point)</li>
+              </ol>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Important Rules</h2>
+              <p class="mb-4">The <code>!important</code> rule overrides all other declarations, but should be used sparingly:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.warning {
+  color: red !important;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Best Practices</h2>
+              <ul class="list-disc pl-6 mb-4">
+                <li>Prefer classes over IDs for styling</li>
+                <li>Keep specificity low for maintainability</li>
+                <li>Use semantic class names (BEM methodology)</li>
+                <li>Avoid overqualifying selectors (div.nav is unnecessary if .nav is unique)</li>
+              </ul>
+            </section>
+          `
+        },
+        {
+          skillTitle: "Box Model and Layout",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Understanding the Box Model</h2>
+              <p class="mb-4">Every element in CSS is a rectangular box with content, padding, border, and margin areas.</p>
+              
+              <div class="bg-gray-100 p-4 rounded mb-4">
+                <div class="border border-gray-400 p-2 mb-2">
+                  <div class="bg-blue-100 p-4 border-2 border-blue-500">
+                    <div class="bg-blue-200 p-4 text-center">Content</div>
+                  </div>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span>Margin</span>
+                  <span>Border</span>
+                  <span>Padding</span>
+                </div>
+              </div>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Box-Sizing Property</h2>
+              <p class="mb-4">The <code>box-sizing</code> property changes how element dimensions are calculated:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>/* Traditional box model */
+box-sizing: content-box; /* width = content width */
+
+/* Modern box model */
+box-sizing: border-box; /* width = content + padding + border */</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Display Property</h2>
+              <p class="mb-4">The display property specifies the display behavior of an element:</p>
+              
+              <ul class="list-disc pl-6 mb-4">
+                <li><code>block</code>: Starts on a new line and takes full width</li>
+                <li><code>inline</code>: Flows with text, no width/height</li>
+                <li><code>inline-block</code>: Flows like inline but accepts dimensions</li>
+                <li><code>flex</code>: Enables flexbox layout</li>
+                <li><code>grid</code>: Enables grid layout</li>
+                <li><code>none</code>: Removes from flow entirely</li>
+              </ul>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "Which selector has the highest specificity?",
+          options: ["Class", "ID", "Element", "Attribute"],
+          correctAnswer: "ID"
+        },
+        {
+          question: "What does box-sizing: border-box do?",
+          options: [
+            "Includes padding and border in element's width",
+            "Excludes margin from element's width",
+            "Adds extra border space",
+            "Makes element responsive"
+          ],
+          correctAnswer: "Includes padding and border in element's width"
+        }
+      ]
+    },
+    {
+      title: "Flexbox Layout",
+      skills: [
+        {
+          skillTitle: "Flexbox Fundamentals",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Flex Container Properties</h2>
+              <p class="mb-4">Flexbox requires a container with <code>display: flex</code>. Key container properties:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.container {
+  display: flex;
+  flex-direction: row | row-reverse | column | column-reverse;
+  flex-wrap: nowrap | wrap | wrap-reverse;
+  justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;
+  align-items: stretch | flex-start | flex-end | center | baseline;
+  gap: 10px; /* Space between items */
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Flex Item Properties</h2>
+              <p class="mb-4">Direct children become flex items with these properties:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.item {
+  order: 5; /* Default 0, reorder visually */
+  flex-grow: 0; /* Ability to grow if space available */
+  flex-shrink: 1; /* Ability to shrink if needed */
+  flex-basis: auto | length; /* Default size before growing/shrinking */
+  align-self: auto | flex-start | flex-end | center | baseline | stretch;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Practical Flexbox Patterns</h2>
+              <p class="mb-4">Common layout solutions with flexbox:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>/* Perfect centering */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Equal height columns */
+.container {
+  display: flex;
+}
+
+/* Sticky footer */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.content { flex: 1; }</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "Which property aligns items along the main axis?",
+          options: ["align-items", "justify-content", "align-content", "flex-direction"],
+          correctAnswer: "justify-content"
+        }
+      ]
+    },
+    {
+      title: "CSS Grid Layout",
+      skills: [
+        {
+          skillTitle: "Grid Fundamentals",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Creating a Grid Container</h2>
+              <p class="mb-4">CSS Grid provides a two-dimensional layout system. Start with:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 3 equal columns */
+  grid-template-rows: 100px auto 100px; /* 3 rows */
+  gap: 20px; /* Space between items */
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Grid Template Areas</h2>
+              <p class="mb-4">Visual layout system with named areas:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.container {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar content content"
+    "footer footer footer";
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.content { grid-area: content; }
+.footer { grid-area: footer; }</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Responsive Grids</h2>
+              <p class="mb-4">Create responsive layouts without media queries:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "What does 1fr unit represent?",
+          options: ["Fixed 16px", "Fraction of available space", "Viewport width", "Flex grow value"],
+          correctAnswer: "Fraction of available space"
+        }
+      ]
+    },
+    {
+      title: "Advanced CSS Techniques",
+      skills: [
+        {
+          skillTitle: "CSS Animations and Transitions",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">CSS Transitions</h2>
+              <p class="mb-4">Smoothly animate property changes:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>.box {
+  transition: all 0.3s ease-out;
+  /* Shorthand for: */
+  transition-property: all;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+  transition-delay: 0s;
+}
+
+.box:hover {
+  transform: scale(1.1);
+  background: blue;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Keyframe Animations</h2>
+              <p class="mb-4">Create complex multi-step animations:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>@keyframes slidein {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.element {
+  animation: slidein 0.5s ease-in-out;
+  animation-iteration-count: infinite;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">CSS Variables</h2>
+              <p class="mb-4">Custom properties for reusable values:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>:root {
+  --primary-color: #3498db;
+  --spacing: 16px;
+}
+
+.element {
+  color: var(--primary-color);
+  margin: var(--spacing);
+}</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "Which property defines the acceleration curve of a transition?",
+          options: ["transition-duration", "transition-timing-function", "transition-delay", "transition-property"],
+          correctAnswer: "transition-timing-function"
+        }
+      ]
+    }
+  ],
+  creator: new mongoose.Types.ObjectId("686d3622b95602004ffbba14"),
+  dateCreated: new Date(),
+  isPublished: true
+};

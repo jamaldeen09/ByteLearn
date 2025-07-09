@@ -3,6 +3,7 @@ import {
   enrollToACourse,
   fetchCourses,
   getSingleCourseDetails,
+  markSkillAsCompleted,
 } from "../controllers/courseController.js";
 import {
   validationMiddleware,
@@ -40,3 +41,18 @@ courseRouter.get(
     validationMiddleware,
   getSingleCourseDetails
 );
+
+courseRouter.post("/api/mark-skill-as-completed", verifyAccessToken, validationMiddleware,
+  body("courseId")
+  .notEmpty()
+  .withMessage("An courseId must provided")
+  .isString()
+  .withMessage("courseId must be a string"),
+  body("skillId")
+  .notEmpty()
+  .withMessage("An skillId must provided")
+  .isString()
+  .withMessage("skillId must be a string"),
+  validationMiddleware,
+  markSkillAsCompleted
+)

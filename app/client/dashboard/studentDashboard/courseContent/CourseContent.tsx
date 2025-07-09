@@ -10,6 +10,8 @@ import BlackSpinner from "@/app/client/components/reusableComponents/BlackSpinne
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon } from "@radix-ui/react-icons"
 import TopicContentDisplay from "@/app/client/components/reusableComponents/TopicContentDisplay"
+import { useSearchParams } from "next/navigation"
+import SkillContent from "./SkillContent"
 
 
 const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
@@ -65,11 +67,12 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         }
       })
   }, [])
-  // http://localhost:3000/client/dashboard/studentDashboard?tab=my-courses&courseId=686d373fa6f8607df293cf6b
+  // http://localhost:3000/client/dashboard/studentDashboard?tab=my-courses&courseId=686e4da8449a3a5a46fe0c0d
 
   // global state managing course information
   const singleCourseInformation = useAppSelector((state) => state.singleCourse)
-  console.log(singleCourseInformation.topics)
+  const searchParams = useSearchParams();
+  const skillId = searchParams.get("skillId");
 
   if (loadingFetch) {
     return (
@@ -81,8 +84,8 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
     )
   }
 
-  const showCourseContent = (id: string[]) => {
-     
+  if (skillId) {
+    return <SkillContent skillId={skillId}/>
   }
   return (
     <div
@@ -99,7 +102,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
 
         {/* Course details + topics showcase */}
 
-        
+
         <div
           className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10
          max-lg:border-black flex-col max-lg:flex-row "
@@ -149,7 +152,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
               <button className="w-full bg-black text-white font-bold rounded-md hover:cursor-pointer py-4
                flex justify-center items-center space-x-4">
                 <p>Continue Learning</p>
-                <span className="">{<ArrowRightIcon className="w-6 h-6"/>}</span>
+                <span className="">{<ArrowRightIcon className="w-6 h-6" />}</span>
               </button>
             </div>
           </div>
@@ -158,18 +161,18 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           <div className="overflow-y-auto h-[90vh] w-full max-w-4xl
           flex flex-col space-y-4">
 
-              {singleCourseInformation.topics.map((topic, index: number) => {
-                  const skillIds = topic.skills?.map(skill => skill?._id).filter(Boolean) || [];
-                 return (
-                  <TopicContentDisplay
-                    key={index}
-                    topicTitle={topic.title}
-                    topicsSkillsTitle={topic.skills}
-                    id={skillIds}
-                    showSkillContent={() => showCourseContent(skillIds)}
-                  />
-                )
-              })}
+            {singleCourseInformation.topics.map((topic, index: number) => {
+            
+              return (
+
+                <TopicContentDisplay
+                  key={index}
+                  topicTitle={topic.title}
+                  topicsSkillsTitle={topic.skills}
+                  selectedSkillId={skillId} 
+                />
+              )
+            })}
           </div>
         </div>
       </div>

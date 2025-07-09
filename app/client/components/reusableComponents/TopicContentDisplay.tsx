@@ -2,17 +2,27 @@ import { useState } from "react";
 import { Check, XIcon } from "lucide-react";
 import { TopicContentDisplaySchema } from "../../types/types";
 import { arrowDownIcon } from "@/app/icons/Icons";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const TopicContentDisplay = ({ 
   topicTitle, 
   skillsMastered, 
   topicsSkillsTitle, 
   isCompleted,
-  showSkillContent,
-  id,
 }: TopicContentDisplaySchema) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const handleSkillClick = (skillId: string) => {
+        const currentTab = searchParams.get("tab") || "my-courses";
+        const courseId = searchParams.get("courseId");
+
+        const newUrl = `/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&skillId=${skillId}`;
+        router.push(newUrl);
+    };
 
   return (
     <div 
@@ -32,7 +42,7 @@ const TopicContentDisplay = ({
           </div>
           <div className="flex flex-col">
             <p className="text-[0.6rem] sm:text-sm md:text-[1rem]">{topicTitle || "Integration and version control with git"}</p>
-            <p className="iphone:text-[0.5rem] text-xs text-gray-400">Skills Mastered: {skillsMastered || 0}</p>
+            <p className="iphone:text-[0.5rem] sm:text-xs text-gray-400">Skills Mastered: {skillsMastered || 0}</p>
           </div>
         </div>
         <div className="fit flex space-x-2 items-center">
@@ -50,7 +60,7 @@ const TopicContentDisplay = ({
        
             <ul className="space-y-2 pl-4">
               {topicsSkillsTitle?.map((skill, index) => (
-                <li onClick={() => showSkillContent(id)} key={index} className="list-disc hover:cursor-pointer hover:text-blue-500 w-fit
+                <li  onClick={() => handleSkillClick(skill._id)} key={index} className="list-disc hover:cursor-pointer hover:text-blue-500 w-fit
                 text-[0.6rem] sm:text-sm md:text-[1rem]">{skill.skillTitle}</li>
               ))}
             </ul>
@@ -62,3 +72,4 @@ const TopicContentDisplay = ({
 };
 
 export default TopicContentDisplay;
+

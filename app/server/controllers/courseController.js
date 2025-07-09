@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import Progress from "../models/Progress.js";
 import User from "../models/User.js";
@@ -113,5 +114,73 @@ export const getSingleCourseDetails = async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).send({ success: false, msg: "Server error" })
+  }
+}
+
+export const markSkillAsCompleted = async (req, res) => {
+  try {
+    if (!req.user.userId) {
+      return res.status(401).send({ success: false, msg: "Unauthorized Access" });
+    }
+ 
+    const { courseId, skillId } = req.data;
+    // Find progress document
+    const progress = await Progress.findOne({ 
+      student: req.user.userId,
+      course: courseId 
+    });
+    
+    if (!progress) {
+      return res.status(404).send({ 
+        success: false, 
+        msg: "No progress data found for this course" 
+      });
+    }
+
+    // Verify couse exists in course collection
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).send({ 
+        success: false, 
+        msg: "Course not found" 
+      });
+    }
+
+    // Check if skill exists in any topic
+    const skillExists = course.topics.some(topic => 
+      topic.skills.some(skill => skill._id.equals(new mongoose.Types.ObjectId(skillId)))
+    );
+
+    if (!skillExists) {
+      return res.status(404).send({ 
+        success: false, 
+        msg: "Skill not found in this course" 
+      });
+    }
+
+    // Check if already completed
+    if (progress.completedSkills.includes(new mongoose.Types.ObjectId(skillId))) {
+      return res.status(409).send({ 
+        success: false, 
+        msg: "Skill already marked as completed" 
+      });
+    }
+
+    // Mark as completed
+    progress.completedSkills.push(new mongoose.Types.ObjectId(skillId));
+    await progress.save();
+
+    return res.status(200).send({ 
+      success: true, 
+      msg: "Skill marked as completed successfully",
+      completedSkills: progress.completedSkills
+    });
+    
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ 
+      success: false, 
+      msg: "Server error while marking skill as completed" 
+    });
   }
 }

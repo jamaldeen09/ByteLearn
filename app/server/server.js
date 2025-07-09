@@ -8,7 +8,7 @@ import cors from "cors"
 import { authRouter } from "./routes/authRouter.js"
 import "./config/passport.js";
 import Course from "./models/Course.js"
-import { exampleCourse } from "./data/courseData.js"
+import { exampleCourse,  cssMasteryCourse } from "./data/courseData.js"
 import { courseRouter } from "./routes/courseRouter.js"
 
 
@@ -35,7 +35,7 @@ mongoose.connect(URL ? URL : "").then(async () => {
     // const deleteCourse = await Course.findOneAndDelete({ title })
     // console.log(deleteCourse, "has been deleted")
 
-    // await Course.insertOne(exampleCourse)
+    // await Course.insertOne(cssMasteryCourse)
     // console.log("Added new course")
     server.listen(PORT, () => console.log(`Server is running on port http://localhost:${PORT}`));
 }).catch((err) => {
