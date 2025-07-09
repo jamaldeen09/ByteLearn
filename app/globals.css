@@ -54,6 +54,14 @@
 .liCon:hover .unread {
   @apply bg-white text-black transition-all duration-200
 }
+
+.topicCon:hover .icon {
+  @apply bg-black 
+}
+
+.topicCon:hover.expanded {
+  @apply border border-black bg-black/10 backdrop-blur-md
+}
 /* Screens */
 @theme {
 

@@ -9,7 +9,7 @@ const NewCourseCard = ({ courseImg, instructorImg, instructorName, dateOfCreatio
       whileHover={{ y: -6 }}
       whileTap={{ scale: 0.9 }}
       transition={{ duration: 0.3, type: "spring", damping: 10, stiffness:100 }}
-      className="rounded-t-xl sm:w-[80vw] md:w-[60vw] max-lg:w-full mb-6 hover:cursor-pointer"
+      className="rounded-xl sm:w-[80vw] md:w-[60vw] max-lg:w-full mb-6 hover:cursor-pointer border border-gray-300"
     >
       {/* Image Area*/}
       <div

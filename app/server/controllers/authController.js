@@ -31,7 +31,7 @@ const generateOTP = () => {
 export const googleAuth = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user);
+
     const token = createAccessToken(user._id);
     res.redirect(`http://localhost:3000/client/auth/success?token=${token}`);
   } catch (error) {
@@ -260,12 +260,14 @@ export const verifyUser = async (req, res) => {
     }
 
   
-    const userId = req.user.userId || req.user._id;
+    const userId = req.user.userId;
+    
     if (!userId) {
       return res.status(401).send({ success: false, msg: "Invalid token payload" });
     }
 
-    const exsistingAcc = await User.findById(new mongoose.Types.ObjectId(userId));
+    const exsistingAcc = await User.findById(userId)
+    
  
     if (!exsistingAcc)
       return res.status(404).send({ success: false, msg: "Account was not found" })

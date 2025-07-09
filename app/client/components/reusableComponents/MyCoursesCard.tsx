@@ -17,11 +17,10 @@ const MyCoursesCard = ({ imgUrl, instructorImg, title, desc, continueCourse, pro
 
     return (
         <motion.div
-            whileHover={{ scale: 1.03 }}
-            transition={{ duration: 0.3, type: "spring", damping: 5, stiffness: 100 }}
-            className="rounded-t-xl sm:w-[80vw] md:w-[60vw] max-lg:w-full mb-6 hover:cursor-pointer"
+            whileHover={{ y: -5}}
+            className="rounded-xl w-full sm:mx-auto max-lg:mx-0 sm:max-w-lg md:max-w-xl max-lg:max-w-lg mb-6 hover:cursor-pointer border border-gray-300"
         >
-            {/* Image Area*/}
+            {/* Image Area */}
             <div
                 style={{
                     backgroundImage: `url(${imgUrl})`,

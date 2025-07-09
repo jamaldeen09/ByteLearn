@@ -49,11 +49,6 @@ export type SidebarLinkSchema = {
   isActive: boolean
 }
 
-export type SidebarProps = {
-  currentRoute: string,
-  setCurrentRoute: React.Dispatch<React.SetStateAction<string>>
-}
-
 
 export type SidebarNavProps = {
   profilePic: string,
@@ -107,9 +102,80 @@ export type CourseCard = {
   imageUrl: string;
   title: string;
   description: string;
-  creator: {
-    name: string;
-    imageUrl?: string;
-  };
-  topics: string[];
+  creator: CreatorSchema,
+  topics: topicSchema[];
+  category: string,
+  enroll: (id: string) => void,
+  id: string,
+  isEnrolling: boolean,
+  isEnrolled: boolean,
+}
+
+type quizSchema = {
+  question: string,
+  options: string[],
+  correctAnswer: string
+}
+
+
+export type singleCourseSchema = {
+  _id: string
+  title: string,
+  description: string,
+  category: string,
+  imageUrl: string,
+  topics: topicSchema[],
+  dateCreated: string,
+  creator: CreatorSchema,
+  isPublished: Boolean,
+}
+
+
+
+export type topicSchema = {
+  title: string,
+  skills: SkillsSchema[]
+  quiz: quizSchema[]
+}
+
+export type CreatorSchema = {
+  fullName: string
+  email: string,
+  profilePicture: string,
+}
+
+export type SkillsSchema = {
+  skillTitle: string,
+  content: string,
+  _id: string,
+}
+
+export type courseSchema = {
+  id: string
+  title: string,
+  description: string,
+  category: string,
+  imageUrl: string,
+  topics: topicSchema[],
+  dateCreated: Date,
+  creator: CreatorSchema,
+  isPublished: Boolean,
+}
+
+
+export type coursesContainer<T> = {
+  courses: T[]
+}
+
+export type MyCoursesProp = {
+  courseId: string | null
+}
+
+export type TopicContentDisplaySchema = {
+  topicTitle: string,
+  skillsMastered: number,
+  topicsSkillsTitle: SkillsSchema[],
+  isCompleted: boolean,
+  showSkillContent: (id: string[]) => void,
+  id: string[],
 }

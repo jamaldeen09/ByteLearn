@@ -51,7 +51,7 @@ const MainDashboard = () => {
                         initial={{ y: -200, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.4, type: "spring", damping: 10, stiffness: 100 }}
-                        className="bg-white h-[52vh] rounded-2xl w-full mt-4 lg:max-w-4xl px-6 py-4 overflow-hidden
+                        className="bg-white h-[52vh] rounded-2xl w-full mt-4 border border-gray-400 px-6 py-4 overflow-hidden
                 hover:shadow-lg transition-shadow duration-300">
                         <div className="">
                             <p className="text-gray-400 flex items-center gap-1 font-bold ">Ongoing Courses <span>{arrowDown}</span></p>
@@ -104,7 +104,7 @@ const MainDashboard = () => {
 
 
             <div className="text-white font-bold text-5xl lg:col-span-4 
-    h-fit sm:h-screen sticky top-0 overflow-y-auto bg-white rounded-tl-2xl p-6 space-y-10">
+    h-fit sm:h-screen sticky top-0 overflow-y-auto bg-white rounded-tl-2xl p-6 space-y-10 border border-gray-400">
 
                 {/* Latest update */}
                 <div className="flex flex-col space-y-4">

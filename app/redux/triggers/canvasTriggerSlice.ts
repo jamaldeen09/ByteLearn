@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { CanvasSchema } from "@/app/client/types/types";
 
 
+
 const initialState: CanvasSchema = {
     canvas: false
 }

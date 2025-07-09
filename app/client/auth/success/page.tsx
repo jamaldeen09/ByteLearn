@@ -20,7 +20,6 @@ const SuccessPage = (): React.ReactElement => {
       localStorage.setItem("bytelearn_token", token);
 
       axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
-        console.log(res.data)
         if (res.data.payload.role === "student") {
           redirectTo("/client/dashboard/studentDashboard");
           return;

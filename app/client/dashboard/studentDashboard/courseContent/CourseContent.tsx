@@ -1,0 +1,182 @@
+"use client"
+import { MyCoursesProp } from "@/app/client/types/types"
+import axios from "../../../utils/config/axios"
+import { useEffect, useState } from "react"
+import { useRedirect } from "@/app/client/utils/utils"
+import toast from "react-hot-toast"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
+import { getSingleCourse } from "@/app/redux/coursesSlices/singleCourseSlice"
+import BlackSpinner from "@/app/client/components/reusableComponents/BlackSpinner"
+import { cn } from "@/lib/utils";
+import { ArrowRightIcon } from "@radix-ui/react-icons"
+import TopicContentDisplay from "@/app/client/components/reusableComponents/TopicContentDisplay"
+
+
+const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
+
+  const [progress, setProgress] = useState<number>(10)
+  // Ensure progress is between 0-100
+  const clampedProgress = Math.min(100, Math.max(0, progress));
+
+  // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
+  const progressColor = clampedProgress >= 70
+    ? "bg-green-500"
+    : clampedProgress >= 40
+      ? "bg-yellow-500"
+      : "bg-red-500";
+
+  if (!courseId) {
+    return (
+      <div
+        className="h-[90vh] centered-flex"
+      >
+        <img
+          src="https://landingi.com/wp-content/uploads/2022/03/en_4041-optimized.png"
+          alt="An image that tells the user the page they are trying to find does not exist"
+          className="w-full max-w-lg"
+        />
+      </div>
+    )
+  }
+
+  // fetch course details with courseId
+  const { redirectTo } = useRedirect()
+  const dispatch = useAppDispatch()
+  const [loadingFetch, setLoadingFetch] = useState<boolean>(false)
+  useEffect(() => {
+    setLoadingFetch(true)
+    axios.get(`/api/single-course/${courseId}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
+      .then((res) => {
+        dispatch(getSingleCourse(res.data.courseDetails))
+        setLoadingFetch(false)
+        return;
+      }).catch((err) => {
+        setLoadingFetch(false)
+        if (err.response.status === 401 || err.response.status === 403) {
+          redirectTo("/client/auth/login");
+          return;
+        } else if (err.response.status === 404) {
+          toast.error(err.response.data.msg);
+          return;
+        } else {
+          console.error(err)
+          toast.error("A server error occurred. Please bare with us");
+          return;
+        }
+      })
+  }, [])
+  // http://localhost:3000/client/dashboard/studentDashboard?tab=my-courses&courseId=686d373fa6f8607df293cf6b
+
+  // global state managing course information
+  const singleCourseInformation = useAppSelector((state) => state.singleCourse)
+  console.log(singleCourseInformation.topics)
+
+  if (loadingFetch) {
+    return (
+      <div
+        className="h-[90vh] centered-flex col-span-14"
+      >
+        <BlackSpinner />
+      </div>
+    )
+  }
+
+  const showCourseContent = (id: string[]) => {
+     
+  }
+  return (
+    <div
+      className="col-span-14 min-h-[90vh]"
+    >
+      {/* Centralized course display area */}
+      <div
+        className="h-full flex flex-col space-y-8 justify-center items-center "
+      >
+        {/* course overview text */}
+        <div className="w-fit">
+          <p className="text-gray-400 text-xs">{`${singleCourseInformation.title}'s overview`}</p>
+        </div>
+
+        {/* Course details + topics showcase */}
+
+        
+        <div
+          className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10
+         max-lg:border-black flex-col max-lg:flex-row "
+        >
+          {/* card with details*/}
+          <div className="w-full max-w-sm border border-gray-200 rounded-xl
+          hover:bg-black/10 hover:backdrop-blur-md hover:border-black h-fit transition-all duration-200
+          flex flex-col space-y-4 px-6 py-4">
+
+            {/* course image url */}
+            <div className="w-full centered-flex min-h-fit py-6">
+
+              <img
+                src={singleCourseInformation.imageUrl ? singleCourseInformation.imageUrl : "https://avatars.githubusercontent.com/u/75042455?s=280&v=4"}
+                alt={`${singleCourseInformation.title}'s image url`}
+                className="w-32 rounded-lg h-20"
+              />
+            </div>
+
+            {/* course title + date made */}
+            <div className="w-full flex flex-col sapce-y-3">
+              <p className="text-[0.9rem]">{singleCourseInformation.title}</p>
+              <p className="text-xs text-gray-400">Created: </p>
+            </div>
+
+            {/* Learning progress bar + percentage */}
+            <div className="w-full flex flex-col space-y-1">
+              <span className="font-medium text-2xl">{clampedProgress}%</span>
+              <p className="text-gray-400 text-sm">Learning Progress</p>
+            </div>
+
+            {/* Progress bar */}
+            <div className="space-y-1 mt-2">
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all duration-700",
+                    progressColor
+                  )}
+                  style={{ width: `${clampedProgress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* continue Learning button */}
+            <div className="w-full">
+              <button className="w-full bg-black text-white font-bold rounded-md hover:cursor-pointer py-4
+               flex justify-center items-center space-x-4">
+                <p>Continue Learning</p>
+                <span className="">{<ArrowRightIcon className="w-6 h-6"/>}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* topics */}
+          <div className="overflow-y-auto h-[90vh] w-full max-w-4xl
+          flex flex-col space-y-4">
+
+              {singleCourseInformation.topics.map((topic, index: number) => {
+                  const skillIds = topic.skills?.map(skill => skill?._id).filter(Boolean) || [];
+                 return (
+                  <TopicContentDisplay
+                    key={index}
+                    topicTitle={topic.title}
+                    topicsSkillsTitle={topic.skills}
+                    id={skillIds}
+                    showSkillContent={() => showCourseContent(skillIds)}
+                  />
+                )
+              })}
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  )
+}
+
+export default CourseContent

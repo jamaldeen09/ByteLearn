@@ -1,25 +1,58 @@
-import { SidebarLinkSchema, SidebarProps } from "../../types/types"
+import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
+import { useRouter,useSearchParams } from "next/navigation"
 
-const Sidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
+const Sidebar = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const tab = searchParams.get('tab')
+    let tabParam = "";
+
     const handleRouteChange = (value: string) => {
-        setCurrentRoute(value);
+       
+        switch (value) {
+            case "a":
+                tabParam = "";
+                break;
+            case "b":
+                tabParam = "?tab=my-courses";
+                break;
+            case "c":
+                tabParam = "?tab=courses";
+                break;
+            default:
+                tabParam = "";
+        }
+        router.push(`/client/dashboard/studentDashboard${tabParam}`);
+    };
+
+    const isActive = (value: string) => {
+        switch (value) {
+            case "a":
+                return !tab; 
+            case "b":
+                return tab === "my-courses";
+            case "c":
+                return tab === "courses";
+            default:
+                return false;
+        }
     };
 
     return (
         <>
-            <div className="col-span-1 max-lg:col-span-3 py-4 hidden md:flex flex-col">
+            <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
+
                 {/* Routes */}
-                <div className="min-h-96 flex flex-col space-y-4">
+                <div className="min-h-fit flex flex-col space-y-4">
                     {/* logo + title */}
-                    <div className="flex max-lg:m-0 max-lg:items-center max-lg:justify-start tablets and iphones: justify-center items-center mx-auto">
+                    <div className="flex justify-center items-center">
                         <Logo />
-                        <h1 className="font-extrabold text-xl hidden max-lg:inline">ByteLearn</h1>
                     </div>
 
                     {/* Links */}
-                    <ul className="flex flex-col h-fit px-3 space-y-10 max-lg:space-y-6">
+                    <ul className="flex flex-col h-fit px-3 space-y-10  mt-6">
                         {sidebarlinks.map((link: SidebarLinkSchema) => (
                             <li
                                 key={link.value}
@@ -27,9 +60,9 @@ const Sidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
                                 className={`
                                 group relative flex items-center transition-all duration-200
                                 hover:cursor-pointer rounded-full mx-auto
-                                max-lg:space-x-4 max-lg:px-4 max-lg:py-5 max-lg:justify-start max-lg:w-full max-lg:h-fit
+                                
                                 justify-center w-12 h-12 liCon
-                                ${currentRoute === link.value
+                                ${isActive(link.value)
                                         ? "bg-black text-white"
                                         : "hover:bg-black hover:text-white"
                                     }
@@ -48,18 +81,16 @@ const Sidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
                                     </span>}
                                 </span>
 
-                                <span className="hidden max-lg:inline ml-2">
-                                    {link.routeName}
-                                </span>
+
 
                                 <span className={`
-                                max-lg:hidden absolute -top-10 left-1/2 transform -translate-x-1/2
+                                absolute -top-10 left-1/2 transform -translate-x-1/2
                                 bg-black text-white text-xs font-medium py-1 px-2 rounded
                                 opacity-0 group-hover:opacity-100 transition-opacity duration-300
                                 whitespace-nowrap pointer-events-none
                                 before:content-[''] before:absolute before:top-full before:left-1/2 
                                 before:-translate-x-1/2 before:border-4 before:border-transparent 
-                                before:border-t-black ${(link.routeName === "Achievements" || link.routeName === "My Courses") ? "ml-4" : "ml-0"}
+                                before:border-t-black z-50 ml-4 lg:m-0
                             `}>
                                     {link.routeName}
                                 </span>

@@ -2,15 +2,48 @@
 import { motion } from "framer-motion"
 import Logo from "../reusableComponents/Logo"
 import { sidebarlinks } from "../../utils/utils"
-import { SidebarLinkSchema, SidebarProps } from "../../types/types"
+import { SidebarLinkSchema } from "../../types/types"
 import { xIcon } from "@/app/icons/Icons"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAppDispatch } from "@/app/redux/essentials/hooks"
 
-const MobileSidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
+const MobileSidebar = () => {
+    const dispatch = useAppDispatch()
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const tab = searchParams.get('tab')
+    let tabParam = "";
+
     const handleRouteChange = (value: string) => {
-        setCurrentRoute(value);
+
+        switch (value) {
+            case "a":
+                tabParam = "";
+                break;
+            case "b":
+                tabParam = "?tab=my-courses";
+                break;
+            case "c":
+                tabParam = "?tab=courses";
+                break;
+            default:
+                tabParam = "";
+        }
+        router.push(`/client/dashboard/studentDashboard${tabParam}`);
     };
-    const dispatch = useAppDispatch();
+
+    const isActive = (value: string) => {
+        switch (value) {
+            case "a":
+                return !tab;
+            case "b":
+                return tab === "my-courses";
+            case "c":
+                return tab === "courses";
+            default:
+                return false;
+        }
+    };
     return (
         <motion.div
             key="mobile-sidebar"
@@ -28,12 +61,12 @@ const MobileSidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
             {/* logo + title */}
             <div className="flex justify-between items-center pr-6">
                 <div className="flex items-center">
-                <Logo />
-                <h1 className="font-extrabold text-xl">ByteLearn</h1>
+                    <Logo />
+                    <h1 className="font-extrabold text-xl">ByteLearn</h1>
                 </div>
 
                 <div onClick={() => dispatch}
-                   className="fit hover:cursor-pointer">
+                    className="fit hover:cursor-pointer">
                     <span>{xIcon}</span>
                 </div>
             </div>
@@ -50,7 +83,7 @@ const MobileSidebar = ({ currentRoute, setCurrentRoute }: SidebarProps) => {
                             className={`
                                 flex items-center space-x-4 w-full py-5 rounded-full hover:bg-black
                                 hover:text-white transition-all duration-300 hover:cursor-pointer px-4
-                                ${currentRoute === link.value
+                                ${isActive(link.value)
                                     ? "bg-black text-white"
                                     : "hover:bg-black hover:text-white"
                                 }

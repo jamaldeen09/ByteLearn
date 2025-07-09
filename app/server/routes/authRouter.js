@@ -23,12 +23,6 @@ import { body, checkSchema } from "express-validator";
 
 export const authRouter = express.Router();
 
-// authRouter.get(
-//   "/auth/google",
-//   passport.authenticate("google", { scope: ["profile", "email"] }),
-//   state,
-//   googleAuth
-// );
 
 authRouter.get("/auth/google", (req, res, next) => {
   const state = req.query.state || "student";
