@@ -67,7 +67,7 @@ const InstructorSignup = (): React.ReactElement => {
             password
         }).then((res) => {
             refresh(setFirstName, setLastName, setEmail, setPassword, false);
-            redirectTo("/client/instructorDashboard");
+            redirectTo("/client/dashboard/instructorDashboard");
         }).catch((err) => {
             setLoading(false);
             console.error(err)

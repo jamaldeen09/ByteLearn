@@ -2,7 +2,7 @@
 "use client";
 import { RobotIcon } from '../components/reusableComponents/RobotIcon';
 import { useRouter } from "next/navigation";
-import { ButtonProps, SidebarLinkSchema } from "../types/types";
+import { ButtonProps, SidebarDropdownLinks, SidebarLinkSchema } from "../types/types";
 import {
   academicCap,
   bookIcon,
@@ -10,7 +10,6 @@ import {
   dashboardIcon,
   profileIcon,
   settingsIcon,
-  starIcon,
 } from "@/app/icons/Icons";
 
 // routing
@@ -29,11 +28,11 @@ export const getButtonInformation = (): ButtonProps[] => {
   const { redirectTo } = useRedirect();
   const buttonInformation: ButtonProps[] = [
     {
-      text: "Sign up as a student",
+      text: "Student",
       funcToExecute: () => redirectTo("/client/auth//studentSignup"),
     },
     {
-      text: "Sign up as an Instructor",
+      text: "Instructor",
       funcToExecute: () => redirectTo("/client/auth/instructorSignup"),
     },
     {
@@ -203,4 +202,47 @@ const colors = [
 export const getRandomColor = () => {
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex]
+}
+
+
+export const sidebarDropdownLinks: SidebarDropdownLinks[] = [
+  {name: "Profile", styles: "px-4 py-2 hover:bg-gray-100 hover:cursor-pointer rounded-md text-sm",
+    routingFunc: () => {
+      console.log("incoming")
+    }
+  },
+  {name: "Settings", styles: "px-4 py-2 hover:bg-gray-100 hover:cursor-pointer rounded-md text-sm",
+    routingFunc: () => {
+      console.log("incoming")
+    }
+  },
+
+  {name: "Log out", styles: "px-4 py-2 hover:bg-red-100 hover:text-red-600 hover:cursor-pointer rounded-md text-sm",
+    routingFunc: () => {
+      console.log("incoming")
+    }
+  },
+]
+
+export const getDropdownLinks = (): SidebarDropdownLinks[] => {
+  const { redirectTo } = useRedirect();
+  const sidebarDropdownLinks: SidebarDropdownLinks[] = [
+    {name: "Profile", styles: "px-4 py-2 hover:bg-gray-100 hover:cursor-pointer rounded-md text-sm",
+      routingFunc: () => {
+        console.log("incoming")
+      }
+    },
+    {name: "Settings", styles: "px-4 py-2 hover:bg-gray-100 hover:cursor-pointer rounded-md text-sm",
+      routingFunc: () => {
+        console.log("incoming")
+      }
+    },
+  
+    {name: "Log out", styles: "px-4 py-2 hover:bg-red-100 hover:text-red-600 hover:cursor-pointer rounded-md text-sm",
+      routingFunc: () => {
+        console.log("incoming")
+      }
+    },
+  ]
+  return sidebarDropdownLinks
 }

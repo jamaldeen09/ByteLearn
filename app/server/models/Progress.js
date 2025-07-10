@@ -7,6 +7,7 @@ const progressSchema = new mongoose.Schema({
         { type: mongoose.Schema.Types.ObjectId, required: true },
     ],
     lastVisitedSkill: { type: mongoose.Schema.Types.ObjectId, default: null},
+    isCompleted: { type: Boolean, default: false },
 })
 
 export default mongoose.model("Progress", progressSchema)

@@ -17,9 +17,6 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
   const quiz = searchParams.get('quiz');
   const topicId = searchParams.get('topicId');
 
-  if (quiz === "true" && topicId) {
-    return <QuizComponent topicId={topicId} />
-  }
 
   // Get all skills from all topics
   const topics = useAppSelector(state => state.singleCourse.topics) || [];
@@ -105,14 +102,19 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
     setCompleted(true);
   };
 
+  if (quiz === "true" && topicId) {
+    return <QuizComponent topicId={topicId} />
+  }
+
  
   return (
-    <div className="col-span-14 h-[90vh] flex justify-center py-6">
+    <div className="col-span-14 min-h-[90vh] flex md:justify-center py-6 
+    overflow-x-hidden sm:px-0 md:px-6 lg:px-0">
       <div className="w-full max-w-5xl flex flex-col gap-10">
         {/* Header with progress */}
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 px-4 sm:px-4 md:px-0 ">
           <div className="w-full flex justify-between items-center">
-            <h1 className="text-2xl font-bold">{currentSkill?.skillTitle}</h1>
+            <h1 className="max-sm:text-lg sm:text-2xl font-bold">{currentSkill?.skillTitle}</h1>
             <p className="text-lg">{currentIndex + 1}/{totalSkills}</p>
           </div>
 
@@ -131,16 +133,16 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
         </div>
 
         {/* Content renderer */}
-        <div className="w-full py-4  flex flex-col items-center justify-between space-y-10">
+        <div className="w-full py-4 flex flex-col items-center justify-between space-y-10">
           <div
-            className="prose max-w-none"
+            className="prose w-full iphone:px-4 sm:px-4 md:max-w-none md:px-0"
             dangerouslySetInnerHTML={{ __html: currentSkill?.content || '' }}
           />
 
-          <div className="flex justify-between items-center w-full">
+          <div className="flex justify-between items-center w-full px-4">
             <button
               onClick={goToPrevSkill}
-              className={`hover:cursor-pointer w-16 h-14 rounded-lg border-black text-black centered-flex border backdrop-blur-md transition-all ${currentIndex === 0
+              className={`hover:cursor-pointer w-10 h-10 sm:w-10 sm:h-10 md:w-16 md:h-14 rounded-lg border-black text-black centered-flex border backdrop-blur-md transition-all ${currentIndex === 0
                 ? 'opacity-50 cursor-not-allowed'
                 : 'bg-black/10 hover:bg-black/20'
                 }`}
@@ -152,7 +154,7 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
             <button
               onClick={handleComplete}
               className={`${completed ? "bg-green-500" : "bg-green-100"
-                } px-8 py-3 rounded-lg hover:cursor-pointer centered-flex space-x-4`}
+                } iphone:px-4 max-sm:px-6 sm:px-8 py-3 rounded-lg hover:cursor-pointer centered-flex space-x-4`}
             >
               <span className={`border-2 h-4 w-4 ${completed ? "border-white text-white" : "border-green-400 text-green-400"
                 } centered-flex`}>
@@ -165,16 +167,16 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
 
             <button
               onClick={goToNextSkill}
-              className={`w-16 h-14 rounded-lg border-black centered-flex border backdrop-blur-md transition-all ${!completed
+              className={`w-10 h-10 sm:w-10 sm:h-10 md:w-16 md:h-14 rounded-lg border-black centered-flex border backdrop-blur-md transition-all ${!completed
                 ? 'bg-gray-300 border-gray-500 text-gray-400'
                 : currentIndex === totalSkills - 1
-                  ? 'bg-black text-white hover:bg-black  hover:cursor-pointer' // Enabled style for last skill
+                  ? 'bg-black text-white hover:bg-black  hover:cursor-pointer w-10 h-10'
                   : 'bg-black/10 text-black hover:bg-black/20'
                 }`}
               disabled={!completed}
             >
               {currentIndex === totalSkills - 1 ? (
-                <span>Finish</span>
+                <span className="text-xs sm:text-sm">Finish</span>
               ) : (
                 <ArrowRightIcon className="w-6 h-6" />
               )}

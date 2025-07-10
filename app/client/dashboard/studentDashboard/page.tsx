@@ -12,13 +12,14 @@ import { useEffect } from "react";
 import axios from "../../utils/config/axios"
 import toast from "react-hot-toast";
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice";
+import Chat from "./chat/Chat";
 
 
 
 
 const page = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
-  const usersInformation = useAppSelector((state) => state.usersInformation)
+  
   const dispatch = useAppDispatch()
   const router = useRouter()
 
@@ -27,7 +28,8 @@ const page = (): React.ReactElement => {
   const tab = searchParams.get('tab');
   const courseId = searchParams.get('courseId');
 
-  const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : "a";
+  // const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : "a";
+  const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : tab === "chat" ? "d" : "a";
 
   // fetch usersInformation
   useEffect(() => {
@@ -87,8 +89,8 @@ const page = (): React.ReactElement => {
             {route === "a" && <MainDashboard />}
             {route === "b" && <MyCourses courseId={courseId} />}
             {route === "c" && <Courses />}
-            {/* Fallback */}
-            {!(route === "a" || route === "b" || route === "c") && (
+            {route === "d" && <Chat />} 
+            {!(route === "a" || route === "b" || route === "c" || route === "d") && (
               <div>Coming soon</div>
             )}
           </div>

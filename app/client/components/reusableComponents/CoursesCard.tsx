@@ -15,7 +15,7 @@ const CourseCardComponent = ({ imageUrl, title, description, creator, topics, ca
             transition={{ duration: 0.3, type: "spring", damping: 10, stiffness: 100 }}
             layout
             className="rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow 
-            w-full"
+            w-full z-0"
         >
             {/* Course Image */}
             <div className="h-64 bg-gray-200 relative">

@@ -2,18 +2,75 @@
 import { motion } from "framer-motion"
 import { MyCoursesCardProps } from "../../types/types"
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/app/redux/essentials/hooks";
+import { useRouter } from "next/navigation";
 
-const MyCoursesCard = ({ imgUrl, instructorImg, title, desc, continueCourse, progress,instructorsName }: MyCoursesCardProps) => {
-
+const MyCoursesCard = ({ 
+    imgUrl, 
+    instructorImg, 
+    title, 
+    desc, 
+    progress,
+    instructorsName,
+    courseId,
+    category
+  }: MyCoursesCardProps & { courseId: string }) => {  
+  
+    const router = useRouter();
+    // const progressData = useAppSelector(state => 
+    //   state.progress.find(p => p.course === courseId)
+    // );
+  
     // Ensure progress is between 0-100
     const clampedProgress = Math.min(100, Math.max(0, progress));
-
-    // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
+  
+    // Determine color based on progress
     const progressColor = clampedProgress >= 70
-        ? "bg-green-500"
-        : clampedProgress >= 40
-            ? "bg-yellow-500"
-            : "bg-red-500";
+      ? "bg-green-500"
+      : clampedProgress >= 40
+        ? "bg-yellow-500"
+        : "bg-red-500";
+
+        const progressData = useAppSelector(state => 
+            state.progress.find(p => p.course === courseId)
+          );
+          const course = useAppSelector(state => 
+            state.coursesSlice.courses.find(c => c.id === courseId)
+          );
+        
+          // Find the last visited topic
+          const getLastVisitedTopic = () => {
+            if (!progressData?.lastVisitedSkill || !course) return "Start Learning";
+            
+            for (const topic of course.topics) {
+              const skill = topic.skills.find(s => s._id === progressData.lastVisitedSkill);
+              if (skill) return topic.title;
+            }
+            return "Continue Learning";
+          };
+        
+          const lastTopic = getLastVisitedTopic();
+    const handleContinueCourse = async () => {
+      try {
+        // 1. Check if we have a last visited skill
+        if (progressData?.lastVisitedSkill) {
+          router.push(
+            `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
+          );
+          return;
+        }
+  
+        // 2. If no last visited skill, go to course overview
+        router.push(
+          `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}`
+        );
+        
+      } catch (err) {
+        console.error("Failed to navigate to continue learning:", err);
+      }
+    };
+
+
 
     return (
         <motion.div
@@ -35,21 +92,21 @@ const MyCoursesCard = ({ imgUrl, instructorImg, title, desc, continueCourse, pro
 
                 {/* category */}
                 <div className="flex items-start">
-                    <div className="bg-blue-300 h-5 rounded-full min-w-16 iphone:text-[0.5rem] sm:text-xs centered-flex px-2 py-3 text-blue-800">
-                        <p>{"space and science"}</p>
+                    <div className="bg-black h-5 rounded-full min-w-16 iphone:text-[0.5rem] sm:text-xs centered-flex px-2 py-3 text-white">
+                        <p>{category}</p>
                     </div>
                 </div>
 
                 {/* Title */}
                 <div className="flex flex-col gap-2">
                     <h1 className="font-extrabold text-md sm:text-xl">{title || "What's Up . April 2020"}</h1>
-                    <p className="text-gray-400 text-sm">Topic: {desc || "State management with react"}</p>
+                    <p className="text-gray-400 iphone:text-[0.7rem] text-xs">Last Topic: {lastTopic}</p>
                 </div>
 
                 {/* Description */}
                 <div className="">
-                    <p className="text-gray-400 iphone:text-[0.5rem]  sm:text-xs">
-                        {"Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus recusandae vitae placeat blanditiis quaerat eligendi non nam fugit ducimus nostrum quia hic modi vel esse id numquam, veritatis consectetur. Libero. Lorem ipsum dolor sit amet consectetur adipisicing elit"}
+                    <p className="text-gray-400 text-sm ">
+                        {desc}
                     </p>
                 </div>
 
@@ -88,7 +145,8 @@ const MyCoursesCard = ({ imgUrl, instructorImg, title, desc, continueCourse, pro
 
                         {/* continue */}
                         <div className="">
-                            <p className="underline text-sm font-extrabold hover:cursor-pointer hover:brightness-90 transition-all duration-300">Continue</p>
+                            <p onClick={handleContinueCourse}
+                            className="underline text-sm font-extrabold hover:cursor-pointer hover:brightness-90 transition-all duration-300">Continue</p>
                         </div>
                     </div>
                 </div>

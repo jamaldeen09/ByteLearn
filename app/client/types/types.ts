@@ -88,14 +88,15 @@ export type NotificationCardProps = {
 
 export type MyCoursesCardProps = {
   imgUrl: string,
-  category: string,
+  category?: string,
   title: string,
   desc: string,
   instructorImg: string,
   progress: number,
   instructorsName: string,
-  continueCourse: (id: string) => void,
-  topic: string,
+  continueCourse?: (id: string) => void,
+  topic?: string,
+  courseId: string,
 }
 
 export type CourseCard = {
@@ -177,9 +178,7 @@ export type MyCoursesProp = {
 
 export type  TopicContentDisplaySchema  = {
   topicTitle: string;
-  skillsMastered: number;
   topicsSkillsTitle: SkillsSchema[]; 
-  isCompleted: boolean;
   selectedSkillId?: string | null;
 }
 
@@ -198,4 +197,27 @@ export type QuizItemProps = {
   id: string,
   isSelected?: boolean,
   showResult?: boolean,
+}
+
+export type ProgressState = {
+  course: string;
+  lastVisitedSkill: string | null;
+  completedSkills: string[];
+  isCompleted: boolean;
+
+}
+
+export type ProgressRootState = {
+  progress: ProgressState[];
+}
+
+export type SidebarDropdownLinks = {
+  name: string,
+  styles: string,
+  routingFunc: () => void
+}
+
+export type ChatFilterProps = {
+  filterName: string,
+  isActive: boolean
 }

@@ -110,18 +110,18 @@ const TopicContentDisplay = ({
     <div className={`w-full bg-gray-100 rounded-3xl overflow-hidden transition-colors border border-gray-300 hover:cursor-pointer hover:bg-black/10 hover:backdrop-blue-md hover:border-black`}>
       {/* Clickable header */}
       <div 
-        className="h-20 flex items-center px-5 hover:cursor-pointer justify-between"
+        className="h-16 sm:h-20 flex items-center px-3 sm:px-5 hover:cursor-pointer justify-between"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center space-x-4 sm:space-x-6">
+        <div className="flex items-center iphone:space-x-2 sm:space-x-6">
           <div className="fit">
             {isTopicCompleted ? (
-              <p className="w-8 h-8 icon centered-flex text-white bg-green-500 rounded-full">
-                <Check />
+              <p className="iphone:p-[0.1rem] sm:p-1 icon centered-flex text-white bg-green-500 rounded-full">
+                <Check className="w-4 h-4"/>
               </p>
             ) : (
-              <p className="w-6 h-6 icon centered-flex text-white bg-red-600 rounded-full">
-                <XIcon />
+              <p className="iphone:p-[0.1rem] sm:p-1icon centered-flex text-white bg-red-600 rounded-full">
+                <XIcon  className="w-4 h-4"/>
               </p>
             )}
           </div>

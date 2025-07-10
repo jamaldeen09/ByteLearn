@@ -1,7 +1,7 @@
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
-import { useRouter,useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 const Sidebar = () => {
     const router = useRouter();
@@ -10,7 +10,7 @@ const Sidebar = () => {
     let tabParam = "";
 
     const handleRouteChange = (value: string) => {
-       
+
         switch (value) {
             case "a":
                 tabParam = "";
@@ -21,6 +21,9 @@ const Sidebar = () => {
             case "c":
                 tabParam = "?tab=courses";
                 break;
+            case "d":
+                tabParam = "?tab=chat";
+                break;
             default:
                 tabParam = "";
         }
@@ -30,11 +33,13 @@ const Sidebar = () => {
     const isActive = (value: string) => {
         switch (value) {
             case "a":
-                return !tab; 
+                return !tab;
             case "b":
                 return tab === "my-courses";
             case "c":
                 return tab === "courses";
+                case "d":
+                    return tab === "chat";
             default:
                 return false;
         }

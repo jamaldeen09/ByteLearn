@@ -7,6 +7,8 @@ import { getCourses } from "@/app/redux/coursesSlices/courseSlice";
 import BlackSpinner from "@/app/client/components/reusableComponents/BlackSpinner";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import { container, item } from "./MainDashboard"
 
 
 const Courses = () => {
@@ -92,14 +94,20 @@ const Courses = () => {
                 </div>
 
                 : <div className="columns-1 sm:columns-1 w-full max-lg:w-full max-lg:columns-2 lg:columns-3 gap-4 ">
+                    <motion.div
+                        variants={container}
+                        initial="hidden"
+                        animate="visible"
+                        className="contents"
+                    >
                     {courses.map(course => (
 
-                        <div key={course.id} className="mb-4 break-inside-avoid w-full sm:mx-auto max-lg:mx-0 sm:max-w-lg md:max-w-xl max-lg:max-w-lg">
+                        <motion.div key={course.id} variants={item} className="mb-4 break-inside-avoid w-full sm:mx-auto max-lg:mx-0 sm:max-w-lg md:max-w-xl max-lg:max-w-lg">
                             <CourseCardComponent {...course} enroll={() => enroll(course.id)} isEnrolling={enrollLoading} 
                             isEnrolled={enrolledCourses.has(course.id)}/>
-                        </div>
+                        </motion.div>
 
-                    ))}
+                    ))}</motion.div>
                 </div>}
         </div>
     )

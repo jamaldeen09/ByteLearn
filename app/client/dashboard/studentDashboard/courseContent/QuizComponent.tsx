@@ -275,10 +275,11 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
   }
 
   return (
-    <div className="flex h-[90vh] col-span-14 flex-col gap-14 items-center">
+    <div className="flex h-[90vh] col-span-14 flex-col gap-14 items-center  iphone:px-4 max-sm:px-2 sm:px-6
+    ">
       {/* Tiny quiz text */}
-      <div className="w-full px-20">
-        <p className="text-gray-400">Quiz</p>
+      <div className="w-full md:px-20">
+        <p className="text-gray-400 text-xs sm:text-md">Quiz</p>
       </div>
 
       {/* Question area */}
@@ -286,7 +287,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
         {/* Question */}
         <div className="flex flex-col gap-8">
           <div className="w-full centered-flex">
-            <h1 className="font-extrabold text-2xl">{currentQuestion.question}</h1>
+            <h1 className="font-extrabold iphone:text-xs max-sm:text-sm sm:text-[1rem] md:text-2xl">{currentQuestion.question}</h1>
           </div>
 
           {/* Progress indicator */}

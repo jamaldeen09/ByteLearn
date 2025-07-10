@@ -5,6 +5,7 @@ import canvasSlice from "./triggers/canvasTriggerSlice"
 import courseSlice from "./coursesSlices/courseSlice"
 import singleCourseSlice from "./coursesSlices/singleCourseSlice"
 import completedSkillsSlice from "./coursesSlices/completedSkillsSlice"
+import progressReducer from "./coursesSlices/progressSlice";
 
 
 export const store = configureStore({
@@ -14,7 +15,8 @@ export const store = configureStore({
     canvasTrigger: canvasSlice,
     coursesSlice: courseSlice,
     singleCourse: singleCourseSlice,
-    completedSkills: completedSkillsSlice
+    completedSkills: completedSkillsSlice,
+    progress: progressReducer,
   }
 })
 

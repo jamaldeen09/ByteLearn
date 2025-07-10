@@ -6,6 +6,7 @@ import { SidebarLinkSchema } from "../../types/types"
 import { xIcon } from "@/app/icons/Icons"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAppDispatch } from "@/app/redux/essentials/hooks"
+import { untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
 
 const MobileSidebar = () => {
     const dispatch = useAppDispatch()
@@ -26,6 +27,9 @@ const MobileSidebar = () => {
             case "c":
                 tabParam = "?tab=courses";
                 break;
+            case "d":
+                tabParam = "?tab=chat";
+                break;
             default:
                 tabParam = "";
         }
@@ -40,6 +44,8 @@ const MobileSidebar = () => {
                 return tab === "my-courses";
             case "c":
                 return tab === "courses";
+                case "d":
+                    return tab === "chat";
             default:
                 return false;
         }
@@ -56,7 +62,7 @@ const MobileSidebar = () => {
                 damping: 30
             }}
             className="fixed top-0 left-0 h-full w-80 max-w-xs bg-white shadow-xl z-50 md:hidden overflow-y-auto
-            gap-4  flex flex-col"
+            gap-10  flex flex-col"
         >
             {/* logo + title */}
             <div className="flex justify-between items-center pr-6">
@@ -65,7 +71,7 @@ const MobileSidebar = () => {
                     <h1 className="font-extrabold text-xl">ByteLearn</h1>
                 </div>
 
-                <div onClick={() => dispatch}
+                <div onClick={() => dispatch(untriggerCanvas())}
                     className="fit hover:cursor-pointer">
                     <span>{xIcon}</span>
                 </div>

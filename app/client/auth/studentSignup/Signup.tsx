@@ -70,7 +70,7 @@ const Signup = () => {
             password
         }).then((res) => {
             refresh(setFirstName, setLastName, setEmail, setPassword, false);
-            redirectTo("/client/dashboard");
+            redirectTo("/client/dashboard/studentDashboard");
         }).catch((err) => {
             setLoading(false);
             console.error(err)
