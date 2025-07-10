@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    bio: {
+        type: String,
+        default: "Hello Bytelearn!"
+    },
     notifications: [ notificationSchema ]
 })
 

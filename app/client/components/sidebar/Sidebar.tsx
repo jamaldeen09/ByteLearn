@@ -80,8 +80,8 @@ const Sidebar = () => {
                                     {link.icon}
                                     {/* Chats Number */}
                                     {link.routeName === "Chats" && <span
-                                        className="text-xs font-bold bg-black rounded-full w-4 h-4 text-white absolute centered-flex top-0 left-4
-                                  unread">
+                                        className={` ${tab === "chat" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-4
+                                  unread`}>
                                         2
                                     </span>}
                                 </span>

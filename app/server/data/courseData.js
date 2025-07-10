@@ -825,3 +825,285 @@ print(book)  # Calls __str__ automatically</code></pre>
   dateCreated: new Date(),
   isPublished: true
 };
+
+
+export const reactCourse = {
+  title: "Mastering React.js: From Fundamentals to Advanced Patterns",
+  description: "Learn to build modern, scalable web applications with React. Master hooks, context, state management, and performance optimization techniques.",
+  category: "Web Development",
+  imageUrl: "https://www.patterns.dev/img/reactjs/react-logo@3x.svg",
+  topics: [
+    {
+      title: "React Fundamentals",
+      skills: [
+        {
+          skillTitle: "Components and JSX",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Understanding React Components</h2>
+              <p class="mb-4">React applications are built using components - reusable, isolated pieces of UI. There are two types of components:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Class Component
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+
+// Function Component (modern approach)
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">JSX Deep Dive</h2>
+              <p class="mb-4">JSX is a syntax extension that combines JavaScript with HTML-like tags:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>const element = (
+  <div className="app">
+    <h1>Hello World</h1>
+    <p>Current time: {new Date().toLocaleTimeString()}</p>
+  </div>
+);</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Props and PropTypes</h2>
+              <p class="mb-4">Props (properties) are how components receive data from their parent:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Using props
+function UserProfile({ name, age, email }) {
+  return (
+    <div>
+      <h2>{name}</h2>
+      <p>Age: {age}</p>
+      <p>Email: {email}</p>
+    </div>
+  );
+}
+
+// PropTypes (type checking)
+import PropTypes from 'prop-types';
+
+UserProfile.propTypes = {
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number,
+  email: PropTypes.string
+};</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Component Composition</h2>
+              <p class="mb-4">React components can be composed together to build complex UIs:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>function App() {
+  return (
+    <Layout>
+      <Header />
+      <Sidebar>
+        <NavMenu />
+      </Sidebar>
+      <MainContent>
+        <Article />
+        <Comments />
+      </MainContent>
+    </Layout>
+  );
+}</code></pre>
+            </section>
+          `
+        },
+        {
+          skillTitle: "State and Lifecycle",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">Understanding State</h2>
+              <p class="mb-4">State allows components to manage data that changes over time:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Class component state
+class Counter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0 };
+  }
+  
+  increment = () => {
+    this.setState({ count: this.state.count + 1 });
+  };
+}
+
+// Functional component with useState hook
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  
+  const increment = () => {
+    setCount(prevCount => prevCount + 1);
+  };</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Lifecycle Methods</h2>
+              <p class="mb-4">Class components have lifecycle methods for different phases:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>class Example extends React.Component {
+  componentDidMount() {
+    // Runs after component mounts
+    console.log('Component mounted');
+  }
+  
+  componentDidUpdate() {
+    // Runs after updates
+    console.log('Component updated');
+  }
+  
+  componentWillUnmount() {
+    // Runs before unmounting
+    console.log('Component will unmount');
+  }
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">useEffect Hook</h2>
+              <p class="mb-4">The useEffect hook combines all lifecycle functionality in functional components:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>import { useEffect } from 'react';
+
+function Example() {
+  useEffect(() => {
+    // ComponentDidMount equivalent
+    console.log('Component mounted');
+    
+    return () => {
+      // ComponentWillUnmount equivalent
+      console.log('Component will unmount');
+    };
+  }, []); // Empty array = run once on mount
+
+  useEffect(() => {
+    // Runs on mount AND when count changes
+    console.log('Count changed:', count);
+  }, [count]); // Dependency array
+}</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "What is the correct way to update state in a functional component?",
+          options: [
+            "this.setState({ count: 1 })",
+            "setState({ count: 1 })",
+            "setCount(1)",
+            "state.count = 1"
+          ],
+          correctAnswer: "setCount(1)"
+        },
+        {
+          question: "Which lifecycle method is equivalent to the empty dependency array in useEffect?",
+          options: [
+            "componentDidUpdate",
+            "componentWillUnmount",
+            "componentDidMount",
+            "shouldComponentUpdate"
+          ],
+          correctAnswer: "componentDidMount"
+        }
+      ]
+    },
+    {
+      title: "Advanced React Patterns",
+      skills: [
+        {
+          skillTitle: "Context API and State Management",
+          content: `
+            <section class="skill-content">
+              <h2 class="text-2xl font-bold mb-4">React Context API</h2>
+              <p class="mb-4">Context provides a way to share values between components without prop drilling:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// 1. Create context
+const ThemeContext = React.createContext('light');
+
+// 2. Provide context value
+function App() {
+  return (
+    <ThemeContext.Provider value="dark">
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+
+// 3. Consume context
+function Toolbar() {
+  const theme = useContext(ThemeContext);
+  return <div className={theme}>Current theme: {theme}</div>;
+}</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">Redux Fundamentals</h2>
+              <p class="mb-4">Redux is a predictable state container for JavaScript apps:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>// Redux store setup
+import { createStore } from 'redux';
+
+function counterReducer(state = { value: 0 }, action) {
+  switch (action.type) {
+    case 'increment':
+      return { value: state.value + 1 };
+    default:
+      return state;
+  }
+}
+
+const store = createStore(counterReducer);</code></pre>
+              
+              <h2 class="text-2xl font-bold mb-4 mt-8">React-Redux Integration</h2>
+              <p class="mb-4">Connecting React components to Redux:</p>
+              
+              <pre class="bg-gray-100 p-4 rounded mb-4"><code>import { Provider, useSelector, useDispatch } from 'react-redux';
+
+function App() {
+  return (
+    <Provider store={store}>
+      <Counter />
+    </Provider>
+  );
+}
+
+function Counter() {
+  const count = useSelector(state => state.value);
+  const dispatch = useDispatch();
+  
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: 'increment' })}>
+        Count: {count}
+      </button>
+    </div>
+  );
+}</code></pre>
+            </section>
+          `
+        }
+      ],
+      quiz: [
+        {
+          question: "What problem does Context API solve?",
+          options: [
+            "Component styling",
+            "Prop drilling",
+            "State immutability",
+            "Server-side rendering"
+          ],
+          correctAnswer: "Prop drilling"
+        },
+        {
+          question: "Which Redux function triggers state changes?",
+          options: [
+            "getState",
+            "dispatch",
+            "subscribe",
+            "connect"
+          ],
+          correctAnswer: "dispatch"
+        }
+      ]
+    }
+  ],
+  creator: new mongoose.Types.ObjectId("686d3622b95602004ffbba14"),
+  dateCreated: new Date(),
+  isPublished: true
+};

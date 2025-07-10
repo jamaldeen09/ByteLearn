@@ -9,6 +9,7 @@ const initialState: UserInfoSchema = {
     friends: [],
     role: "",
     _id: "",
+    bio: "",
 }
 
 const usersInformationSlice = createSlice({
@@ -22,6 +23,7 @@ const usersInformationSlice = createSlice({
             state.role = action.payload.role
             state.courses = action.payload.courses
             state._id = action.payload._id
+            state.bio = action.payload.bio
         }
     }
 })

@@ -40,6 +40,7 @@ export type UserInfoSchema = {
   role: string;
   courses: any[];
   _id: string,
+  bio: string,
 };
 
 export type SidebarLinkSchema = {
@@ -220,4 +221,48 @@ export type SidebarDropdownLinks = {
 export type ChatFilterProps = {
   filterName: string,
   isActive: boolean
+}
+
+export type FriendProps = {
+  friendImageUrl: string,
+  friendName: string,
+  previousMessage: string,
+  timePreviousMsgWasSent: string,
+  unreadMessages: number,
+}
+
+export type EnableAddFriendProps = {
+  triggerAddFriend: boolean,
+  setTriggerAddFriend: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export type AddComponentProps = {
+  icon: any,
+  purpose: string,
+  whatTheButtonDoes: () => void;
+}
+
+export type FriendsOnByteLearnProps = {
+  profilePicture: string,
+  name: string,
+  bio: string,
+  createRoom: (id: string) => void
+  id: string,
+}
+
+export type NewFriendTrigger = {
+  triggerNewFriend: boolean
+}
+
+export type NewGroupTrigger = {
+  triggerNewGroup: boolean
+}
+
+export type GroupMembersProps = {
+  memberName: string,
+  profilePic: string,
+  bio: string,
+  setIsAdded: React.Dispatch<React.SetStateAction<boolean>>,
+  id: string,
+  isAdded: boolean,
 }

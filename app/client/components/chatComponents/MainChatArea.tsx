@@ -1,8 +1,8 @@
-import React from 'react'
+
 
 const MainChatArea = () => {
   return (
-   <div className="bg-blue-400 h-full w-full ">
+   <div className="h-full w-full border">
 
    </div>
   )

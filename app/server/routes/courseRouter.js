@@ -4,6 +4,7 @@ import {
   enrollToACourse,
   fetchCourses,
   getCompletedSkills,
+  getEnrolledCourses,
   getProgessData,
   getSingleCourseDetails,
   markSkillAsCompleted,
@@ -90,3 +91,9 @@ courseRouter.get(
   verifyAccessToken,
   getProgessData,
 );
+
+courseRouter.get(
+  "/api/enrolled-courses",
+  verifyAccessToken,
+  getEnrolledCourses,
+)

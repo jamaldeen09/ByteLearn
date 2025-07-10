@@ -171,7 +171,7 @@ export const getSingleCourseDetails = async (req, res) => {
         .send({ success: false, msg: "Unauthorized Access" });
     const { id } = req.data;
 
-    // check for exsisting course
+    // check for exsisting course  
     const requestedCourse = await Course.findById(id).populate({
       path: "creator",
       model: "User",
@@ -266,7 +266,6 @@ export const updateLastVisitedSkill = async (req, res) => {
     }
 
     const { courseId, skillId } = req.data;
-
     const progress = await Progress.findOneAndUpdate(
       { student: req.user.userId, course: courseId },
       {
@@ -283,7 +282,7 @@ export const updateLastVisitedSkill = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({
+    return res.status(500).send({ 
       success: false,
       msg: "Server error while updating last visited skill",
     });
@@ -294,9 +293,20 @@ export const getProgessData = async (req, res) => {
   try {
     const progress = await Progress.find({ student: req.user.userId })
     .select('course completedSkills lastVisitedSkill isCompleted');
+
     res.status(200).send({ progress });
   } catch (err) {
     console.error(err);
     res.status(500).send({ success: false, msg: "Server error" });
+  }
+};
+
+export const getEnrolledCourses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate('courses');
+    res.status(200).send({ courses: user.courses });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
   }
 };

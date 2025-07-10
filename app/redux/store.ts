@@ -6,7 +6,9 @@ import courseSlice from "./coursesSlices/courseSlice"
 import singleCourseSlice from "./coursesSlices/singleCourseSlice"
 import completedSkillsSlice from "./coursesSlices/completedSkillsSlice"
 import progressReducer from "./coursesSlices/progressSlice";
-
+import newFriendsSlice from "./triggers/newFriendTrigger"
+import newGroupSlice from "./triggers/groupCreationTrigger"
+import enrolledCoursesReducer from './coursesSlices/enrolledCoursesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +19,9 @@ export const store = configureStore({
     singleCourse: singleCourseSlice,
     completedSkills: completedSkillsSlice,
     progress: progressReducer,
+    newFriendTrigger: newFriendsSlice,
+    newGroupTrigger: newGroupSlice,
+    enrolledCourses: enrolledCoursesReducer,
   }
 })
 

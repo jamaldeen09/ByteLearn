@@ -70,8 +70,6 @@ const MyCoursesCard = ({
       }
     };
 
-
-
     return (
         <motion.div
             whileHover={{ y: -5}}
