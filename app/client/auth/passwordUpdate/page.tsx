@@ -16,7 +16,7 @@ const page = (): React.ReactElement => {
             bgDesc="Don’t worry, it happens to the best of us. Enter your email to receive a secure OTP and get back into your learning journey."
             googleAuthReq={() => {
                 try {
-                    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`
+                    redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
                 } catch (err) {
                     toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
                     redirectTo("/client/auth/login")

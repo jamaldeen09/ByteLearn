@@ -57,13 +57,15 @@ const Sidebar = () => {
             dispatch(getInformation(res.data.payload))
         }).catch((err) => {
             console.error(err)
-            toast.error(err)
+            toast.error(err.response.msg);
         })
     }
     useEffect(() => {
         fetchInfo();
     }, [])
 
+    const notifications = useAppSelector(state => state.notificationContainer.notifications);
+    const notSeenNotifs = notifications.filter((notif) => !notif.isSeen)
     return (
         <>
             <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
@@ -104,10 +106,10 @@ const Sidebar = () => {
                                         2
                                     </span>}
 
-                                    {link.routeName === "Inbox" && <span
+                                    {notSeenNotifs.length <= 0 ? "" : link.routeName === "Inbox" && <span
                                         className={` ${tab === "inbox" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-3
                                   unread`}>
-                                        2
+                                        {notSeenNotifs.length}
                                     </span>}
                                 </span>
 

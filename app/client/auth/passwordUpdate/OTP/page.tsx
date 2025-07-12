@@ -16,7 +16,7 @@ const page = () => {
       bgDesc="We’ve sent a one-time password (OTP) to your email. Please enter it below to verify your identity and continue."
       googleAuthReq={() => {
         try {
-          window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`
+          redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
         } catch (err) {
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
           redirectTo("/client/auth/login")

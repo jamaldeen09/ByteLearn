@@ -287,13 +287,15 @@ export type NotificationSchema = {
   sender: {
     _id: string,
     fullName: string,
-    avatar: string
+    avatar: string,
+    email: string,
   },
   content: string,
   receiver: {
     _id: string,
     fullName: string,
-    avatar: string
+    avatar: string,
+    email: string,
   },
   isSeen: Boolean,
   sentAt: Date,
@@ -302,6 +304,13 @@ export type NotificationSchema = {
 
 export type NotificationContainer = {
   notifications: NotificationSchema[]
+}
+
+export type NotifSenderInformationSchema = {
+  fullName: string,
+  avatar: string,
+  email: string,
+  content: string,
 }
 
 

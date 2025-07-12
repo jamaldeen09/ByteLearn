@@ -12,5 +12,12 @@ export const events = {
   SEND_NOTIFICATION: "send-notification",
   JOIN_ROOM: "join-room",
   SEEN_NOTIFICATION: "seen-notification",
-  CHANGED_TO_SEEN: "seen"
+  CHANGED_TO_SEEN: "seen",
+  ACCEPT_FRIEND_REQUEST: "accept-friend-request",
+  REJECT_FRIEND_REQUEST: "reject-friend-request",
+  FRIEND_REQUEST_ACCEPTED: "friend-request-accepted",
+  FRIEND_REQUEST_ACCEPTED_NOTIFICATION: "friend-request-accepted-notification",
+  REJECT_FRIEND_REQUEST: "reject-friend-request",
+  FRIEND_REQUEST_REJECTED: "friend-request-rejected",
+  FRIEND_REQUEST_REJECTED_NOTIFICATION: "friend-request-rejected-notification"
 };

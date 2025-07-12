@@ -18,7 +18,7 @@ import { chatRouter } from "./routes/chatRouter.js";
 import jwt from "jsonwebtoken";
 import { events } from "../client/utils/events.js";
 import User from "./models/User.js";
-import { responseGenerator } from "./utils/utils.js";
+import { generateFriendRequest, responseGenerator } from "./utils/utils.js";
 import Notification from "./models/Notification.js";
 
 
@@ -93,39 +93,35 @@ io.on("connection", async (socket) => {
         socket.emit(events.NOT_FOUND, responseGenerator(false, "Person you are trying to add does not exist"))
         return;
       }
+      const currentUserIdStr = currentUser._id.toString();
+      const friendIdStr = friend._id.toString();
 
-      if (currentUser._id.equals(friend._id)) {
+      if (currentUserIdStr === friendIdStr) {
         socket.emit(events.NOT_ALLOWED, responseGenerator(false, "You cannot add yourself as a friend"));
         return;
       }
 
-      if (currentUser.friends.includes(friend._id)) {
+      const alreadyFriends = 
+      currentUser.friends.some(id => id.toString() === friendIdStr) || 
+      friend.friends.some(id => id.toString() === currentUserIdStr);
+
+      if (alreadyFriends) {
         socket.emit(events.NOT_ALLOWED, responseGenerator(false, `You and ${friend.fullName} are already friends`));
         return;
       }
 
-      if (!currentUser.friends.includes(friend._id)) {
+      if (!alreadyFriends) {
 
-       setTimeout(() => {
-        io.to(friend._id.toString()).emit(events.SEND_NOTIFICATION, responseGenerator(true, `${currentUser.fullName} sent you a friend request`));
-       }, 2000)
+        setTimeout(() => {
+          io.to(friend._id.toString()).emit(events.SEND_NOTIFICATION, responseGenerator(true, `${currentUser.fullName} sent you a friend request`));
+        }, 2000)
 
         socket.emit(events.NEW_NOTIFICATION, responseGenerator(false, `A friend request has been sent to ${friend.fullName}`));
 
-        // create new notfication
-        const notificationContent = `
-          <div class="friend-request">
-          <img src="${currentUser.avatar}" width="40" height="40" style="border-radius:50%"/>
-             <p>${currentUser.fullName} wants to be friends!</p>
-          <div class="request-actions">
-           <button class="accept-btn" data-sender="${currentUser._id}">Accept</button>
-          <button class="reject-btn" data-sender="${currentUser._id}">Reject</button>
-          </div>
-        </div>`
-
+        // create new notification
         const notificationSent = await Notification.create({
           sender: currentUser._id,
-          content: notificationContent,
+          content: generateFriendRequest(currentUser.fullName, currentUser._id),
           receiver: friend._id,
           isSeen: false,
           sentAt: Date.now(),
@@ -134,33 +130,144 @@ io.on("connection", async (socket) => {
         friend.notifications.push(notificationSent._id)
         await friend.save();
         return;
-      }  
+      }
     })
 
     // seen notification
     socket.on(events.SEEN_NOTIFICATION, async ({ notifId }) => {
-      if (!notifId){
+      if (!notifId) {
         socket.emit(events.NOT_ALLOWED, responseGenerator(false, "Notification ID must be proivided"))
         return;
       }
-
       // find notification
-      const foundNotification = await Notification.findById(notifId);
+      const foundNotification = await Notification.findById(notifId).populate({
+        path: "sender",
+        model: "User",
+        select: "email fullName avatar"
+      });
+      const data = {
+        success: true,
+        notifSender: {
+          fullName: foundNotification.sender.fullName,
+          avatar: foundNotification.sender.avatar,
+          email: foundNotification.sender.email,
+          content: foundNotification.content
+        },
+      }
       if (!foundNotification) {
+
         socket.emit(events.NOT_FOUND, responseGenerator(false, "Notification was not found"))
         return;
       }
 
       if (foundNotification.isSeen) {
-        socket.emit(events.NOT_ALLOWED, responseGenerator(true, "Notification is already seen"));
+
+        socket.emit(events.NOT_ALLOWED, data);
         return;
       }
 
       foundNotification.isSeen = true;
       await foundNotification.save();
 
-      socket.emit(events.CHANGED_TO_SEEN, responseGenerator(true, "Notification seen"));
+
+      socket.emit(events.CHANGED_TO_SEEN, data);
     })
+
+    socket.on(events.ACCEPT_FRIEND_REQUEST, async ({ senderId, notificationId }) => {
+      if (!senderId || !notificationId) {
+        socket.emit(events.NOT_ALLOWED, responseGenerator(false, "Please provide a senderId and notificationId"))
+        return;
+      }
+      const notification = await Notification.findOneAndUpdate(
+        { _id: notificationId, receiver: socket.user.userId },
+        { 
+          requestStatus: "accepted",
+          isSeen: true,
+          content: generateFriendRequest(
+            currentUser.fullName,
+            senderId,
+            "accepted"
+          )
+        },
+        { new: true }
+      ).populate("sender", "fullName avatar email");
+
+      if (!notification) {
+        socket.emit(events.NOT_FOUND, {
+          success: false,
+          message: "Notification not found or unauthorized"
+        });
+        return;
+      }
+
+      // 3. Add friend relationship (both directions)
+      await User.findByIdAndUpdate(socket.user.userId, {
+        $addToSet: { friends: senderId }
+      });
+      await User.findByIdAndUpdate(senderId, {
+        $addToSet: { friends: socket.user.userId }
+      });
+
+      // 4. Notify both users
+      const updatedNotification = await Notification.findById(notificationId)
+        .populate("sender", "fullName avatar email");
+
+      socket.emit(events.FRIEND_REQUEST_ACCEPTED, {
+        success: true,
+        notification: updatedNotification 
+      });
+
+      io.to(senderId.toString()).emit(events.FRIEND_REQUEST_ACCEPTED_NOTIFICATION, {
+        success: true,
+        message: `${currentUser.fullName} accepted your friend request!`,
+        notification: updatedNotification
+      });
+
+    })
+
+    socket.on(events.REJECT_FRIEND_REQUEST, async ({ senderId, notificationId }) => {
+      if (!senderId || !notificationId) {
+        socket.emit(events.NOT_ALLOWED, responseGenerator(false, "Please provide a senderId and notificationId"));
+        return;
+      }
+    
+      const notification = await Notification.findOneAndUpdate(
+        { _id: notificationId, receiver: socket.user.userId },
+        { 
+          requestStatus: "rejected",
+          isSeen: true,
+          content: generateFriendRequest(
+            currentUser.fullName,
+            senderId,
+            "rejected"
+          )
+        },
+        { new: true }
+      ).populate("sender", "fullName avatar email");
+    
+      if (!notification) {
+        socket.emit(events.NOT_FOUND, {
+          success: false,
+          message: "Notification not found or unauthorized"
+        }); 
+        return;
+      }
+    
+      // Notify both users
+      const updatedNotification = await Notification.findById(notificationId)
+        .populate("sender", "fullName avatar email");
+    
+      socket.emit(events.FRIEND_REQUEST_REJECTED, {
+        success: true,
+        notification: updatedNotification 
+      });
+    
+      io.to(senderId.toString()).emit(events.FRIEND_REQUEST_REJECTED_NOTIFICATION, {
+        success: true,
+        message: `${currentUser.fullName} declined your friend request`,
+        notification: updatedNotification
+      });
+    });
   } catch (err) {
     console.error(err)
     socket.emit(events.ERROR_OCCURED, { success: false, msg: "Server Error" })
@@ -197,11 +304,17 @@ mongoose
     // console.log(deleted)
     // console.log("Added new course")
 
+    // const deleted = await User.deleteOne({ fullName: "Jamal Omotoyosi" })
+    // const omotoyosi = await User.deleteOne({ fullName: "Olatunji Omotoyosi" })
+    // const distopian = await User.deleteOne({ fullName: "disptopian disto" })
+    // // console.log(deleted)
+    // // console.log(omotoyosi)
+    // console.log(distopian)
 
     server.listen(PORT, () =>
       console.log(`Server is running on port http://localhost:${PORT}`)
     );
   })
-  .catch((err) => {
+  .catch((err) => { 
     console.error(err);
   });

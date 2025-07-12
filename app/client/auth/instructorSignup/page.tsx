@@ -16,7 +16,7 @@ const page = (): React.ReactElement => {
      bgDesc="Share your expertise, guide students and create impactful courses on ByteLearn"
      googleAuthReq={() => {
       try {
-        window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?state=instructor`
+        redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?state=instructor`)
       } catch (err) {
         toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
         redirectTo("/client/auth/login")

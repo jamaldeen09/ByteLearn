@@ -1,5 +1,5 @@
 export const generateHTML = (code) => {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -105,14 +105,16 @@ export const generateHTML = (code) => {
 </html>`
 }
 
-export const responseGenerator  = (isSuccessfull, message) => {
-    return {
-        success: isSuccessfull,
-        msg: message,
-    }
+export const responseGenerator = (isSuccessfull, message) => {
+  return {
+    success: isSuccessfull,
+    msg: message,
+  }
 }
+
+
 export const notificationGenerator = (avatar, sendersName, notificationId) => {
-    return `
+  return `
       <div class="friend-request-notification" data-notification-id="${notificationId}">
         <div class="notification-header">
           <img src="${avatar}" alt="Profile" class="user-avatar">
@@ -127,4 +129,170 @@ export const notificationGenerator = (avatar, sendersName, notificationId) => {
         </div>
       </div>
     `;
-  };
+};
+
+export const generateFriendRequest = (
+  fullName,
+  id,
+  requestStatus = "pending"
+) => {
+  // Base HTML for the notification content (keep this exactly as is)
+  const notificationContent = `
+    <div class="friend-request-letter" style="
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #f9fafb;
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+      color: #111827;
+    ">
+      <!-- Header -->
+      <div class="letter-header" style="
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+      ">
+        <h2 style="font-size: 1.5rem; color: #1f2937; margin-bottom: 5px;">
+          Friendship Request
+        </h2>
+        <p style="font-style: italic; color: #6b7280;">
+          From: ${fullName}
+        </p>
+      </div>
+
+      <!-- Body -->
+      <div class="letter-body" style="margin-bottom: 20px;">
+        <p>Dear Friend,</p>
+        <p style="margin: 15px 0;">
+          I came across your profile and was genuinely impressed. 
+          I'd love the chance to connect and share experiences.
+        </p>
+      </div>
+  `;
+
+  // Only modify the buttons section
+  const baseButtonStyles = `
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  `;
+
+  let buttonsHTML = '';
+  
+  if (requestStatus === "accepted") {
+    buttonsHTML = `
+      <div class="letter-actions" style="
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+      ">
+        <button 
+          style="
+            ${baseButtonStyles}
+            background: #059669;
+            color: white;
+            width: 100%;
+            cursor: not-allowed;
+          "
+          disabled
+        >
+          ✓ Accepted
+        </button>
+      </div>
+    `;
+  } 
+  else if (requestStatus === "rejected") {
+    buttonsHTML = `
+      <div class="letter-actions" style="
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+      ">
+        <button 
+          style="
+            ${baseButtonStyles}
+            background: #f3f4f6;
+            color: #6b7280;
+            width: 100%;
+            cursor: not-allowed;
+            border: 1px solid #e5e7eb;
+          "
+          disabled
+        >
+          ✗ Declined
+        </button>
+      </div>
+    `;
+  }
+  else {
+    buttonsHTML = `
+      <div class="letter-actions" style="
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+      ">
+        <button 
+          id="accept-btn-${id}" 
+          class="accept-btn" 
+          data-sender="${id}"
+          style="
+            ${baseButtonStyles}
+            background: #10b981;
+            color: white;
+            flex: 1;
+          "
+        >
+          Accept
+        </button>
+        <button 
+          id="reject-btn-${id}" 
+          class="reject-btn" 
+          data-sender="${id}"
+          style="
+            ${baseButtonStyles}
+            background: white;
+            color: #6b7280;
+            flex: 1;
+            border: 1px solid #e5e7eb;
+          "
+        >
+          Decline
+        </button>
+      </div>
+    `;
+  }
+
+  // Closing HTML (keep this as is)
+  const closingHTML = `
+      <!-- Closing -->
+      <div class="letter-closing" style="
+        margin-top: 20px;
+        font-style: italic;
+        color: #6b7280;
+      ">
+        <p>Warm regards,</p>
+        <p>${fullName}</p>
+      </div>
+    </div>
+  `;
+
+  // Combine all parts
+  return notificationContent + buttonsHTML + closingHTML;
+};

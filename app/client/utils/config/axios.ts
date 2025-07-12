@@ -1,6 +1,6 @@
 import axios from "axios"
 
 
-axios.defaults.baseURL = `http://localhost:${process.env.NEXT_PUBLIC_PORT}`
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL
 export default axios;
 

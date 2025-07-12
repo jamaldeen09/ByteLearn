@@ -57,16 +57,26 @@ const Login = (): React.ReactElement => {
       password
     }).then((res) => {
       setLoading(false)
-      localStorage.setItem("bytelearn_token", res.data.token);
-      redirectTo("/client/dashboard")
       refresh(setEmail, setEmail, setEmail, setPassword, true);
-      console.log(res.data)
+      localStorage.setItem("bytelearn_token", res.data.token);
+
+      setTimeout(() => {
+        redirectTo("/client/dashboard");
+      }, 1000);
+
     }).catch((err) => {
       console.error(err)
       setLoading(false)
-      refresh(setEmail, setEmail, setEmail, setPassword, true)
-      setPasswordError(err.response?.data.msg);
-      return;
+      if (err.response.status === 404) {
+        setPasswordError("Account was not found. Please sign up");
+        refresh(setEmail, setEmail, setEmail, setPassword, true)
+        return;
+      }
+      if (err.response.status === 406) {
+        setPasswordError("Invalid credentials");
+        refresh(setEmail, setEmail, setEmail, setPassword, true)
+        return;
+      }
     })
   }
   return (
