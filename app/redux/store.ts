@@ -9,6 +9,8 @@ import progressReducer from "./coursesSlices/progressSlice";
 import newFriendsSlice from "./triggers/newFriendTrigger"
 import newGroupSlice from "./triggers/groupCreationTrigger"
 import enrolledCoursesReducer from './coursesSlices/enrolledCoursesSlice';
+import friendsReducer from "./informationSlices/friendInformation"
+import notificationReducer from "./chatSlices/notificationSlice"
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +24,7 @@ export const store = configureStore({
     newFriendTrigger: newFriendsSlice,
     newGroupTrigger: newGroupSlice,
     enrolledCourses: enrolledCoursesReducer,
+    notificationContainer: notificationReducer
   }
 })
 

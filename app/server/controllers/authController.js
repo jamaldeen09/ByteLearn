@@ -279,7 +279,8 @@ export const verifyUser = async (req, res) => {
       role: exsistingAcc.role,
       courses: exsistingAcc.courses,
       _id: exsistingAcc._id,
-      bio: exsistingAcc.bio
+      bio: exsistingAcc.bio,
+      avatar: exsistingAcc.avatar
     }
     
 

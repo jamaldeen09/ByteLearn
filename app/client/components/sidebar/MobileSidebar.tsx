@@ -7,6 +7,10 @@ import { xIcon } from "@/app/icons/Icons"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAppDispatch } from "@/app/redux/essentials/hooks"
 import { untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
+import axios from "../../utils/config/axios"
+import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice"
+import { useEffect } from "react"
+import toast from "react-hot-toast"
 
 const MobileSidebar = () => {
     const dispatch = useAppDispatch()
@@ -16,7 +20,7 @@ const MobileSidebar = () => {
     let tabParam = "";
 
     const handleRouteChange = (value: string) => {
-
+        let tabParam = "";
         switch (value) {
             case "a":
                 tabParam = "";
@@ -30,6 +34,9 @@ const MobileSidebar = () => {
             case "d":
                 tabParam = "?tab=chat";
                 break;
+            case "e":
+                tabParam = "?tab=inbox";
+                break;
             default:
                 tabParam = "";
         }
@@ -38,18 +45,27 @@ const MobileSidebar = () => {
 
     const isActive = (value: string) => {
         switch (value) {
-            case "a":
-                return !tab;
-            case "b":
-                return tab === "my-courses";
-            case "c":
-                return tab === "courses";
-                case "d":
-                    return tab === "chat";
-            default:
-                return false;
+            case "a": return !tab;
+            case "b": return tab === "my-courses";
+            case "c": return tab === "courses";
+            case "d": return tab === "chat";
+            case "e": return tab === "inbox";  // Add this case
+            default: return false;
         }
     };
+
+    const fetchInfo = async () => {
+        axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
+            .then((res) => {
+                dispatch(getInformation(res.data.payload))
+            }).catch((err) => {
+                console.error(err)
+                toast.error(err)
+            })
+    }
+    useEffect(() => {
+        fetchInfo();
+    }, [])
     return (
         <motion.div
             key="mobile-sidebar"

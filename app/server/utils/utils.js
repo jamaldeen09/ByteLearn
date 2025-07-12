@@ -104,3 +104,27 @@ export const generateHTML = (code) => {
 </body>
 </html>`
 }
+
+export const responseGenerator  = (isSuccessfull, message) => {
+    return {
+        success: isSuccessfull,
+        msg: message,
+    }
+}
+export const notificationGenerator = (avatar, sendersName, notificationId) => {
+    return `
+      <div class="friend-request-notification" data-notification-id="${notificationId}">
+        <div class="notification-header">
+          <img src="${avatar}" alt="Profile" class="user-avatar">
+          <div class="user-info">
+            <span class="username">${sendersName}</span>
+            <span class="request-text">sent you a friend request</span>
+          </div>
+        </div>
+        <div class="notification-actions">
+          <button class="accept-btn">Accept</button>
+          <button class="reject-btn">Reject</button>
+        </div>
+      </div>
+    `;
+  };

@@ -26,6 +26,7 @@ const courseSchema = new mongoose.Schema({
   dateCreated: { type: Date, default: Date.now },
   creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   isPublished: { type: Boolean, default: false },
+  likes: { type: Number, defaut: 0 }
 });
 
 export default mongoose.model("Course", courseSchema);

@@ -1,12 +1,5 @@
 import mongoose from "mongoose"
 
-
-const notificationSchema = new mongoose.Schema({
-    sender: { type: mongoose.Schema.Types.ObjectId, required: true },
-    dateSent: { type: Date, default: Date.now() },
-    content: { type: String, required: true },
-    read: { type: Boolean, default: false }
-})
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -40,7 +33,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "Hello Bytelearn!"
     },
-    notifications: [ notificationSchema ]
+    lastSeen: {
+        type: Date,
+        default: Date.now(),
+    },
+    notifications: {
+        type: [ mongoose.Schema.Types.ObjectId ],
+        ref: "Notfication",
+        defaut: [],
+    }
 })
 
 export default mongoose.model("User", userSchema)

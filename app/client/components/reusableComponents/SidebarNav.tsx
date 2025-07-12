@@ -3,16 +3,20 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { SidebarDropdownLinks, SidebarNavProps } from "../../types/types"
 import { harmBurgerMenu } from "@/app/icons/Icons"
-import { useAppDispatch } from "@/app/redux/essentials/hooks"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { triggerCanvas, untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
 import { sidebarDropdownLinks } from "../../utils/utils"
+import { socket } from "../../utils/config/io.js"
+import { events } from "../../utils/events"
 
 
-const SidebarNav = ({ profilePic, firstName }: SidebarNavProps) => {
+const SidebarNav = () => {
     // trigger dropdown
     const [triggerDropdown, setTriggerDropdown] = useState<boolean>(false);
     const dispatch = useAppDispatch();
-
+    const usersInformation = useAppSelector(state => state.usersInformation)
+        
+    
     useEffect(() => {
         document.body.addEventListener("click", () => {
             setTriggerDropdown(false)
@@ -44,8 +48,8 @@ const SidebarNav = ({ profilePic, firstName }: SidebarNavProps) => {
                 </div>
 
                 <div className="flex items-center space-x-4 relative w-full justify-end">
-                    <img onClick={() => setTriggerDropdown(true)} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:cursor-pointer" src={profilePic} alt="Rounded avatar" />
-                    <p className="text-sm sm:text-md">{firstName}</p>
+                    <img onClick={() => setTriggerDropdown(true)} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:cursor-pointer" src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"}  alt={`${usersInformation.fullName}'s profile picture`} />
+                    <p className="text-sm sm:text-md">{usersInformation.fullName}</p>
                 </div>
                 {/* Dropdown */}
                 <AnimatePresence>
@@ -65,8 +69,8 @@ const SidebarNav = ({ profilePic, firstName }: SidebarNavProps) => {
                         >
                             {/* MAIN */}
                             <div className="w-full flex items-center border-b border-gray-200 px-4 py-2 space-x-4">
-                            <img className="w-8 h-8 rounded-full hover:cursor-pointer" src={profilePic} alt="Rounded avatar" />
-                                <p className="text-sm">Jamaldeen</p>
+                            <img className="w-8 h-8 rounded-full hover:cursor-pointer" src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"} alt={`${usersInformation.fullName}'s profile picture`} />
+                                <p className="text-sm">{usersInformation.fullName}</p>
                             </div>
                             <div className="flex flex-col space-y-4 w-full">
                             {sidebarDropdownLinks.map((link: SidebarDropdownLinks) => {

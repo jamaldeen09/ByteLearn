@@ -2,7 +2,7 @@ import { FriendProps } from "../../types/types"
 
 
 const Friend = ({ friendImageUrl, friendName, previousMessage, timePreviousMsgWasSent, unreadMessages  }: FriendProps) => {
-    return (
+    return (  
         <div
             className="flex items-center space-x-2 hover:bg-gray-100 hover:cursor-pointer
       transition-all duration-300 px-2 py-2 rounded-lg"

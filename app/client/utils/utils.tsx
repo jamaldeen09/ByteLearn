@@ -11,6 +11,7 @@ import {
   profileIcon,
   settingsIcon,
 } from "@/app/icons/Icons";
+import { EnvelopeClosedIcon } from '@radix-ui/react-icons';
 
 // routing
 export const useRedirect = () => {
@@ -132,10 +133,10 @@ export const sidebarlinks: SidebarLinkSchema[] = [
     isActive: false,
   },
   {
-    routeName: "ByteLearn Ai",
-    icon: <RobotIcon />,
-    value: "g",
-    isActive: false,
+    routeName: "Inbox",
+    icon: <EnvelopeClosedIcon className="w-5 h-5"/>,
+    value: "e",
+    isActive: false
   },
   {
     routeName: "Settings",
@@ -245,4 +246,42 @@ export const getDropdownLinks = (): SidebarDropdownLinks[] => {
     },
   ]
   return sidebarDropdownLinks
+}
+
+export function getTimeAgo(timestamp: string | Date): string {
+  const now: Date = new Date();
+  const past: Date = new Date(timestamp);
+  const seconds: number = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+  // Time intervals in seconds
+  const intervals: Record<string, number> = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+  };
+
+  // Future time (e.g., "in 30 minutes")
+  if (seconds < 0) {
+    const absSeconds: number = Math.abs(seconds);
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+      const interval: number = Math.floor(absSeconds / secondsInUnit);
+      if (interval >= 1) {
+        return `in ${interval} ${unit}${interval === 1 ? "" : "s"}`;
+      }
+    }
+    return "just now";
+  }
+
+  // Past time (e.g., "30 minutes ago")
+  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+    const interval: number = Math.floor(seconds / secondsInUnit);
+    if (interval >= 1) {
+      return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
+    }
+  }
+
+  return "just now";
 }

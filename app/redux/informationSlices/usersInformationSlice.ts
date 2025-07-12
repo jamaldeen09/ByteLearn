@@ -10,6 +10,7 @@ const initialState: UserInfoSchema = {
     role: "",
     _id: "",
     bio: "",
+    avatar: "",
 }
 
 const usersInformationSlice = createSlice({
@@ -24,6 +25,7 @@ const usersInformationSlice = createSlice({
             state.courses = action.payload.courses
             state._id = action.payload._id
             state.bio = action.payload.bio
+            state.avatar = action.payload.avatar
         }
     }
 })

@@ -41,6 +41,7 @@ export type UserInfoSchema = {
   courses: any[];
   _id: string,
   bio: string,
+  avatar: string,
 };
 
 export type SidebarLinkSchema = {
@@ -229,6 +230,9 @@ export type FriendProps = {
   previousMessage: string,
   timePreviousMsgWasSent: string,
   unreadMessages: number,
+  bio: string,
+  isOnline: boolean,
+  lastSeen: string,
 }
 
 export type EnableAddFriendProps = {
@@ -266,3 +270,38 @@ export type GroupMembersProps = {
   id: string,
   isAdded: boolean,
 }
+
+export type FriendSchema = {
+  friendImageUrl: string,
+  isOnline: boolean,
+  friendName: string,
+  lastSeen: string,
+}
+
+export type ReduxFriendsSliceSchema = {
+  friends: FriendSchema[],
+}
+
+export type NotificationSchema = {
+  _id: string,
+  sender: {
+    _id: string,
+    fullName: string,
+    avatar: string
+  },
+  content: string,
+  receiver: {
+    _id: string,
+    fullName: string,
+    avatar: string
+  },
+  isSeen: Boolean,
+  sentAt: Date,
+  briefContent: string,
+}
+
+export type NotificationContainer = {
+  notifications: NotificationSchema[]
+}
+
+

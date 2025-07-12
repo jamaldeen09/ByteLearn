@@ -4,7 +4,11 @@ import NewCourseCard from "@/app/client/components/reusableComponents/NewCourseC
 import NotficationCard from "@/app/client/components/reusableComponents/NotficationCard";
 import OngoingCourse from "@/app/client/components/reusableComponents/OngoingCourse"
 import { arrowDown } from "@/app/icons/Icons"
+import { useEffect } from "react";
+import { socket } from "@/app/client/utils/config/io";
+import { events } from "@/app/client/utils/events";
 import { motion, Variants } from "framer-motion";
+import { useAppSelector } from "@/app/redux/essentials/hooks";
 
 export const container: Variants = {
     hidden: { opacity: 0 },
@@ -35,12 +39,14 @@ export const item: Variants = {
 
 
 const MainDashboard = () => {
+
+    
     return (
         <>
 
             {/* Main Content */}
 
-            <div className="lg:col-span-10 overflow-y-auto ">
+            <div className="lg:col-span-14 overflow-y-auto ">
                 <div className="min-h-[91vh] px-6 flex flex-col space-y-4">
                     {/* Page Title */}
                     <div className="mx-auto max-lg:m-0">
@@ -81,7 +87,7 @@ const MainDashboard = () => {
                         </div>
 
                         {/* New Courses */}
-                        <div className="min-h-[60vh] grid max-lg:grid-cols-2 gap-4 py-4 justify-items-center">
+                        <div className="min-h-[60vh] grid max-lg:grid-cols-2 lg:grid-cols-3 gap-4 py-4 justify-items-center">
                             <motion.div
                                 variants={container}
                                 initial="hidden"
@@ -101,42 +107,6 @@ const MainDashboard = () => {
                 </div>
             </div>
 
-
-
-            <div className="text-white font-bold text-5xl lg:col-span-4 
-    h-fit sm:h-screen sticky top-0 overflow-y-auto bg-white rounded-tl-2xl p-6 space-y-10 border border-gray-400">
-
-                {/* Latest update */}
-                <div className="flex flex-col space-y-4">
-                    {/* Latest Updates Title*/}
-                    <div className="">
-                        <h1 className="text-xl font-extrabold text-black">Latest Updates</h1>
-                    </div>
-
-                    {/* Latest Updated Cards */}
-                    <div className="flex flex-col gap-5">
-
-                        {Array.from([1, 2, 3, 4]).map((i) => {
-                            return <LatestUpdateCards key={i} />
-                        })}
-                    </div>
-                </div>
-
-                {/* Notficiations */}
-                <div className="flex flex-col space-y-4">
-
-                    <div className="">
-                        <h1 className="text-xl text-black font-bold">Notifications</h1>
-                    </div>
-                    {/* Notifications display */}
-                    <div className="flex flex-col gap-4">
-
-                        {Array.from([1, 2, 3, 4]).map((i) => {
-                            return <NotficationCard key={i} />
-                        })}
-                    </div>
-                </div>
-            </div>
         </>
     )
 }

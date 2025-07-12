@@ -13,6 +13,7 @@ import axios from "../../utils/config/axios"
 import toast from "react-hot-toast";
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice";
 import Chat from "./chat/Chat";
+import Inbox from "./chat/Inbox";
 
 
 
@@ -29,7 +30,11 @@ const page = (): React.ReactElement => {
   const courseId = searchParams.get('courseId');
 
   // const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : "a";
-  const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : tab === "chat" ? "d" : "a";
+  // const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : tab === "chat" ? "d" : tab === "inbox" ? "e" : "a";
+  const route = tab === "my-courses" ? "b" : 
+              tab === "courses" ? "c" : 
+              tab === "chat" ? "d" : 
+              tab === "inbox" ? "e" : "a";
 
   // fetch usersInformation
   useEffect(() => {
@@ -80,17 +85,15 @@ const page = (): React.ReactElement => {
       >
 
         <div className="min-h-fit flex flex-col gap-10">
-          <SidebarNav
-            profilePic="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMfPRrW0_4u-15F-1v756VaWkys1zQ4Hzuuw&s"
-            firstName="Jamaldeen"
-          />
+          <SidebarNav />
 
           <div className="grid lg:grid-cols-14">
             {route === "a" && <MainDashboard />}
             {route === "b" && <MyCourses courseId={courseId} />}
             {route === "c" && <Courses />}
             {route === "d" && <Chat />} 
-            {!(route === "a" || route === "b" || route === "c" || route === "d") && (
+            {route === "e" && <Inbox />}
+            {!(route === "a" || route === "b" || route === "c" || route === "d" || route === "e") && (
               <div>Coming soon</div>
             )}
           </div>

@@ -1,16 +1,20 @@
+import { useEffect } from "react"
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
+import axios from "../../utils/config/axios"
+import toast from "react-hot-toast"
+import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice"
 
 const Sidebar = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab')
     let tabParam = "";
-
     const handleRouteChange = (value: string) => {
-
+        let tabParam = "";
         switch (value) {
             case "a":
                 tabParam = "";
@@ -24,6 +28,9 @@ const Sidebar = () => {
             case "d":
                 tabParam = "?tab=chat";
                 break;
+            case "e":
+                tabParam = "?tab=inbox";
+                break;
             default:
                 tabParam = "";
         }
@@ -32,18 +39,30 @@ const Sidebar = () => {
 
     const isActive = (value: string) => {
         switch (value) {
-            case "a":
-                return !tab;
-            case "b":
-                return tab === "my-courses";
-            case "c":
-                return tab === "courses";
-                case "d":
-                    return tab === "chat";
-            default:
-                return false;
+            case "a": return !tab;
+            case "b": return tab === "my-courses";
+            case "c": return tab === "courses";
+            case "d": return tab === "chat";
+            case "e": return tab === "inbox";  // Add this case
+            default: return false;
         }
     };
+   
+
+    const dispatch = useAppDispatch()
+
+    const fetchInfo = async () => {
+        axios.get("/api/get-information",{ headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`}})
+        .then((res) => {
+            dispatch(getInformation(res.data.payload))
+        }).catch((err) => {
+            console.error(err)
+            toast.error(err)
+        })
+    }
+    useEffect(() => {
+        fetchInfo();
+    }, [])
 
     return (
         <>
@@ -81,6 +100,12 @@ const Sidebar = () => {
                                     {/* Chats Number */}
                                     {link.routeName === "Chats" && <span
                                         className={` ${tab === "chat" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-4
+                                  unread`}>
+                                        2
+                                    </span>}
+
+                                    {link.routeName === "Inbox" && <span
+                                        className={` ${tab === "inbox" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-3
                                   unread`}>
                                         2
                                     </span>}

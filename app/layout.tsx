@@ -3,6 +3,8 @@ import { Poppins } from 'next/font/google';
 import "./globals.css";
 import { Toaster } from "react-hot-toast"
 import ReduxProvider from "./redux/essentials/ReduxProvider";
+import ToastProvider from "./client/utils/ToastContainer";
+
 
 const poppins = Poppins({
   weight: ['400', '700'],
@@ -26,6 +28,7 @@ export default function RootLayout({
         <ReduxProvider>
           <Toaster />
           {children}
+          <ToastProvider />
         </ReduxProvider>
       </body>
     </html>
