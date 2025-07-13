@@ -1,7 +1,7 @@
 "use client"
 import { MyCoursesProp } from "@/app/client/types/types"
 import axios from "../../../utils/config/axios"
-import { useCallback, useEffect, useState, useMemo } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRedirect } from "@/app/client/utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
@@ -30,6 +30,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   const [progressPercentage, setProgressPercentage] = useState<number>(10);
   const { redirectTo } = useRedirect();
   const dispatch = useAppDispatch();
+
 
   // Ensure progress is between 0-100
   const clampedProgress = Math.min(100, Math.max(0, progressPercentage));
@@ -65,14 +66,20 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
         });
         dispatch(getSingleCourse(response.data.courseDetails));
-      } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          redirectTo("/client/auth/login");
-        } else if (err.response?.status === 404) {
-          toast.error(err.response.data.msg);
+      } catch (err: unknown) {
+        if (err instanceof Error && 'response' in err && typeof err.response === 'object' && err.response !== null) {
+          const response = err.response as { status?: number, data?: { msg?: string } };
+          if (response.status === 401 || response.status === 403) {
+            redirectTo("/client/auth/login");
+          } else if (response.status === 404) {
+            toast.error(response.data?.msg || "Not found");
+          } else {
+            console.error(err);
+            toast.error("A server error occurred. Please bear with us");
+          }
         } else {
           console.error(err);
-          toast.error("A server error occurred. Please bare with us");
+          toast.error("An unexpected error occurred");
         }
       }
     };
@@ -101,11 +108,14 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
         });
         dispatch(getCompletedSkills(response.data.completedSkills));
-      } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 404) {
-          toast.error(err.response.data.msg);
-        } else {
-          toast.error("Network error");
+      } catch (err: unknown) {
+        if (err instanceof Error && 'response' in err && typeof err.response === 'object' && err.response !== null) {
+          const response = err.response as { status?: number, data?: { msg?: string } };
+          if (response.status === 401 || response.status === 404) {
+            toast.error(response.data?.msg || "Unauthorized");
+          } else {
+            toast.error("Network error");
+          }
         }
       }
     };

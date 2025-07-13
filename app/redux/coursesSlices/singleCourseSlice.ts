@@ -23,15 +23,15 @@ const singleCourseSlice = createSlice({
     name: "singleCourse",
     reducers: {
         getSingleCourse: (state, action: PayloadAction<singleCourseSchema>) => {
-            state._id = action.payload._id,
-            state.title = action.payload.title,
-            state.topics = action.payload.topics,
-            state.description = action.payload.description,
-            state.category = action.payload.category,
-            state.imageUrl = action.payload.imageUrl,
-            state.dateCreated = action.payload.dateCreated,
-            state.creator = action.payload.creator,
-            state.isPublished = action.payload.isPublished
+            state._id = action.payload._id;
+            state.title = action.payload.title;
+            state.topics = action.payload.topics;
+            state.description = action.payload.description;
+            state.category = action.payload.category;
+            state.imageUrl = action.payload.imageUrl;
+            state.dateCreated = action.payload.dateCreated;
+            state.creator = action.payload.creator;
+            state.isPublished = action.payload.isPublished;
         }
     }
 })

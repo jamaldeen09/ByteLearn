@@ -5,7 +5,7 @@ import InstructorSignup from "./InstructorSignup"
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
-const page = (): React.ReactElement => {
+const Page = (): React.ReactElement => {
   const router = useRouter()
   return (
     <FormComponent
@@ -18,6 +18,7 @@ const page = (): React.ReactElement => {
       try {
         router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?state=instructor`)
       } catch (err) {
+        console.error(err)
         toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
         router.push("/client/auth/login")
       }
@@ -28,4 +29,4 @@ const page = (): React.ReactElement => {
   )
 }
 
-export default page
+export default Page

@@ -18,6 +18,7 @@ const Page = (): React.ReactElement => {
         try {
           router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?role=student`)
         } catch (err) {
+          console.error(err)
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
           router.push("/client/auth/login")
         }

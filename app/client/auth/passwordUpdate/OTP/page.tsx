@@ -2,11 +2,12 @@
 import FormComponent from "@/app/client/components/authComponents/FormComponent"
 import toast from "react-hot-toast"
 import Otp from "./Otp"
-import { useRedirect } from "@/app/client/utils/utils"
+
+import { useRouter } from "next/navigation"
 
 
-const page = () => {  
-  const { redirectTo } = useRedirect()
+const Page = () => {  
+  const router = useRouter()
   return (
     <FormComponent
       context="OTP has been sent to you"
@@ -16,11 +17,11 @@ const page = () => {
       bgDesc="We’ve sent a one-time password (OTP) to your email. Please enter it below to verify your identity and continue."
       googleAuthReq={() => {
         try {
-          redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
+          router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
         } catch (err) {
           console.error(err)
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
-          redirectTo("/client/auth/login")
+          router.push("/client/auth/login")
         }
        }}
     >
@@ -29,4 +30,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

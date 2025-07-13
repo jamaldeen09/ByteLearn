@@ -44,20 +44,21 @@ const ChatSidebar = (): React.ReactElement => {
 
   // Fetch all friends
   useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const res = await axios.get("/api/get-friends", {
-          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
-        });
+    const fetchFriends = () => {
+
+      axios.get("/api/get-friends", {
+        headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+      }).then((res) => {
         dispatch(getFriends(res.data.payload));
-      } catch (err: any) {
+      }).catch((err) => {
+
         console.error(err);
         if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
           redirectTo("/client/auth/login");
           return;
         }
         toast.error('Server Error');
-      }
+      });
     };
 
     fetchFriends();

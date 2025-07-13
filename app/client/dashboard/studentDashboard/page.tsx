@@ -15,9 +15,6 @@ import { getInformation } from "@/app/redux/informationSlices/usersInformationSl
 import Chat from "./chat/Chat";
 import Inbox from "./chat/Inbox";
 
-
-
-
 const Page = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
   
@@ -29,8 +26,6 @@ const Page = (): React.ReactElement => {
   const tab = searchParams.get('tab');
   const courseId = searchParams.get('courseId');
 
-  // const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : "a";
-  // const route = tab === "my-courses" ? "b" : tab === "courses" ? "c" : tab === "chat" ? "d" : tab === "inbox" ? "e" : "a";
   const route = tab === "my-courses" ? "b" : 
               tab === "courses" ? "c" : 
               tab === "chat" ? "d" : 
@@ -83,7 +78,6 @@ const Page = (): React.ReactElement => {
       <div
         className="md:col-span-9 max-lg:col-span-13 bg-white overflow-y-auto"
       >
-
         <div className="min-h-fit flex flex-col gap-10">
           <SidebarNav />
 

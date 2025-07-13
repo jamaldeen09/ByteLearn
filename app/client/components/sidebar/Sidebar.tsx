@@ -51,16 +51,19 @@ const Sidebar = () => {
         }
     };
 
-    const fetchInfo = useCallback(async () => {
-        try {
-            const res = await axios.get("/api/get-information", { 
-                headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
-            });
+    const fetchInfo = useCallback(() => {
+
+        axios.get("/api/get-information", {
+            headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+        }).then((res) => {
+
             dispatch(getInformation(res.data.payload));
-        } catch (err: any) {
-            console.error(err);
+        }).catch((err) => {
+            console.error(err)
             toast.error(err.response?.msg || "Failed to fetch information");
-        }
+            return;
+        });
+
     }, [dispatch]);
 
     useEffect(() => {
