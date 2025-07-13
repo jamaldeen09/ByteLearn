@@ -390,5 +390,5 @@ export const generateFriendRequest = (
   `;
 
   // Combine all parts
-  return notificationContent + buttonsHTML + closingHTML;
-};
+  return notificationContent + buttonsHTML + closingHTML
+}
