@@ -63,6 +63,7 @@ const MainDashboard = () => {
                             <div className="flex flex-col space-y-4">
                                 {Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((i) => {
                                     return <OngoingCourse
+                                       courseImgURL="https://localhost2080kjtjt"
                                         key={i}
                                         courseName="Advanced React Patterns"
                                         currentTopic="State Management with Zustand"

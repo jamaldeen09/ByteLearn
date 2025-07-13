@@ -1,7 +1,7 @@
 "use client"
 import { MyCoursesProp } from "@/app/client/types/types"
 import axios from "../../../utils/config/axios"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRedirect } from "@/app/client/utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
@@ -21,7 +21,12 @@ import { singleCourseSchema, SkillsSchema, topicSchema } from "@/app/client/type
 
 const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   const searchParams = useSearchParams();
-  const singleCourseInformation = useAppSelector((state) => state.singleCourse) || { topics: [] };
+  const rawSingleCourseInformation = useAppSelector((state) => state.singleCourse);
+
+  const singleCourseInformation = useMemo(
+    () => rawSingleCourseInformation || { topics: [] },
+    [rawSingleCourseInformation]
+  );
   const skillId = searchParams.get("skillId");
   const quiz = searchParams.get("quiz");
   const topicId = searchParams.get("topicId");
