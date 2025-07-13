@@ -2,7 +2,7 @@
 import toast from "react-hot-toast"
 import FormComponent from "../../components/authComponents/FormComponent"
 import FirstResetProcess from "./FirstResetProcess"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 
 
 const Page = (): React.ReactElement => {
