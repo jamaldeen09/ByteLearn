@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import MyCourses from "./content/MyCourses";
 import Courses from "./content/Courses";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../utils/config/axios"
 import toast from "react-hot-toast";
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice";
@@ -17,10 +17,9 @@ import Inbox from "./chat/Inbox";
 
 const Page = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
-  
   const dispatch = useAppDispatch()
   const router = useRouter()
-
+  const [isLoading, setIsLoading] = useState(true)
 
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
@@ -33,23 +32,41 @@ const Page = (): React.ReactElement => {
 
   // fetch usersInformation
   useEffect(() => {
-    axios.get(`/api/get-information`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }} )
-      .then((res) => {
-        dispatch(getInformation(res.data.payload))
-      }).catch((err) => {
-      console.error(err)
-      if (err.response.status === 401 || err.response.status === 403 || err.response.status === 404){
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("bytelearn_token")
+      if (!token) {
         router.push("/client/auth/login");
         return;
       }
-      toast.error("A server error occured. Please bare with us");
-    })
+
+      setIsLoading(true)
+      axios.get(`/api/get-information`, { headers: { "Authorization": `Bearer ${token}` }} )
+        .then((res) => {
+          dispatch(getInformation(res.data.payload))
+        })
+        .catch((err) => {
+          console.error(err)
+          if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404){
+            router.push("/client/auth/login");
+            return;
+          }
+          toast.error("A server error occurred. Please bear with us");
+        })
+        .finally(() => setIsLoading(false))
+    }
   }, [dispatch, router])
 
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className="h-screen bg-white grid grid-cols-1 sm:grid-cols-1 md:grid-cols-10 max-lg:grid-cols-14 overflow-hidden"
-    >
+    <div className="h-screen bg-white grid grid-cols-1 sm:grid-cols-1 md:grid-cols-10 max-lg:grid-cols-14 overflow-hidden">
       {/* Desktop SideBar */}
       <div className="hidden md:block md:col-span-1 max-lg:col-span-1 h-screen sticky top-0">
         <Sidebar />
@@ -75,9 +92,7 @@ const Page = (): React.ReactElement => {
         )}
       </AnimatePresence>
 
-      <div
-        className="md:col-span-9 max-lg:col-span-13 bg-white overflow-y-auto"
-      >
+      <div className="md:col-span-9 max-lg:col-span-13 bg-white overflow-y-auto">
         <div className="min-h-fit flex flex-col gap-10">
           <SidebarNav />
 
