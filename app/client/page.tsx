@@ -36,7 +36,7 @@ const LandingPage = (): React.ReactElement => {
             <h1 className="font-extrabold iphone:text-xl max-sm:text-2xl sm:text-3xl md:text-5xl max-lg:text-6xl">Learn By Building</h1>
 
             {/* Sub Heading */}
-            <h3 className="iphone:text-[0.7rem] max-sm:text-[0.7rem] sm:text-sm md:text-md max-lg:text-[1rem]">Master coding by working on real projects, completing quizzes,and getting feedback from mentors—so you're ready for your first developer job</h3>
+            <h3 className="iphone:text-[0.7rem] max-sm:text-[0.7rem] sm:text-sm md:text-md max-lg:text-[1rem]">Master coding by working on real projects, completing quizzes,and getting feedback from mentors—so you&apos;re ready for your first developer job</h3>
           </div>
 
           {/* Buttons */}
