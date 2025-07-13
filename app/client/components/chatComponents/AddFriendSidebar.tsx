@@ -4,7 +4,7 @@ import { AddComponentProps, EnableAddFriendProps } from "../../types/types"
 import { ArrowLeftIcon } from "@radix-ui/react-icons"
 import { newContact, newGroup } from "@/app/icons/Icons"
 import AddComponent from "./AddComponent"
-import FriendsOnByteLearn from "./FriendsOnByteLearn"
+
 import { useAppDispatch } from "@/app/redux/essentials/hooks"
 import { newFriend } from "@/app/redux/triggers/newFriendTrigger"
 import { newGroupTrigger } from "@/app/redux/triggers/groupCreationTrigger"

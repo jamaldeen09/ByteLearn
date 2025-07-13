@@ -4,7 +4,7 @@ import { untriggerNewGroup } from "@/app/redux/triggers/groupCreationTrigger"
 import { Input } from "@/components/ui/input"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeftIcon } from "lucide-react"
-import GroupMembers from "./GroupMembers"
+
 
 const AddGroupTrigger = () => {
     const groupTrigger = useAppSelector(state => state.newGroupTrigger.triggerNewGroup)
