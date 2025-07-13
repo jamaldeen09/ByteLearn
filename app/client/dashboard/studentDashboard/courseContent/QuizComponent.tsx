@@ -1,4 +1,3 @@
-
 "use client"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -25,9 +24,9 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
   const currentQuestion = quiz[currentQuestionIndex]
   
   // Check if answer is correct
-  const isCorrect = (option: string) => {
+  const isCorrect = useCallback((option: string) => {
     return option === currentQuestion?.correctAnswer
-  }
+  }, [currentQuestion?.correctAnswer])
   
   // Handle answer selection
   const handleAnswerSelect = useCallback((option: string) => {
@@ -53,7 +52,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
       ...prev,
       [currentQuestionIndex]: true
     }))
-  }, [currentQuestionIndex])
+  }, [currentQuestionIndex, isCorrect])
   
   // Check if current question has been answered
   const isQuestionAnswered = selectedAnswers[currentQuestionIndex] !== undefined
@@ -97,8 +96,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
   }
 
   return (
-    <div className="flex h-[90vh] col-span-14 flex-col gap-14 items-center  iphone:px-4 max-sm:px-2 sm:px-6
-    ">
+    <div className="flex h-[90vh] col-span-14 flex-col gap-14 items-center  iphone:px-4 max-sm:px-2 sm:px-6">
       {/* Tiny quiz text */}
       <div className="w-full md:px-20">
         <p className="text-gray-400 text-xs sm:text-md">Quiz</p>

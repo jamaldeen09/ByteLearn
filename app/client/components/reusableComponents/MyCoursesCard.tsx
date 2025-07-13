@@ -4,6 +4,7 @@ import { MyCoursesCardProps } from "../../types/types"
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/app/redux/essentials/hooks";
 import { useRouter } from "next/navigation";
+import Image from "next/image"; // Added Image import
 
 const MyCoursesCard = ({ 
     imgUrl, 
@@ -17,42 +18,35 @@ const MyCoursesCard = ({
   }: MyCoursesCardProps & { courseId: string }) => {  
   
     const router = useRouter();
-    // const progressData = useAppSelector(state => 
-    //   state.progress.find(p => p.course === courseId)
-    // );
-  
-    // Ensure progress is between 0-100
     const clampedProgress = Math.min(100, Math.max(0, progress));
   
-    // Determine color based on progress
     const progressColor = clampedProgress >= 70
       ? "bg-green-500"
       : clampedProgress >= 40
         ? "bg-yellow-500"
         : "bg-red-500";
 
-        const progressData = useAppSelector(state => 
-            state.progress.find(p => p.course === courseId)
-          );
-          const course = useAppSelector(state => 
-            state.coursesSlice.courses.find(c => c.id === courseId)
-          );
+    const progressData = useAppSelector(state => 
+        state.progress.find(p => p.course === courseId)
+    );
+    const course = useAppSelector(state => 
+        state.coursesSlice.courses.find(c => c.id === courseId)
+    );
+  
+    const getLastVisitedTopic = () => {
+        if (!progressData?.lastVisitedSkill || !course) return "Start Learning";
         
-          // Find the last visited topic
-          const getLastVisitedTopic = () => {
-            if (!progressData?.lastVisitedSkill || !course) return "Start Learning";
-            
-            for (const topic of course.topics) {
-              const skill = topic.skills.find(s => s._id === progressData.lastVisitedSkill);
-              if (skill) return topic.title;
-            }
-            return "Continue Learning";
-          };
-        
-          const lastTopic = getLastVisitedTopic();
+        for (const topic of course.topics) {
+          const skill = topic.skills.find(s => s._id === progressData.lastVisitedSkill);
+          if (skill) return topic.title;
+        }
+        return "Continue Learning";
+    };
+  
+    const lastTopic = getLastVisitedTopic();
+
     const handleContinueCourse = async () => {
       try {
-        // 1. Check if we have a last visited skill
         if (progressData?.lastVisitedSkill) {
           router.push(
             `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
@@ -60,7 +54,6 @@ const MyCoursesCard = ({
           return;
         }
   
-        // 2. If no last visited skill, go to course overview
         router.push(
           `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}`
         );
@@ -85,6 +78,7 @@ const MyCoursesCard = ({
                 }}
                 className="h-56 rounded-t-xl">
             </div>
+            
             {/* Body */}
             <div className="bg-white px-4 flex flex-col gap-3 py-4 rounded-b-xl">
 
@@ -111,7 +105,6 @@ const MyCoursesCard = ({
                 {/* Progress bar with percentage */}
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs">
-
                         <span className="font-medium">{clampedProgress}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -127,10 +120,14 @@ const MyCoursesCard = ({
 
                 {/* Instructor Info */}
                 <div className="flex items-center space-x-3 ">
-                    <img
+                    <Image
                         src={instructorImg || "https://media.istockphoto.com/id/515264642/photo/happy-teacher-at-desk-talking-to-adult-education-students.jpg?s=612x612&w=0&k=20&c=cpcqqIE9WgVgirdpelsjl2GqwhPFMu5UajW2QG-MOrM="}
-                        alt={`The avator of ${title}'s instructor`}
+                        alt={`The avatar of ${title}'s instructor`}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full"
+                        priority={false}
+                        unoptimized={true}
                     />
 
                     <div className="flex items-center justify-between w-full">

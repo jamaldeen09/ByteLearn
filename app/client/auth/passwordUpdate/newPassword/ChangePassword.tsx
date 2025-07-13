@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { triangleErr } from "@/app/icons/Icons"
 import Spinner from "@/app/client/components/reusableComponents/Spinner"
 import axios from "../../../utils/config/axios"
-import AlertComponent from "@/app/client/components/reusableComponents/Alert"
 import toast from "react-hot-toast"
 
 
@@ -66,14 +65,13 @@ const ChangePassword = () => {
     setLoading(true);
     axios.post("/api/change-password", {
       password: newPassword
-    }, { headers: { "Authorization": `Bearer ${localStorage.getItem("password-reset-token")}`} }).then((res) => {
+    }, { headers: { "Authorization": `Bearer ${localStorage.getItem("password-reset-token")}`} }).then(() => {
       setNewPassword("")
       setPassword("")
       toast.success("Password Changed successfully")
       redirectTo("/client")
       
     }).catch((err) => {
-      console.log(err.response.data)
       setLoading(false)
 
       if (err.response?.status === 403){

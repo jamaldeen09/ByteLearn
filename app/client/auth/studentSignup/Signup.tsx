@@ -1,6 +1,5 @@
 "use client"
 import { triangleErr } from "@/app/icons/Icons";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
@@ -68,7 +67,7 @@ const Signup = () => {
             lastName,
             email,
             password
-        }).then((res) => {
+        }).then(() => {
             refresh(setFirstName, setLastName, setEmail, setPassword, false);
             redirectTo("/client/dashboard/studentDashboard");
         }).catch((err) => {

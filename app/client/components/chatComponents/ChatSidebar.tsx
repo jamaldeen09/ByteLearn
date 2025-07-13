@@ -14,19 +14,29 @@ import { useRedirect } from "../../utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { getFriends } from "@/app/redux/informationSlices/friendInformation"
-import { FriendSchema } from "../../types/types"
+import { FriendSchema, IMessage } from "../../types/types"
 import { getClickedFriendId, getClickedFriendInformation } from "@/app/redux/chatSlices/clickedFriend"
 import BlackSpinner from "../reusableComponents/BlackSpinner"
 import { events } from "../../utils/events"
 import { socket } from "../../utils/config/io"
 import { setMessages } from "@/app/redux/chatSlices/messagesSlice"
 
+interface ChatroomData {
+  information: {
+    _id: string;
+    fullName: string,
+    isOnline: boolean,
+    avatar: string,
+    bio: string,
+  };
+  messages: IMessage[];
+}
+
 const ChatSidebar = (): React.ReactElement => {
   const [addfriendTrigger, setAddFriendTrigger] = useState<boolean>(false)
   const { redirectTo } = useRedirect()
   const dispatch = useAppDispatch()
   const friends = useAppSelector(state => state.friendsContainer.friends)
-  const [fetchingFriends, setFetchingFriends] = useState<boolean>(false)
   const clickedFriend = useAppSelector(state => state.clickedFriend.id)
 
   // Memoized function to generate room ID
@@ -34,24 +44,23 @@ const ChatSidebar = (): React.ReactElement => {
 
   // Fetch all friends
   useEffect(() => {
-    setFetchingFriends(true);
-    axios.get("/api/get-friends", { 
-      headers: {"Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`} 
-    })
-    .then((res) => {
-      dispatch(getFriends(res.data.payload));
-    })
-    .catch((err: { response?: { status: number } }) => {
-      console.error(err);
-      if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
-        redirectTo("/client/auth/login");
-        return;
+    const fetchFriends = async () => {
+      try {
+        const res = await axios.get("/api/get-friends", {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+        });
+        dispatch(getFriends(res.data.payload));
+      } catch (err: any) {
+        console.error(err);
+        if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
+          redirectTo("/client/auth/login");
+          return;
+        }
+        toast.error('Server Error');
       }
-      toast.error('Server Error');
-    })
-    .finally(() => {
-      setFetchingFriends(false);
-    });
+    };
+
+    fetchFriends();
   }, [dispatch, redirectTo]);
 
   // Handle room creation and events
@@ -62,17 +71,17 @@ const ChatSidebar = (): React.ReactElement => {
       roomId: generateRoomId(),
       participantId: clickedFriend,
     }
-    
+
     socket.emit(events.CREATE_ROOM, data)
 
-    const handleChatroomFound = (data: any) => {
+    const handleChatroomFound = (data: ChatroomData) => {
       if (data.information._id === clickedFriend) {
         dispatch(getClickedFriendInformation(data))
         dispatch(setMessages(data.messages))
       }
     }
 
-    const handleChatroomCreated = (data: any) => {
+    const handleChatroomCreated = (data: ChatroomData) => {
       if (data.information._id === clickedFriend) {
         dispatch(getClickedFriendInformation(data))
         dispatch(setMessages(data.messages))
@@ -106,7 +115,7 @@ const ChatSidebar = (): React.ReactElement => {
 
       {/* Input field */}
       <div className="w-full relative px-4 border-b border-gray-200 py-4">
-        <Input 
+        <Input
           placeholder="Search by name"
           type="text"
           className="h-12 rounded-full bg-gray-50 px-16"
@@ -125,11 +134,11 @@ const ChatSidebar = (): React.ReactElement => {
       {/* Chats Area */}
       <div className="w-full flex flex-col h-full overflow-hidden overflow-y-auto px-2 gap-4 py-4">
         {!friends ? (
-          <div className="h-full centered-flex w-full"> 
+          <div className="h-full centered-flex w-full">
             <BlackSpinner />
           </div>
         ) : friends?.map((friend: FriendSchema) => (
-          <Friend 
+          <Friend
             key={friend._id}
             friendImageUrl={friend.friendImageUrl}
             friendName={friend.friendName}
@@ -140,9 +149,9 @@ const ChatSidebar = (): React.ReactElement => {
           />
         ))}
       </div>
-    
+
       {/* Sidebar components */}
-      <AddFriendSidebar 
+      <AddFriendSidebar
         triggerAddFriend={addfriendTrigger}
         setTriggerAddFriend={setAddFriendTrigger}
       />

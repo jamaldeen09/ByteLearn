@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { emailValidation, passwordValidation, useRedirect } from "../../utils/utils";
+import { emailValidation, passwordValidation } from "../../utils/utils";
 import Spinner from "../../components/reusableComponents/Spinner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";

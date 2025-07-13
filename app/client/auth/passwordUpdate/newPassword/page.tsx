@@ -3,10 +3,10 @@
 import FormComponent from "@/app/client/components/authComponents/FormComponent"
 import ChangePassword from "./ChangePassword"
 import toast from "react-hot-toast"
-import { useRedirect } from "@/app/client/utils/utils"
+import { useRouter } from "next/navigation"
 
-const page = (): React.ReactElement => {
-  const { redirectTo } = useRedirect()
+const Page = (): React.ReactElement => {
+  const router = useRouter()
   return (
     <FormComponent
       context="New password"
@@ -16,10 +16,11 @@ const page = (): React.ReactElement => {
       bgDesc="Create a strong new password to keep your ByteLearn account secure and continue your journey without interruptions"
       googleAuthReq={() => {
         try {
-          redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
+          router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
         } catch (err) {
+          console.error(err)
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
-          redirectTo("/client/auth/login")
+          router.push("/client/auth/login")
         }
       }}
     >
@@ -28,4 +29,4 @@ const page = (): React.ReactElement => {
   )
 }
 
-export default page
+export default Page

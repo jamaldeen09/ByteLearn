@@ -38,7 +38,7 @@ export type UserInfoSchema = {
   fullName: string;
   friends: UserInfoSchema[];
   role: string;
-  courses: any[];
+  courses: unknown[]; // Replaced any with unknown
   _id: string,
   bio: string,
   avatar: string,
@@ -46,11 +46,10 @@ export type UserInfoSchema = {
 
 export type SidebarLinkSchema = {
   routeName: string,
-  icon: any,
+  icon: React.ReactNode, // Replaced any with React.ReactNode
   value: string,
   isActive: boolean
 }
-
 
 export type SidebarNavProps = {
   profilePic: string,
@@ -120,7 +119,6 @@ type quizSchema = {
   correctAnswer: string
 }
 
-
 export type singleCourseSchema = {
   _id: string
   title: string,
@@ -168,7 +166,6 @@ export type courseSchema = {
   isPublished: boolean,
 }
 
-
 export type coursesContainer<T> = {
   courses: T[]
 }
@@ -177,8 +174,7 @@ export type MyCoursesProp = {
   courseId: string | null
 }
 
-
-export type  TopicContentDisplaySchema  = {
+export type TopicContentDisplaySchema = {
   topicTitle: string;
   topicsSkillsTitle: SkillsSchema[]; 
   selectedSkillId?: string | null;
@@ -206,7 +202,6 @@ export type ProgressState = {
   lastVisitedSkill: string | null;
   completedSkills: string[];
   isCompleted: boolean;
-
 }
 
 export type ProgressRootState = {
@@ -248,7 +243,6 @@ export type ClickedFriendState = {
   } | null;
 }
 
-
 export type InformationSchema = {
   information: {
     _id: string,
@@ -256,7 +250,7 @@ export type InformationSchema = {
     avatar: string,
     isOnline: boolean,
     bio: string,
-}
+  }
 }
 
 export type EnableAddFriendProps = {
@@ -265,7 +259,7 @@ export type EnableAddFriendProps = {
 }
 
 export type AddComponentProps = {
-  icon: any,
+  icon: React.ReactNode, // Replaced any with React.ReactNode
   purpose: string,
   whatTheButtonDoes: () => void;
 }
@@ -323,7 +317,7 @@ export type NotificationSchema = {
     avatar: string,
     email: string,
   },
-  isSeen: Boolean,
+  isSeen: boolean, // Changed from Boolean to boolean
   sentAt: Date,
   briefContent: string,
 }

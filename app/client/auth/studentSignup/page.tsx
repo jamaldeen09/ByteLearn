@@ -2,11 +2,11 @@
 import toast from "react-hot-toast";
 import FormComponent from "../../components/authComponents/FormComponent"
 import Signup from "./Signup";
-import { useRedirect } from "../../utils/utils";
+import { useRouter } from "next/navigation";
 
 
-const page = (): React.ReactElement => {
-  const { redirectTo } = useRedirect()
+const Page = (): React.ReactElement => {
+  const router = useRouter()
   return (
     <FormComponent
       context="Sign up as a student"
@@ -16,10 +16,10 @@ const page = (): React.ReactElement => {
       showDontHaveAnAcc={false}
       googleAuthReq={() => {
         try {
-          redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?role=student`)
+          router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?role=student`)
         } catch (err) {
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
-          redirectTo("/client/auth/login")
+          router.push("/client/auth/login")
         }
       }}
     >
@@ -28,4 +28,4 @@ const page = (): React.ReactElement => {
   )
 }
 
-export default page
+export default Page

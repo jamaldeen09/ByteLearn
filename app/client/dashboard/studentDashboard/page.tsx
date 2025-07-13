@@ -49,7 +49,7 @@ const Page = (): React.ReactElement => {
       }
       toast.error("A server error occured. Please bare with us");
     })
-  }, [dispatch])
+  }, [dispatch, router])
 
   return (
     <div

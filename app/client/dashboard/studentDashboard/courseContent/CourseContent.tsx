@@ -1,7 +1,7 @@
 "use client"
 import { MyCoursesProp } from "@/app/client/types/types"
 import axios from "../../../utils/config/axios"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useMemo } from "react"
 import { useRedirect } from "@/app/client/utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
@@ -17,19 +17,19 @@ import { getCompletedSkills } from "@/app/redux/coursesSlices/completedSkillsSli
 import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
 import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
 import Image from 'next/image';
+import { singleCourseSchema, SkillsSchema, topicSchema } from "@/app/client/types/types"
 
 const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
-  const singleCourseInformation = useAppSelector((state) => state.singleCourse)  || { topics: [] };
   const searchParams = useSearchParams();
+  const singleCourseInformation = useAppSelector((state) => state.singleCourse) || { topics: [] };
   const skillId = searchParams.get("skillId");
   const quiz = searchParams.get("quiz");
   const topicId = searchParams.get("topicId");
   const quizResults = searchParams.get("quizResults");
   const router = useRouter();
-  const [progressPercentage, setProgressPercentage] = useState<number>(10)
-  const [loadingFetch, setLoadingFetch] = useState<boolean>(false)
-  const { redirectTo } = useRedirect()
-  const dispatch = useAppDispatch()
+  const [progressPercentage, setProgressPercentage] = useState<number>(10);
+  const { redirectTo } = useRedirect();
+  const dispatch = useAppDispatch();
 
   // Ensure progress is between 0-100
   const clampedProgress = Math.min(100, Math.max(0, progressPercentage));
@@ -40,13 +40,13 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
       ? "bg-yellow-500"
       : "bg-red-500";
 
-  const calculateCourseProgress = (course: any, completedSkills: string[]) => {
+  const calculateCourseProgress = (course: singleCourseSchema, completedSkills: string[]) => {
     const completedSet = new Set(completedSkills);
     let totalSkills = 0;
     let completedCount = 0;
 
-    course.topics.forEach((topic: any) => {
-      topic.skills.forEach((skill: any) => {
+    course.topics.forEach((topic: topicSchema) => {
+      topic.skills.forEach((skill: SkillsSchema) => {
         totalSkills++;
         if (completedSet.has(skill._id.toString())) {
           completedCount++;
@@ -59,49 +59,58 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
 
   // fetch course details with courseId
   useEffect(() => {
-    setLoadingFetch(true)
-    axios.get(`/api/single-course/${courseId}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
-      .then((res) => {
-        dispatch(getSingleCourse(res.data.courseDetails))
-        setLoadingFetch(false)
-        return;
-      }).catch((err) => {
-        setLoadingFetch(false)
-        if (err.response.status === 401 || err.response.status === 403) {
+    const fetchCourse = async () => {
+      try {
+        const response = await axios.get(`/api/single-course/${courseId}`, { 
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
+        });
+        dispatch(getSingleCourse(response.data.courseDetails));
+      } catch (err: any) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
           redirectTo("/client/auth/login");
-          return;
-        } else if (err.response.status === 404) {
+        } else if (err.response?.status === 404) {
           toast.error(err.response.data.msg);
-          return;
         } else {
-          console.error(err)
+          console.error(err);
           toast.error("A server error occurred. Please bare with us");
-          return;
         }
-      })
-  }, [courseId, dispatch, redirectTo])
-
-  useEffect(() => {
-    axios.get("/api/courses").then((res) => {
-      dispatch(getCourses(res.data.courses));
-    }).catch((err) => {
-      console.error(err);
-    })
-  }, [dispatch])
-
-  const completedSkillsContainer = useAppSelector(state => state.completedSkills.completedSkills)
-
-  useEffect(() => {
-    axios.get(`/api/completed-skills/${courseId}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
-      dispatch(getCompletedSkills(res.data.completedSkills))
-    }).catch((err) => {
-      if (err.response.status === 401 || err.response.status === 404) {
-        toast.error(err.response.data.msg)
-      } else {
-        toast.error("Network error")
       }
-    })
-  }, [courseId, dispatch])
+    };
+    
+    fetchCourse();
+  }, [courseId, dispatch, redirectTo]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get("/api/courses");
+        dispatch(getCourses(response.data.courses));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchCourses();
+  }, [dispatch]);
+
+  const completedSkillsContainer = useAppSelector(state => state.completedSkills.completedSkills);
+
+  useEffect(() => {
+    const fetchCompletedSkills = async () => {
+      try {
+        const response = await axios.get(`/api/completed-skills/${courseId}`, { 
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
+        });
+        dispatch(getCompletedSkills(response.data.completedSkills));
+      } catch (err: any) {
+        if (err.response?.status === 401 || err.response?.status === 404) {
+          toast.error(err.response.data.msg);
+        } else {
+          toast.error("Network error");
+        }
+      }
+    };
+    fetchCompletedSkills();
+  }, [courseId, dispatch]);
 
   // Calculate progress whenever course or completed skills change
   useEffect(() => {
@@ -142,15 +151,15 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         return;
       }
 
-      const allSkills = singleCourseInformation.topics.flatMap((topic: any) => ({
-        ...topic.skills.map((skill: any) => ({
+      const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => ({
+        ...topic.skills.map((skill: SkillsSchema) => ({
           skillId: skill._id,
           topicId: topic._id,
           isCompleted: completedSkillsContainer.some(c => c._id === skill._id)
         }))
       }));
 
-      const nextSkill = allSkills.find((skill: any) => !skill.isCompleted) || allSkills[0];
+      const nextSkill = allSkills.find(skill => !skill.isCompleted) || allSkills[0];
 
       if (nextSkill) {
         router.push(
@@ -182,25 +191,24 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           height={400}
         />
       </div>
-    )
+    );
   }
 
   if (skillId || (quiz === "true" && topicId)) {
-    return <SkillContent skillId={skillId ?? ""} />
+    return <SkillContent skillId={skillId ?? ""} />;
   }
+  
   if (quizResults) {
-    return <QuizResult />
+    return <QuizResult />;
   }
 
   if (!singleCourseInformation || !singleCourseInformation.topics) {
-    return <BlackSpinner />
+    return <BlackSpinner />;
   }
 
   if (!singleCourseInformation) {
     return (
-      <div
-        className="col-span-14 min-h-[90vh] w-full"
-      >
+      <div className="col-span-14 min-h-[90vh] w-full">
         <Image
           src="https://cdn-icons-png.flaticon.com/512/9772/9772025.png"
           alt="An image that illustrates or shows the users that no courses are available"
@@ -210,8 +218,9 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           unoptimized={true}
         />
       </div>
-    )
+    );
   }
+
   return (
     <div className="col-span-14 min-h-[90vh]">
       {/* Centralized course display area */}
@@ -284,7 +293,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
           {/* topics */}
           <div className="overflow-y-auto h-[90vh] w-full max-w-4xl
           flex flex-col space-y-4">
-            {singleCourseInformation.topics.map((topic: any, index: number) => (
+            {singleCourseInformation.topics.map((topic: topicSchema, index: number) => (
               <TopicContentDisplay
                 key={index}
                 topicTitle={topic.title}
@@ -296,7 +305,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CourseContent
+export default CourseContent;

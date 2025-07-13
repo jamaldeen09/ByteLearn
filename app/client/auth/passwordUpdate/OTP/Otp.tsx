@@ -47,7 +47,7 @@ const Otp = (): React.ReactElement => {
         }
 
         return () => clearInterval(interval);
-    }, [timerTrigger]);
+    }, [timerTrigger, dispatch]);
 
 
     const resetTimer = () => {
@@ -72,7 +72,7 @@ const Otp = (): React.ReactElement => {
         setLoading(true);
         axios.post("/api/verify-otp", {
             otp: parseInt(value)
-        }, { headers: { "Authorization": `Bearer ${localStorage.getItem("password-reset-token")}`} }).then((res) => {
+        }, { headers: { "Authorization": `Bearer ${localStorage.getItem("password-reset-token")}`} }).then(() => {
             setValue("")
             setLoading(false);
             redirectTo("/client/auth/passwordUpdate/newPassword");

@@ -3,10 +3,10 @@ import React from 'react'
 import FormComponent from '../../components/authComponents/FormComponent'
 import InstructorSignup from "./InstructorSignup"
 import toast from 'react-hot-toast'
-import { useRedirect } from '../../utils/utils'
+import { useRouter } from 'next/navigation'
 
 const page = (): React.ReactElement => {
-  const { redirectTo } = useRedirect()
+  const router = useRouter()
   return (
     <FormComponent
      context="Sign up as an instructor"
@@ -16,10 +16,10 @@ const page = (): React.ReactElement => {
      bgDesc="Share your expertise, guide students and create impactful courses on ByteLearn"
      googleAuthReq={() => {
       try {
-        redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?state=instructor`)
+        router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?state=instructor`)
       } catch (err) {
         toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
-        redirectTo("/client/auth/login")
+        router.push("/client/auth/login")
       }
      }}
     >

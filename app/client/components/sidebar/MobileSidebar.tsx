@@ -9,7 +9,7 @@ import { useAppDispatch } from "@/app/redux/essentials/hooks"
 import { untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
 import axios from "../../utils/config/axios"
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice"
-import { useEffect } from "react"
+import { useEffect, useCallback } from "react" // Added useCallback
 import toast from "react-hot-toast"
 
 const MobileSidebar = () => {
@@ -18,6 +18,20 @@ const MobileSidebar = () => {
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab')
 
+    // Wrap fetchInfo in useCallback
+    const fetchInfo = useCallback(async () => {
+        axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
+            .then((res) => {
+                dispatch(getInformation(res.data.payload))
+            }).catch((err) => {
+                console.error(err)
+                toast.error(err)
+            })
+    }, [dispatch]) // Add dependencies here
+
+    useEffect(() => {
+        fetchInfo();
+    }, [fetchInfo]) // Now fetchInfo is stable between renders
 
     const handleRouteChange = (value: string) => {
         let tabParam = "";
@@ -49,23 +63,11 @@ const MobileSidebar = () => {
             case "b": return tab === "my-courses";
             case "c": return tab === "courses";
             case "d": return tab === "chat";
-            case "e": return tab === "inbox";  // Add this case
+            case "e": return tab === "inbox";
             default: return false;
         }
     };
 
-    const fetchInfo = async () => {
-        axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
-            .then((res) => {
-                dispatch(getInformation(res.data.payload))
-            }).catch((err) => {
-                console.error(err)
-                toast.error(err)
-            })
-    }
-    useEffect(() => {
-        fetchInfo();
-    }, [fetchInfo])
     return (
         <motion.div
             key="mobile-sidebar"

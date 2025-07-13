@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useCallback } from "react"
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
@@ -12,6 +12,10 @@ const Sidebar = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab');
+    const dispatch = useAppDispatch();
+    const notifications = useAppSelector(state => state.notificationContainer.notifications);
+    const notSeenNotifs = notifications.filter((notif) => !notif.isSeen);
+
     const handleRouteChange = (value: string) => {
         let tabParam = "";
         switch (value) {
@@ -42,79 +46,72 @@ const Sidebar = () => {
             case "b": return tab === "my-courses";
             case "c": return tab === "courses";
             case "d": return tab === "chat";
-            case "e": return tab === "inbox";  // Add this case
+            case "e": return tab === "inbox";
             default: return false;
         }
     };
-   
 
-    const dispatch = useAppDispatch()
+    const fetchInfo = useCallback(async () => {
+        try {
+            const res = await axios.get("/api/get-information", { 
+                headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+            });
+            dispatch(getInformation(res.data.payload));
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err.response?.msg || "Failed to fetch information");
+        }
+    }, [dispatch]);
 
-    const fetchInfo = async () => {
-        axios.get("/api/get-information",{ headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`}})
-        .then((res) => {
-            dispatch(getInformation(res.data.payload))
-        }).catch((err) => {
-            console.error(err)
-            toast.error(err.response.msg);
-        })
-    }
     useEffect(() => {
         fetchInfo();
-    }, [fetchInfo])
+    }, [fetchInfo]);
 
-    const notifications = useAppSelector(state => state.notificationContainer.notifications);
-    const notSeenNotifs = notifications.filter((notif) => !notif.isSeen)
     return (
-        <>
-            <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
+        <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
+            {/* Routes */}
+            <div className="min-h-fit flex flex-col space-y-4">
+                {/* logo + title */}
+                <div className="flex justify-center items-center">
+                    <Logo />
+                </div>
 
-                {/* Routes */}
-                <div className="min-h-fit flex flex-col space-y-4">
-                    {/* logo + title */}
-                    <div className="flex justify-center items-center">
-                        <Logo />
-                    </div>
-
-                    {/* Links */}
-                    <ul className="flex flex-col h-fit px-3 space-y-10  mt-6">
-                        {sidebarlinks.map((link: SidebarLinkSchema) => (
-                            <li
-                                key={link.value}
-                                onClick={() => handleRouteChange(link.value)}
-                                className={`
+                {/* Links */}
+                <ul className="flex flex-col h-fit px-3 space-y-10 mt-6">
+                    {sidebarlinks.map((link: SidebarLinkSchema) => (
+                        <li
+                            key={link.value}
+                            onClick={() => handleRouteChange(link.value)}
+                            className={`
                                 group relative flex items-center transition-all duration-200
                                 hover:cursor-pointer rounded-full mx-auto
-                                
                                 justify-center w-12 h-12 liCon
                                 ${isActive(link.value)
-                                        ? "bg-black text-white"
-                                        : "hover:bg-black hover:text-white"
-                                    }
+                                    ? "bg-black text-white"
+                                    : "hover:bg-black hover:text-white"
+                                }
                             `}
-                            >
-                                {/* Icon */}
-                                <span
-                                    className="relative"
-                                >
-                                    {link.icon}
-                                    {/* Chats Number */}
-                                    {link.routeName === "Chats" && <span
-                                        className={` ${tab === "chat" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-4
-                                  unread`}>
+                        >
+                            {/* Icon */}
+                            <span className="relative">
+                                {link.icon}
+                                {/* Chats Number */}
+                                {link.routeName === "Chats" && (
+                                    <span className={`${tab === "chat" ? "bg-white text-black" : "text-white"} 
+                                        text-xs font-bold bg-black rounded-full w-4 h-4 absolute centered-flex top-0 left-4 unread`}>
                                         2
-                                    </span>}
+                                    </span>
+                                )}
 
-                                    {notSeenNotifs.length <= 0 ? "" : link.routeName === "Inbox" && <span
-                                        className={` ${tab === "inbox" ? "bg-white text-black" : "text-white"} text-xs font-bold bg-black rounded-full w-4 h-4  absolute centered-flex top-0 left-3
-                                  unread`}>
+                                {notSeenNotifs.length > 0 && link.routeName === "Inbox" && (
+                                    <span className={`${tab === "inbox" ? "bg-white text-black" : "text-white"} 
+                                        text-xs font-bold bg-black rounded-full w-4 h-4 absolute centered-flex top-0 left-3 unread`}>
                                         {notSeenNotifs.length}
-                                    </span>}
-                                </span>
+                                    </span>
+                                )}
+                            </span>
 
-
-
-                                <span className={`
+                            <span className={`
                                 absolute -top-10 left-1/2 transform -translate-x-1/2
                                 bg-black text-white text-xs font-medium py-1 px-2 rounded
                                 opacity-0 group-hover:opacity-100 transition-opacity duration-300
@@ -123,14 +120,13 @@ const Sidebar = () => {
                                 before:-translate-x-1/2 before:border-4 before:border-transparent 
                                 before:border-t-black z-50 ml-4 lg:m-0
                             `}>
-                                    {link.routeName}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                                {link.routeName}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
             </div>
-        </>
+        </div>
     )
 }
 

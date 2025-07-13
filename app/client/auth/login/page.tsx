@@ -4,7 +4,7 @@ import FormComponent from '../../components/authComponents/FormComponent'
 import Login from './Login'
 import toast from 'react-hot-toast'
 
-const page = (): React.ReactElement => {
+const Page = (): React.ReactElement => {
   const router = useRouter()
   
     
@@ -19,6 +19,7 @@ const page = (): React.ReactElement => {
       try {
         router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
       } catch (err) {
+        console.error(err)
         toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
         router.push("/client/auth/login")
       }
@@ -29,4 +30,4 @@ const page = (): React.ReactElement => {
   )
 }
 
-export default page
+export default Page
