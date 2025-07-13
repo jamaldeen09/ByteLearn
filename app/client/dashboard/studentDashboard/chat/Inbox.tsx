@@ -12,7 +12,7 @@ import { getTimeAgo } from '@/app/client/utils/utils'
 import { socket } from "../../../utils/config/io"
 import { events } from '@/app/client/utils/events'
 import { Trash2Icon } from 'lucide-react'
-import { generateFriendRequest } from '@/app/server/utils/utils'
+import { generateFriendRequest } from '../../../utils/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 
