@@ -1,6 +1,6 @@
 "use client"
 import Logo from "./Logo"
-import { getButtonInformation } from "../../utils/utils"
+import { useButtonInformation } from "../../utils/utils"
 import { ButtonProps } from "../../types/types"
 import { harmBurgerMenu } from "@/app/icons/Icons"
 import Dropdown from "./Dropdown"
@@ -9,7 +9,7 @@ import Dropdown from "./Dropdown"
 const LandingPageNav = (): React.ReactElement => {
   
   // Buttons
-  const buttonInfo: ButtonProps[] = getButtonInformation();
+  const buttonInfo: ButtonProps[] = useButtonInformation();
  
   return (
     <nav

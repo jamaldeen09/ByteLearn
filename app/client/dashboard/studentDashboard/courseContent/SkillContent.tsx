@@ -78,7 +78,7 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
       courseId: courseId,
       skillId: skillId
     }, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
-      .then((res) => {
+      .then(() => {
         setCompleted(true);
       }).catch((err) => {
         console.error(err)

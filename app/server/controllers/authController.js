@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import nodemailer from "nodemailer";
 import otpGenerator from "otp-generator";
 import { generateHTML } from "../utils/utils.js"
-import mongoose from "mongoose";
+
 
 // node mailer transporter
 const transporter = nodemailer.createTransport({
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   port: 465, // Secure port
   secure: true, // SSL/TLS
   auth: {
-    user: process.env.EMAIL_USER,
+    user: process.env.EMAIL_USER,  
     pass: process.env.YAHOO_APP_PASSWORD,
   },
 });

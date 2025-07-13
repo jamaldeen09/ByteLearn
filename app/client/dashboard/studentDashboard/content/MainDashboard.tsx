@@ -1,14 +1,9 @@
 "use client"
-import LatestUpdateCards from "@/app/client/components/reusableComponents/LatestUpdateCards";
 import NewCourseCard from "@/app/client/components/reusableComponents/NewCourseCard"
-import NotficationCard from "@/app/client/components/reusableComponents/NotficationCard";
 import OngoingCourse from "@/app/client/components/reusableComponents/OngoingCourse"
 import { arrowDown } from "@/app/icons/Icons"
-import { useEffect } from "react";
-import { socket } from "@/app/client/utils/config/io";
-import { events } from "@/app/client/utils/events";
 import { motion, Variants } from "framer-motion";
-import { useAppSelector } from "@/app/redux/essentials/hooks";
+
 
 export const container: Variants = {
     hidden: { opacity: 0 },

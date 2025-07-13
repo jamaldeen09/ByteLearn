@@ -11,6 +11,8 @@ import newGroupSlice from "./triggers/groupCreationTrigger"
 import enrolledCoursesReducer from './coursesSlices/enrolledCoursesSlice';
 import friendsReducer from "./informationSlices/friendInformation"
 import notificationReducer from "./chatSlices/notificationSlice"
+import clickedFriendReducer from "./chatSlices/clickedFriend"
+import messagesSlice from "./chatSlices/messagesSlice"
 
 export const store = configureStore({
   reducer: {
@@ -24,7 +26,10 @@ export const store = configureStore({
     newFriendTrigger: newFriendsSlice,
     newGroupTrigger: newGroupSlice,
     enrolledCourses: enrolledCoursesReducer,
-    notificationContainer: notificationReducer
+    notificationContainer: notificationReducer,
+    friendsContainer: friendsReducer,
+    clickedFriend: clickedFriendReducer,
+    messages: messagesSlice,
   }
 })
 

@@ -9,14 +9,7 @@ import GroupMembers from "./GroupMembers"
 const AddGroupTrigger = () => {
     const groupTrigger = useAppSelector(state => state.newGroupTrigger.triggerNewGroup)
     const dispatch = useAppDispatch()
-    const generateArray = (lastNum: number): number[] => {
-        let generatedArr: number[] = [];
-        for (let i = 0; i < lastNum; i++) {
-            generatedArr.push(i)
-        }
 
-        return generatedArr
-    }
     return (
         <AnimatePresence>
             {groupTrigger && (
@@ -68,11 +61,7 @@ const AddGroupTrigger = () => {
                                 <p>B</p>
                             </div>
                             <div className="h-full flex flex-col gap-4 ">
-                                {Array.from(generateArray(10)).map((i) => {
-                                    return (
-                                        <GroupMembers key={i} />
-                                    )
-                                })}
+                                <GroupMembers />
                             </div>
                         </div>
                     </motion.div>

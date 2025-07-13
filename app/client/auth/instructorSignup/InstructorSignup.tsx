@@ -1,12 +1,13 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { emailValidation, firstNameValidation, lastNameValidation, passwordValidation, refresh, useRedirect } from "../../utils/utils";
+import { emailValidation, firstNameValidation, lastNameValidation, passwordValidation, refresh } from "../../utils/utils";
 import { invalidInput } from "../../utils/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { triangleErr } from "@/app/icons/Icons";
 import Spinner from "../../components/reusableComponents/Spinner";
 import axios from "../../utils/config/axios"
+import { useRouter } from "next/navigation";
 
 const InstructorSignup = (): React.ReactElement => {
     // local states
@@ -16,6 +17,7 @@ const InstructorSignup = (): React.ReactElement => {
     const [lastName, setLastName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const router = useRouter()
 
     // booleans
     const [showFirstNameErr, setShowFirstNameErr] = useState<boolean>(false);
@@ -32,7 +34,7 @@ const InstructorSignup = (): React.ReactElement => {
     const [passwordError, setPasswordError] = useState<string>("")
 
     // utility functions
-    const { redirectTo } = useRedirect();
+   
 
     useEffect(() => {
         const firstnameValidity = firstNameValidation(firstName)
@@ -65,9 +67,9 @@ const InstructorSignup = (): React.ReactElement => {
             lastName,
             email,
             password
-        }).then((res) => {
+        }).then(() => {
             refresh(setFirstName, setLastName, setEmail, setPassword, false);
-            redirectTo("/client/dashboard/instructorDashboard");
+            router.push("/client/dashboard/instructorDashboard");
         }).catch((err) => {
             setLoading(false);
             console.error(err)

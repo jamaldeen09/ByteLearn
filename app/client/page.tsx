@@ -2,11 +2,11 @@
 import LandingPageButton from "./components/reusableComponents/LandingPageButton"
 import LandingPageNav from "./components/reusableComponents/LandingPageNav"
 import { ButtonProps } from "./types/types"
-import { getButtonInformation } from "./utils/utils"
+import { useButtonInformation } from "./utils/utils"
 
 const LandingPage = (): React.ReactElement => {
 
-  const buttonInformation: ButtonProps[] = getButtonInformation();
+  const buttonInformation: ButtonProps[] = useButtonInformation();
   const buttonLinks: ButtonProps[] = [
     buttonInformation[0],
     buttonInformation[1],

@@ -5,23 +5,27 @@ import User from "../models/User.js"
 export const getFriends = async(req, res) => {
     try {
         if (!req.user.userId)
-            return res.status(400).send({ success: false, msg: "Unauthorized Access" })
+            return res.status(401).send({ success: false, msg: "Unauthorized Access" })
 
         const exsistingAcc = await User.findById(req.user.userId).populate({
             path: "friends",
             ref: "User"
         });
+        
         if (!exsistingAcc)
             return res.status(404).send({ success: false, msg: "Your account does not exsist please login" })
 
-        const friendPayload = exsistingAcc.friends.forEach((friend) => {
+        const friendPayload = exsistingAcc.friends.map((friend) => {
             return {
                 friendName: friend.fullName,
                 friendImageUrl: friend.avatar,
                 isOnline: friend.isOnline,
                 lastSeen: friend.lastSeen,
+                bio: friend.bio,
+                _id: friend._id
             }
         })
+
 
         return res.status(200).send({ success: true, payload: friendPayload })
     } catch (err) {
@@ -80,7 +84,7 @@ export const deleteNotification = async (req, res) => {
       // delete notification from Notification Collection;
       const deletedNotif = await Notification.findByIdAndDelete({ _id: new mongoose.Types.ObjectId(notificationId) });
 
-      return res.status(200).send({ success: true, msg: "Notification successfully deleted" })
+      return res.status(200).send({ success: true, msg: "Notification successfully deleted", deletedNotif })
     } catch (err) {
         console.error(err)
         return res.status(500).send({ success: false, msg: "Server Error" })

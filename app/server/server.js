@@ -7,12 +7,6 @@ import passport from "passport";
 import cors from "cors";
 import { authRouter } from "./routes/authRouter.js";
 import "./config/passport.js";
-import {
-  exampleCourse,
-  cssMasteryCourse,
-  pythonCourse,
-  reactCourse,
-} from "./data/courseData.js";
 import { courseRouter } from "./routes/courseRouter.js";
 import { chatRouter } from "./routes/chatRouter.js";
 import jwt from "jsonwebtoken";
@@ -20,9 +14,11 @@ import { events } from "../client/utils/events.js";
 import User from "./models/User.js";
 import { generateFriendRequest, responseGenerator } from "./utils/utils.js";
 import Notification from "./models/Notification.js";
+import ChatRoom from "./models/ChatRoom.js"
+import Message from "./models/Message.js"
 
 
-dotenv.config();
+dotenv.config();   
 
 const URL = process.env.MONGO_URL;
 const PORT = process.env.NEXT_PUBLIC_PORT;
@@ -73,9 +69,9 @@ io.on("connection", async (socket) => {
     console.log(`${currentUser.fullName} has connected to  byteLearn website`)
     currentUser.isOnline = true;
     await currentUser.save()
+    console.log("reached here")
 
-    socket.off("disconnect", async () => {
-
+    socket.on("disconnect", async () => {
       console.log(`${currentUser.fullName} has disconnected from byteLearn website`)
       currentUser.isOnline = false
       await currentUser.save()
@@ -101,9 +97,9 @@ io.on("connection", async (socket) => {
         return;
       }
 
-      const alreadyFriends = 
-      currentUser.friends.some(id => id.toString() === friendIdStr) || 
-      friend.friends.some(id => id.toString() === currentUserIdStr);
+      const alreadyFriends =
+        currentUser.friends.some(id => id.toString() === friendIdStr) ||
+        friend.friends.some(id => id.toString() === currentUserIdStr);
 
       if (alreadyFriends) {
         socket.emit(events.NOT_ALLOWED, responseGenerator(false, `You and ${friend.fullName} are already friends`));
@@ -180,7 +176,7 @@ io.on("connection", async (socket) => {
       }
       const notification = await Notification.findOneAndUpdate(
         { _id: notificationId, receiver: socket.user.userId },
-        { 
+        {
           requestStatus: "accepted",
           isSeen: true,
           content: generateFriendRequest(
@@ -214,7 +210,7 @@ io.on("connection", async (socket) => {
 
       socket.emit(events.FRIEND_REQUEST_ACCEPTED, {
         success: true,
-        notification: updatedNotification 
+        notification: updatedNotification
       });
 
       io.to(senderId.toString()).emit(events.FRIEND_REQUEST_ACCEPTED_NOTIFICATION, {
@@ -229,11 +225,11 @@ io.on("connection", async (socket) => {
       if (!senderId || !notificationId) {
         socket.emit(events.NOT_ALLOWED, responseGenerator(false, "Please provide a senderId and notificationId"));
         return;
-      }
-    
+      } 
+
       const notification = await Notification.findOneAndUpdate(
         { _id: notificationId, receiver: socket.user.userId },
-        { 
+        {
           requestStatus: "rejected",
           isSeen: true,
           content: generateFriendRequest(
@@ -244,30 +240,212 @@ io.on("connection", async (socket) => {
         },
         { new: true }
       ).populate("sender", "fullName avatar email");
-    
+
       if (!notification) {
         socket.emit(events.NOT_FOUND, {
           success: false,
           message: "Notification not found or unauthorized"
-        }); 
+        });
         return;
       }
-    
+
       // Notify both users
       const updatedNotification = await Notification.findById(notificationId)
         .populate("sender", "fullName avatar email");
-    
+
       socket.emit(events.FRIEND_REQUEST_REJECTED, {
         success: true,
-        notification: updatedNotification 
+        notification: updatedNotification
       });
-    
+
       io.to(senderId.toString()).emit(events.FRIEND_REQUEST_REJECTED_NOTIFICATION, {
         success: true,
         message: `${currentUser.fullName} declined your friend request`,
         notification: updatedNotification
       });
     });
+
+    socket.on(events.CREATE_ROOM, async ({ roomId, participantId }) => {
+      if (!roomId || !participantId) {
+        socket.emit(events.NOT_ALLOWED, responseGenerator(false, "A roomId and a participant id must be provided"))
+        return;
+      }
+
+
+      // validate friend id
+      const friend = await User.findById(participantId)
+      if (!friend) {
+        socket.emit(events.NOT_FOUND, responseGenerator(false, "Friend was not found"));
+        return;
+      }
+
+      const isExsistingRoom = await ChatRoom.findOne({
+        $and: [
+          { participants: { $all: [currentUser._id, friend._id] } },
+          { participants: { $size: 2 } }
+        ]
+      }).populate({
+        path: "messages",
+        populate: [
+          { path: "senderId", select: "fullName avatar" },
+          { path: "receiverId", select: "fullName avatar" }
+        ]
+      });
+
+      const data = {
+        information: {
+          _id: friend._id.toString(),
+          fullName: friend.fullName,
+          isOnline: friend.isOnline,
+          avatar: friend.avatar,
+          bio: friend.bio,
+        },
+        messages: isExsistingRoom?.messages?.map(msg => ({
+          _id: msg._id,
+          sender: {
+            _id: msg.senderId._id,
+            fullName: msg.senderId.fullName,
+            avatar: msg.senderId.avatar
+          },
+          receiver: {
+            _id: msg.receiverId._id,
+            fullName: msg.receiverId.fullName,
+            avatar: msg.receiverId.avatar
+          },
+          roomId: msg.roomId,
+          status: msg.status,
+          content: msg.content,
+          sentAt: msg.sentAt,
+          deliveredAt: msg.deliveredAt,
+          readAt: msg.readAt
+        })) || []
+      };
+
+      if (isExsistingRoom) {
+        socket.join(isExsistingRoom.roomId.toString())
+        socket.emit(events.CHATROOM_FOUND, data)
+        return;
+      } else {
+
+        const newRoom = await ChatRoom.create(
+          {
+            participants: [currentUser._id, friend._id],
+            roomId: roomId,
+            messages: [],
+            createdAt: Date.now()
+          }
+        )
+
+        socket.join(newRoom.roomId.toString())
+        socket.emit(events.CHATROOM_CREATED, data);
+        return;
+      }
+    })
+
+    // Message sending
+    socket.on(events.SEND_MESSAGE, async ({ receiverId, content }) => {
+      if (!receiverId || !content) {
+        socket.emit(events.NOT_ALLOWED, responseGenerator(false, "A receiverId and content must be provided"))
+        return;
+      }
+
+      // check if user exists
+      const receiver = await User.findById(receiverId)
+      if (!receiver) {
+        socket.emit(events.NOT_FOUND, responseGenerator(false, "Receiver was not found"))
+        return;
+      }
+      // find a room with both participants
+      const exsistingRoom = await ChatRoom.findOne({
+        participants: { $all: [currentUser._id, receiver._id] }
+      }).populate({
+        path: "messages",
+        model: "Message",
+        populate: [
+          {
+            path: "senderId",
+            select: "fullName avatar"
+          },
+          {
+            path: "receiverId",
+            select: "fullName avatar"
+          }
+        ],
+        options: { sort: { createdAt: -1 } }
+      });
+      if (!exsistingRoom) {
+        socket.emit(events.NOT_FOUND, responseGenerator(false, "Room was not found"))
+        return;
+      }
+
+      const formattedMessages = exsistingRoom.messages.map(msg => ({
+        _id: msg._id,
+        sender: {
+          _id: msg.senderId._id,
+          fullName: msg.senderId.fullName,
+          avatar: msg.senderId.avatar
+        },
+        receiver: {
+          _id: msg.receiverId._id,
+          fullName: msg.receiverId.fullName,
+          avatar: msg.receiverId.avatar
+        },
+        roomId: msg.roomId,
+        status: msg.status,
+        content: msg.content,
+        sentAt: msg.sentAt,
+        deliveredAt: msg.deliveredAt,
+        readAt: msg.readAt
+      }));
+
+      socket.emit(events.MESSAGE_HISTORY, {
+        roomId: exsistingRoom.roomId,
+        messages: formattedMessages,
+      });
+
+      const newMessage = await Message.create({
+        senderId: currentUser._id,
+        receiverId,
+        roomId: exsistingRoom.roomId,
+        status: "sent",
+        content,
+        sentAt: new Date(),
+      });
+
+      const populatedMessage = await Message.findById(newMessage._id)
+        .populate('senderId', 'fullName avatar')
+        .populate('receiverId', 'fullName avatar')
+        .lean();
+
+      exsistingRoom.messages.push(newMessage._id);
+      await exsistingRoom.save();
+
+      const data = {
+        message: {
+          _id: populatedMessage._id,
+          sender: {
+            _id: populatedMessage.senderId._id,
+            fullName: populatedMessage.senderId.fullName,
+            avatar: populatedMessage.senderId.avatar
+          },
+          receiver: {
+            _id: populatedMessage.receiverId._id,
+            fullName: populatedMessage.receiverId.fullName,
+            avatar: populatedMessage.receiverId.avatar
+          },
+          roomId: populatedMessage.roomId,
+          status: populatedMessage.status,
+          content: populatedMessage.content,
+          sentAt: populatedMessage.sentAt,
+          deliveredAt: populatedMessage.deliveredAt,
+          readAt: populatedMessage.readAt
+        },
+        room: exsistingRoom.roomId
+      };
+
+
+      io.to(exsistingRoom.roomId).emit(events.RECEIVED_MESSAGE, data);
+    })
   } catch (err) {
     console.error(err)
     socket.emit(events.ERROR_OCCURED, { success: false, msg: "Server Error" })
@@ -315,6 +493,7 @@ mongoose
       console.log(`Server is running on port http://localhost:${PORT}`)
     );
   })
-  .catch((err) => { 
+  .catch((err) => {
     console.error(err);
   });
+

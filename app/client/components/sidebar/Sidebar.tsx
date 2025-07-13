@@ -11,8 +11,7 @@ import { getInformation } from "@/app/redux/informationSlices/usersInformationSl
 const Sidebar = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const tab = searchParams.get('tab')
-    let tabParam = "";
+    const tab = searchParams.get('tab');
     const handleRouteChange = (value: string) => {
         let tabParam = "";
         switch (value) {
@@ -62,7 +61,7 @@ const Sidebar = () => {
     }
     useEffect(() => {
         fetchInfo();
-    }, [])
+    }, [fetchInfo])
 
     const notifications = useAppSelector(state => state.notificationContainer.notifications);
     const notSeenNotifs = notifications.filter((notif) => !notif.isSeen)

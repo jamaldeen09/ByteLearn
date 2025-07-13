@@ -10,7 +10,6 @@ import { newFriend } from "@/app/redux/triggers/newFriendTrigger"
 import { newGroupTrigger } from "@/app/redux/triggers/groupCreationTrigger"
 
 
-
 const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFriendProps) => {
     const dispatch = useAppDispatch()
     const addButtonUtils: AddComponentProps[] = [
@@ -25,14 +24,7 @@ const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFr
             }
         },
     ]
-    const generateArray = (lastNum: number): number[] => {
-        let generatedArr: number[] = [];
-        for (let i = 0; i < lastNum; i++) {
-            generatedArr.push(i)
-        }
-
-        return generatedArr
-    }
+    
     return (
         <>
             <AnimatePresence>
@@ -83,9 +75,7 @@ const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFr
                                         <p>B</p>
                                     </div>
                                     <div className="h-full flex flex-col gap-4 ">
-                                        {Array.from(generateArray(10)).map((i) => {
-                                            return <FriendsOnByteLearn key={i} />
-                                        })}
+                                        <FriendsOnByteLearn />
                                     </div>
                                 </div>
                             </div>

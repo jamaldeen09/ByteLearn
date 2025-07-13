@@ -1,7 +1,7 @@
 "use client"
 import { motion } from "framer-motion"
 import { NewCourseCardProps } from "../../types/types"
-
+import Image from 'next/image'
 
 const NewCourseCard = ({ courseImg, instructorImg, instructorName, dateOfCreation, description, title, category }: NewCourseCardProps) => {
   return (
@@ -46,19 +46,22 @@ const NewCourseCard = ({ courseImg, instructorImg, instructorName, dateOfCreatio
 
         {/* Instructor Info */}
         <div className="flex items-start space-x-3 flex-col gap-4 lg:flex-row lg:items-center lg:gap-0">
-          <img
+          <Image
             src={instructorImg || "https://media.istockphoto.com/id/515264642/photo/happy-teacher-at-desk-talking-to-adult-education-students.jpg?s=612x612&w=0&k=20&c=cpcqqIE9WgVgirdpelsjl2GqwhPFMu5UajW2QG-MOrM="}
-            alt={`The avator of ${title}'s instructor`}
+            alt={`The avatar of ${title}'s instructor`}
             className="w-10 h-10 rounded-full"
+            width={40}
+            height={40}
+            unoptimized={true}
           />
 
           <div className="flex items-center justify-between w-full">
             {/* Name */}
             <div className="flex flex-col">
-            <h1 className="font-bold iphone:text-md sm:text-lg">
-              {instructorName || "Eric Michell"}
-            </h1>
-            <p className="iphone:text-[0.5rem] sm:text-xs text-gray-400">Topics: 3</p>
+              <h1 className="font-bold iphone:text-md sm:text-lg">
+                {instructorName || "Eric Michell"}
+              </h1>
+              <p className="iphone:text-[0.5rem] sm:text-xs text-gray-400">Topics: 3</p>
             </div>
 
             <div className="iphone:text-[0.5rem] sm:text-xs bg-orange-300 text-orange-600 p-2 rounded-r-sm rounded-tl-lg relative">

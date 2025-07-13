@@ -4,7 +4,6 @@ import User from "../models/User.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const PORT = process.env.NEXT_PUBLIC_PORT;
 
 passport.use(
   new GoogleStrategy(

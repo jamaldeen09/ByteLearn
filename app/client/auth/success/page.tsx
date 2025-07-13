@@ -11,30 +11,28 @@ const SuccessPage = (): React.ReactElement => {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
-
 
     if (token) {
       localStorage.setItem("bytelearn_token", token);
 
-      axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
-        if (res.data.payload.role === "student") {
-          redirectTo("/client/dashboard/studentDashboard");
-          return;
-        } else {
-          redirectTo("/client/dashboard/instructorDashboard");
-        }
-        
-        dispatch(getInformation(res.data.payload));
-      }).catch((err) => {
-        redirectTo("/client/auth/login")
-      })
+      axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
+        .then((res) => {
+          if (res.data.payload.role === "student") {
+            redirectTo("/client/dashboard/studentDashboard");
+          } else {
+            redirectTo("/client/dashboard/instructorDashboard");
+          }
+          dispatch(getInformation(res.data.payload));
+        })
+        .catch(() => {  // Removed unused 'err' parameter
+          redirectTo("/client/auth/login")
+        })
     } else {
       redirectTo("/client/auth/login")
     }
-  }, [dispatch]);
+  }, [dispatch, redirectTo]);  // Added missing dependency
 
   return (
     <div className="h-screen centered-flex">

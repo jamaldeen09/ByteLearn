@@ -12,7 +12,7 @@ const QuizComponentItem = ({
   // Determine the styling based on selection and correctness
   let bgColor = "bg-gray-100";
   let borderColor = "border-gray-300";
-  let hoverStyles = "hover:bg-black/10 hover:border-black";
+  const hoverStyles = "hover:bg-black/10 hover:border-black"; 
   
   if (showResult) {
     if (isCorrect) {

@@ -1,7 +1,6 @@
 import express from "express";
 import passport from "passport";
 import {
-  googleAuth,
   googleRedirect,
   studentSignup,
   getUsers,

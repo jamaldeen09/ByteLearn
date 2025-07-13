@@ -17,7 +17,7 @@ const MobileSidebar = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab')
-    let tabParam = "";
+
 
     const handleRouteChange = (value: string) => {
         let tabParam = "";
@@ -65,7 +65,7 @@ const MobileSidebar = () => {
     }
     useEffect(() => {
         fetchInfo();
-    }, [])
+    }, [fetchInfo])
     return (
         <motion.div
             key="mobile-sidebar"

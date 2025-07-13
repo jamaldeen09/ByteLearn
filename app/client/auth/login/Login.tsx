@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { invalidInput, refresh } from "../../utils/utils";
 import { triangleErr } from "@/app/icons/Icons";
 import axios from "axios"
+import { useRouter } from "next/navigation";
 
 
 const Login = (): React.ReactElement => {
@@ -27,8 +28,7 @@ const Login = (): React.ReactElement => {
   const [passwordError, setPasswordError] = useState<string>("")
 
   // utility functions
-  const { redirectTo } = useRedirect();
-
+  const router = useRouter()
   useEffect(() => {
     const emailValidity = emailValidation(email)
     const passwordValidity = passwordValidation(password)
@@ -61,7 +61,7 @@ const Login = (): React.ReactElement => {
       localStorage.setItem("bytelearn_token", res.data.token);
 
       setTimeout(() => {
-        redirectTo("/client/dashboard");
+        router.push("/client/dashboard");
       }, 1000);
 
     }).catch((err) => {
@@ -147,7 +147,7 @@ const Login = (): React.ReactElement => {
 
       {/* Forgot password */}
       <div className="w-full">
-        <p onClick={() => redirectTo("/client/auth/passwordUpdate")} className="text-sm text-blue-500 hover:cursor-pointer">Forgot your password?</p>
+        <p onClick={() => router.push("/client/auth/passwordUpdate")} className="text-sm text-blue-500 hover:cursor-pointer">Forgot your password?</p>
       </div>
     </form>
   )

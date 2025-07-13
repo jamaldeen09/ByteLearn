@@ -1,5 +1,5 @@
 export type ButtonProps = {
-  text: String;
+  text: string;
   funcToExecute: () => void;
 };
 
@@ -130,7 +130,7 @@ export type singleCourseSchema = {
   topics: topicSchema[],
   dateCreated: string,
   creator: CreatorSchema,
-  isPublished: Boolean,
+  isPublished: boolean,
 }
 
 export type topicSchema = {
@@ -165,7 +165,7 @@ export type courseSchema = {
   topics: topicSchema[],
   dateCreated: Date,
   creator: CreatorSchema,
-  isPublished: Boolean,
+  isPublished: boolean,
 }
 
 
@@ -231,8 +231,32 @@ export type FriendProps = {
   timePreviousMsgWasSent: string,
   unreadMessages: number,
   bio: string,
-  isOnline: boolean,
   lastSeen: string,
+  createRoom: (id: string) => void,
+  id: string,
+  isActive: boolean,
+}
+
+export type ClickedFriendState = {
+  id: string;
+  information: {
+    _id: string;
+    fullName: string;
+    avatar: string;
+    isOnline: boolean;
+    bio: string;
+  } | null;
+}
+
+
+export type InformationSchema = {
+  information: {
+    _id: string,
+    fullName: string,
+    avatar: string,
+    isOnline: boolean,
+    bio: string,
+}
 }
 
 export type EnableAddFriendProps = {
@@ -276,6 +300,8 @@ export type FriendSchema = {
   isOnline: boolean,
   friendName: string,
   lastSeen: string,
+  bio: string,
+  _id: string,
 }
 
 export type ReduxFriendsSliceSchema = {
@@ -313,4 +339,32 @@ export type NotifSenderInformationSchema = {
   content: string,
 }
 
+export type UserPreview = {
+  _id: string;
+  fullName: string;
+  avatar: string;
+};
 
+export type IMessage = {
+  _id: string;
+  sender: UserPreview;
+  receiver: UserPreview;
+  roomId: string;
+  status: "sent" | "delivered" | "read";
+  content: string;
+  sentAt: Date | string;
+  deliveredAt?: Date | string;
+  readAt?: Date | string;
+};
+
+export type IMessageInput = {
+  sender: string;
+  receiver: string; 
+  roomId: string;
+  content: string;
+  status?: "sent";
+};
+
+export type MessagesState = {
+  messages: IMessage[];
+};

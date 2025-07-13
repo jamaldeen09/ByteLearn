@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { container, item } from "./MainDashboard"
-
+import Image from 'next/image';
 
 const Courses = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -29,20 +29,16 @@ const Courses = () => {
             console.error(err);
             setLoading(false);
         })
-
-
-    }, [])
+    }, [dispatch])
 
     const [enrollLoading, setEnrollLoading] = useState<boolean>(false);
 
     const enroll = (id: string) => {
-      
         setEnrollLoading(true);
         axios.post("/api/enroll", { courseId: id }, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
             setEnrollLoading(false);
             router.push(`/client/dashboard/studentDashboard?tab=my-courses&courseId=${id}`);
             toast.success(res.data.msg);
-
             return;
         }).catch((err) => {
             console.error(err)
@@ -65,34 +61,26 @@ const Courses = () => {
     }
     
     return (
-
-
         <div className="lg:col-span-16 px-4 flex flex-col gap-4 h-[90vh]">
-
             <div className="w-fit md:mx-auto max-lg:m-0">
                 <h1 className="font-bold text-xl">Courses</h1>
             </div>
 
-
             {loading ? (
-                <div
-                 
-                    className="h-[90vh] centered-flex"
-                >
+                <div className="h-[90vh] centered-flex">
                     <BlackSpinner />
                 </div>
             ) : courses.length <= 0 ?
-                <div
-                 
-                    className="h-full centered-flex"
-                >
-                    <img
+                <div className="h-full centered-flex">
+                    <Image
                         src="https://cdn-icons-png.flaticon.com/512/9772/9772025.png"
                         alt="An image that illustrates or shows the users that no courses are available"
-                        className="w-full max-w-lg"
+                        className="w-full"
+                        width={600}
+                        height={600}
+                        unoptimized={true}
                     />
                 </div>
-
                 : <div className="columns-1 sm:columns-1 w-full max-lg:w-full max-lg:columns-2 lg:columns-3 gap-4 ">
                     <motion.div
                         variants={container}
@@ -101,12 +89,10 @@ const Courses = () => {
                         className="contents"
                     >
                     {courses.map(course => (
-
                         <motion.div key={course.id} variants={item} className="mb-4 break-inside-avoid w-full sm:mx-auto max-lg:mx-0 sm:max-w-lg md:max-w-xl max-lg:max-w-lg">
                             <CourseCardComponent {...course} enroll={() => enroll(course.id)} isEnrolling={enrollLoading} 
                             isEnrolled={enrolledCourses.has(course.id)}/>
                         </motion.div>
-
                     ))}</motion.div>
                 </div>}
         </div>

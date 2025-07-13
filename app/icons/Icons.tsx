@@ -1,5 +1,5 @@
-import { ArrowLeftIcon, ChatBubbleIcon, Cross2Icon, DashboardIcon, ExclamationTriangleIcon, GearIcon, HamburgerMenuIcon, HeartIcon, MagnifyingGlassIcon, StarIcon } from "@radix-ui/react-icons"
-import { EllipsisVerticalIcon, UserIcon, X, XIcon } from "lucide-react"
+import { ArrowLeftIcon, DashboardIcon, ExclamationTriangleIcon, GearIcon, HamburgerMenuIcon,  MagnifyingGlassIcon, StarIcon } from "@radix-ui/react-icons"
+import { EllipsisVerticalIcon, UserIcon, X } from "lucide-react"
 
 export const harmBurgerMenu = <HamburgerMenuIcon className="icon-size"/>
 

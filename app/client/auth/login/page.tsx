@@ -1,11 +1,11 @@
 "use client"
+import { useRouter } from 'next/navigation'
 import FormComponent from '../../components/authComponents/FormComponent'
-import { useRedirect } from '../../utils/utils'
 import Login from './Login'
 import toast from 'react-hot-toast'
 
 const page = (): React.ReactElement => {
-  const { redirectTo } = useRedirect()
+  const router = useRouter()
   
     
   return (
@@ -17,10 +17,10 @@ const page = (): React.ReactElement => {
      bgDesc="Continue your journey towards building real-world skills and achieving your goals with hands-on projects and mentorship"
      googleAuthReq={() => {
       try {
-        redirectTo(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
+        router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
       } catch (err) {
         toast.error("Unable to initiate Google sign in at the moment. Please try again later.")
-        redirectTo("/client/auth/login")
+        router.push("/client/auth/login")
       }
      }}
     >

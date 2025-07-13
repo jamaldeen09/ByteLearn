@@ -4,7 +4,7 @@ import {
   verifyAccessToken,
 } from "../middlewares/auth.js";
 import { deleteNotification, getFriends, getNotifications } from "../controllers/chatController.js";
-import { body, param } from "express-validator";
+import { param } from "express-validator";
 
 export const chatRouter = express.Router();
 

@@ -18,7 +18,7 @@ import Inbox from "./chat/Inbox";
 
 
 
-const page = (): React.ReactElement => {
+const Page = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
   
   const dispatch = useAppDispatch()
@@ -103,4 +103,4 @@ const page = (): React.ReactElement => {
   )
 }
 
-export default page
+export default Page
