@@ -61,7 +61,7 @@ const AddGroupTrigger = () => {
                                 <p>B</p>
                             </div>
                             <div className="h-full flex flex-col gap-4 ">
-                                <GroupMembers />
+                                
                             </div>
                         </div>
                     </motion.div>

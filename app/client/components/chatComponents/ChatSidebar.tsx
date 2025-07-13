@@ -126,10 +126,7 @@ const ChatSidebar = (): React.ReactElement => {
 
       {/* Filters */}
       <div className="w-full flex items-center space-x-3 px-4">
-        <FriendFilters />
-        <FriendFilters />
-        <FriendFilters />
-        <FriendFilters />
+        
       </div>
 
       {/* Chats Area */}
@@ -147,6 +144,10 @@ const ChatSidebar = (): React.ReactElement => {
             id={friend._id}
             createRoom={() => dispatch(getClickedFriendId(friend._id))}
             isActive={clickedFriend === friend._id}
+            unreadMessages={4}
+            previousMessage="wsp bro"
+            timePreviousMsgWasSent="11:44pm"
+            lastSeen="20.99"
           />
         ))}
       </div>

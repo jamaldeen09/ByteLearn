@@ -75,7 +75,7 @@ const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFr
                                         <p>B</p>
                                     </div>
                                     <div className="h-full flex flex-col gap-4 ">
-                                        <FriendsOnByteLearn />
+                              
                                     </div>
                                 </div>
                             </div>
