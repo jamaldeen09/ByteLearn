@@ -228,8 +228,8 @@ export function getTimeAgo(timestamp: string | Date): string {
 }
 
 export const generateFriendRequest = (
-  fullName: any,
-  id: any,
+  fullName: string,
+  id: string,
   requestStatus = "pending"
 ) => {
   // Base HTML for the notification content (keep this exactly as is)
