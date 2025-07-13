@@ -92,6 +92,12 @@ const MainDashboard = () => {
                                 {Array.from([1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13]).map((i) => (
                                     <motion.div key={i} variants={item}>
                                         <NewCourseCard
+                                            instructorImg="https://localhost:400/api/users/jollof"
+                                            dateOfCreation="2050"
+                                            description="Dancing"
+                                            title="Incoming"
+                                            category="dancers"
+                                            instructorName="dance master"
                                             courseImg="https://media.istockphoto.com/id/1587601513/photo/international-day-of-human-space-flight-cosmonautics-day-concept.jpg?s=612x612&w=0&k=20&c=86fTkpYtoD73xp5OT3Jm9gR3Wu0c5ej0B9_hZ4dZBqo="
                                         />
                                     </motion.div>
