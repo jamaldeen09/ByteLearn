@@ -19,6 +19,8 @@ import BlackSpinner from "../reusableComponents/BlackSpinner"
 import { events } from "../../utils/events"
 import { socket } from "../../utils/config/io"
 import { setMessages } from "@/app/redux/chatSlices/messagesSlice"
+import { setIsFriendsFalse, setIsFriendsTrue } from "@/app/redux/triggers/isFriendsTrigger"
+import Image from "next/image"
 
 interface ChatroomData {
   information: {
@@ -29,6 +31,7 @@ interface ChatroomData {
     bio: string,
   };
   messages: IMessage[];
+  roomId: string;
 }
 
 const ChatSidebar = (): React.ReactElement => {
@@ -37,9 +40,27 @@ const ChatSidebar = (): React.ReactElement => {
   const dispatch = useAppDispatch()
   const friends = useAppSelector(state => state.friendsContainer.friends)
   const clickedFriend = useAppSelector(state => state.clickedFriend.id)
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
+
 
   // Memoized function to generate room ID
   const generateRoomId = useCallback(() => crypto.randomUUID(), [])
+
+  // const handleFriendClick = useCallback((friendId: string) => {
+  //   // First dispatch the friend ID
+  //   dispatch(getClickedFriendId(friendId));
+    
+  //   // Then generate and set the room ID
+  //   const newRoomId = generateRoomId();
+  //   setRoomId(newRoomId);
+  
+  //   // Emit the CREATE_ROOM event with both IDs
+  //   socket.emit(events.CREATE_ROOM, {
+  //     roomId: newRoomId,
+  //     participantId: friendId
+  //   });
+  // }, [dispatch, generateRoomId]);
 
   // Fetch all friends
   useEffect(() => {
@@ -50,7 +71,6 @@ const ChatSidebar = (): React.ReactElement => {
       }).then((res) => {
         dispatch(getFriends(res.data.payload));
       }).catch((err) => {
-
         console.error(err);
         if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
           redirectTo("/client/auth/login");
@@ -65,9 +85,32 @@ const ChatSidebar = (): React.ReactElement => {
 
   // Handle room creation and events
   useEffect(() => {
+    if (clickedFriend && roomId) {
+      socket.emit(events.MARK_MESSAGES_AS_READ, {
+        roomId,
+        friendId: clickedFriend
+      });
+    }
+  }, [clickedFriend, roomId]);
+  
+  useEffect(() => {
+    const handleMessagesMarkedAsRead = ({ roomId: incomingRoomId, messages }: { roomId: string, messages: IMessage[] }) => {
+      if (incomingRoomId !== roomId) return; 
+      setUnreadMessages(messages.length); 
+    };
+  
+    socket.on(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
+  
+    return () => {
+      socket.off(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
+    };
+  }, [roomId]);
+  
+  
+  useEffect(() => {
     if (!clickedFriend) return
 
-    const data = {
+    const data: { roomId: string, participantId: string } = {
       roomId: generateRoomId(),
       participantId: clickedFriend,
     }
@@ -78,6 +121,7 @@ const ChatSidebar = (): React.ReactElement => {
       if (data.information._id === clickedFriend) {
         dispatch(getClickedFriendInformation(data))
         dispatch(setMessages(data.messages))
+        setRoomId(data?.roomId || null)
       }
     }
 
@@ -85,9 +129,17 @@ const ChatSidebar = (): React.ReactElement => {
       if (data.information._id === clickedFriend) {
         dispatch(getClickedFriendInformation(data))
         dispatch(setMessages(data.messages))
+        setRoomId(data?.roomId || null)
       }
     }
-
+    socket.on(events.NO_LONGER_FRIENDS, ({ isFriends }: {  isFriends: boolean }) => {
+      if (isFriends) {
+        dispatch(setIsFriendsTrue())
+      } else {
+        dispatch(setIsFriendsFalse());
+      }
+      return;
+    })
     socket.on(events.CHATROOM_FOUND, handleChatroomFound)
     socket.on(events.CHATROOM_CREATED, handleChatroomCreated)
 
@@ -97,8 +149,15 @@ const ChatSidebar = (): React.ReactElement => {
     }
   }, [clickedFriend, dispatch, generateRoomId])
 
+  const [friendSearch, setFriendSearch] = useState<string>("")
+  const foundFriends: FriendSchema[] = friends.filter((friend) => friend.friendName.includes(friendSearch));
+ 
+
   return (
-    <div className="border border-gray-200 h-full col-span-5 overflow-hidden flex flex-col gap-6 relative basic-border">
+    <div 
+      className="border border-gray-200 h-full col-span-5 overflow-hidden flex flex-col gap-6 relative basic-border"
+    >
+
       {/* Heading */}
       <div className="w-full flex items-center justify-between mt-6 px-4">
         <h1 className="font-bold text-xl">Chats</h1>
@@ -119,6 +178,8 @@ const ChatSidebar = (): React.ReactElement => {
           placeholder="Search by name"
           type="text"
           className="h-12 rounded-full bg-gray-50 px-16"
+          value={friendSearch}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFriendSearch(e.target.value)}
         />
         <span className="text-gray-400 absolute text-sm top-7 left-9">{searchIcon}</span>
       </div>
@@ -130,11 +191,20 @@ const ChatSidebar = (): React.ReactElement => {
 
       {/* Chats Area */}
       <div className="w-full flex flex-col h-full overflow-hidden overflow-y-auto px-2 gap-4 py-4">
-        {!friends ? (
-          <div className="h-full centered-flex w-full">
-            <BlackSpinner />
-          </div>
-        ) : friends?.map((friend: FriendSchema) => (
+        {friends.length <= 0 ? (
+            <div className="h-full col-centered gap-2 w-full text-center">
+              <Image 
+                src="https://media.istockphoto.com/id/1443485971/video/animated-greeting-man-character.jpg?s=640x640&k=20&c=TiAalsG2gyOQk_XptDUocQigdIEtbYH8D1u9ReU9RaQ="
+                alt="An Illustration of a 2d male character waving"
+                width={400}
+                height={400}
+                className="w-auto h-auto"
+                priority={true}
+                unoptimized={true}
+              />
+              <p className="text-gray-400 text-xs">No friends? Click the plus button to add some friends!</p>
+            </div> 
+        ) :foundFriends ? foundFriends?.map((friend: FriendSchema) => (
           <Friend
             key={friend._id}
             friendImageUrl={friend.friendImageUrl}
@@ -143,10 +213,22 @@ const ChatSidebar = (): React.ReactElement => {
             id={friend._id}
             createRoom={() => dispatch(getClickedFriendId(friend._id))}
             isActive={clickedFriend === friend._id}
-            unreadMessages={4}
-            previousMessage="wsp bro"
-            timePreviousMsgWasSent="11:44pm"
-            lastSeen="20.99"
+            unreadMessages={unreadMessages}
+            previousMessage={friend.lastMessage?.content}
+            timePreviousMsgWasSent={new Date(friend.lastMessage?.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          />
+        )) : friends?.map((friend: FriendSchema) => (
+          <Friend
+            key={friend._id}
+            friendImageUrl={friend.friendImageUrl}
+            friendName={friend.friendName}
+            bio={friend.bio}
+            id={friend._id}
+            createRoom={() =>  dispatch(getClickedFriendId(friend._id))}
+            isActive={clickedFriend === friend._id}
+            unreadMessages={unreadMessages}
+            previousMessage={friend.lastMessage.content}
+            timePreviousMsgWasSent={new Date(friend.lastMessage.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           />
         ))}
       </div>
@@ -163,3 +245,4 @@ const ChatSidebar = (): React.ReactElement => {
 }
 
 export default ChatSidebar
+

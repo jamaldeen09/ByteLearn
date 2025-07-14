@@ -226,7 +226,6 @@ export type FriendProps = {
   timePreviousMsgWasSent: string,
   unreadMessages: number,
   bio: string,
-  lastSeen: string,
   createRoom: (id: string) => void,
   id: string,
   isActive: boolean,
@@ -296,6 +295,7 @@ export type FriendSchema = {
   lastSeen: string,
   bio: string,
   _id: string,
+  lastMessage: IMessage,
 }
 
 export type ReduxFriendsSliceSchema = {
@@ -334,13 +334,14 @@ export type NotifSenderInformationSchema = {
 }
 
 export type UserPreview = {
-  _id: string;
+  _id: string | undefined;
   fullName: string;
-  avatar: string;
+  avatar: string | undefined;
 };
 
 export type IMessage = {
   _id: string;
+  imageUrl?: string,
   sender: UserPreview;
   receiver: UserPreview;
   roomId: string;
@@ -362,3 +363,22 @@ export type IMessageInput = {
 export type MessagesState = {
   messages: IMessage[];
 };
+
+export type IsFriendsState  = {
+  isFriends: boolean;
+}
+
+export type ChatDropDownData = {
+  name: string, 
+  clickFunc: () => void
+}
+
+export type ProfileSidebar = {
+  fullName: string,
+  bio: string,
+  trigger: boolean, 
+  avatar: string
+  setTrigger: React.Dispatch<React.SetStateAction<boolean>>,
+  triggerImgView: React.Dispatch<React.SetStateAction<boolean>>,
+  imgView: boolean,
+}

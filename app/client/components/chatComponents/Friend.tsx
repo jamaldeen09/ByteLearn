@@ -24,9 +24,9 @@ const Friend = ({
           src={friendImageUrl || "https://img.freepik.com/free-photo/lifestyle-people-emotions-casual-concept-confident-nice-smiling-asian-woman-cross-arms-chest-confident-ready-help-listening-coworkers-taking-part-conversation_1258-59335.jpg"}
           alt={`${friendName || "Friend"}'s profile picture`}
           className="rounded-full object-cover"
-          width={56}  // matches w-14 (14 * 4 = 56px)
+          width={56}  
           height={56}
-          unoptimized={true} // matches h-14
+          unoptimized={true}
         />
       </div>
 

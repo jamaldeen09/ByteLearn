@@ -13,6 +13,7 @@ import friendsReducer from "./informationSlices/friendInformation"
 import notificationReducer from "./chatSlices/notificationSlice"
 import clickedFriendReducer from "./chatSlices/clickedFriend"
 import messagesSlice from "./chatSlices/messagesSlice"
+import isFriendsReducer from "./triggers/isFriendsTrigger";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     friendsContainer: friendsReducer,
     clickedFriend: clickedFriendReducer,
     messages: messagesSlice,
+    isFriends: isFriendsReducer,
   }
 })
 

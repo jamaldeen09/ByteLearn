@@ -63,22 +63,6 @@ const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFr
                                 })}
                             </div>
 
-                            {/* contacts on whatsapp */}
-                            <div className="w-full overflow-hidden h-full flex flex-col py-4 ">
-                                <div className="w-full px-6 mb-10">
-                                    <p>Friends on Bytelearn</p>
-                                </div>
-
-                                <div className=" overflow-y-auto h-full flex flex-col px-4 gap-6">
-
-                                    <div className="w-full px-6">
-                                        <p>B</p>
-                                    </div>
-                                    <div className="h-full flex flex-col gap-4 ">
-                              
-                                    </div>
-                                </div>
-                            </div>
                         </motion.div>
                     </motion.div>
                 )}

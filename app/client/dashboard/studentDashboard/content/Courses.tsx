@@ -76,8 +76,8 @@ const Courses = () => {
                         src="https://cdn-icons-png.flaticon.com/512/9772/9772025.png"
                         alt="An image that illustrates or shows the users that no courses are available"
                         className="w-full"
-                        width={600}
-                        height={600}
+                        width={200}
+                        height={200}
                         unoptimized={true}
                     />
                 </div>

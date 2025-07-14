@@ -245,6 +245,7 @@ const Inbox = () => {
               className="rounded-full w-full max-w-[10rem]"
               width={160}
               height={160}
+              unoptimized={true}
             />
           </div> : filterNotifications ? filterNotifications.map((notification: NotificationSchema) => {
             const isClicked = isNotifClicked === notification._id
@@ -267,6 +268,7 @@ const Inbox = () => {
                       className="w-10 h-10 rounded-full"
                       width={40}
                       height={40}
+                      unoptimized={true}
                     />
                   </div>
                   <div className="w-full flex flex-col ">
@@ -306,6 +308,7 @@ const Inbox = () => {
                       className="w-10 h-10 rounded-full"
                       width={40}
                       height={40}
+                      unoptimized={true}
                     />
                   </div>
                   <div className="w-full flex flex-col ">
@@ -363,6 +366,7 @@ const Inbox = () => {
                       width={56}
                       height={56}
                       alt="Sender avatar"
+                      unoptimized={true}
                     />
                     <div className="flex flex-col">
                       <h1 className="font-extrabold text-xl">{notifSender?.fullName}</h1>

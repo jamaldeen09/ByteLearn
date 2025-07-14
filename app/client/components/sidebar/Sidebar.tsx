@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState } from "react"
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
@@ -7,6 +7,9 @@ import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import axios from "../../utils/config/axios"
 import toast from "react-hot-toast"
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice"
+import { getNotifications } from "@/app/redux/chatSlices/notificationSlice"
+import { socket } from "../../utils/config/io"
+import { events } from "../../utils/events"
 
 const Sidebar = () => {
     const router = useRouter();
@@ -15,6 +18,42 @@ const Sidebar = () => {
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(state => state.notificationContainer.notifications);
     const notSeenNotifs = notifications.filter((notif) => !notif.isSeen);
+    const [unreadMessages, setUnreadMessages] = useState<number>(0);
+    const usersInformation = useAppSelector(state => state.usersInformation)
+
+    const fetchNotifs = useCallback(() => {
+        axios.get("/api/get-notifications", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
+            dispatch(getNotifications(res.data.notifications))
+        }).catch((err) => {
+            console.error(err)
+            if (err.response.status === 401 || err.response.status === 403) {
+                router.push("/client/auth/login")
+                return
+            }
+            toast.error("A server error occurred. Please bare with us")
+        })
+    }, [dispatch, router])
+
+    const fetchChatNotifications = useCallback(() => {
+        axios.get("/api/unread-messages", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
+           setUnreadMessages(res.data.count);
+        }).catch((err) => {
+            console.error(err)
+            if (err.response.status === 401 || err.response.status === 403) {
+                router.push("/client/auth/login")
+                return
+            }
+            toast.error("A server error occurred. Please bare with us")
+        })
+    }, [dispatch, router])
+
+    useEffect(() => {
+        fetchNotifs()
+    }, [dispatch])
+
+    useEffect(() => {
+        fetchChatNotifications()
+    }, [dispatch])
 
     const handleRouteChange = (value: string) => {
         let tabParam = "";
@@ -70,6 +109,17 @@ const Sidebar = () => {
         fetchInfo();
     }, [fetchInfo]);
 
+    useEffect(() => {
+            const data = {
+                room: usersInformation._id.toString()
+            }
+    
+            socket.emit(events.JOIN_ROOM, data)
+            return () => {
+                socket.off(events.JOIN_ROOM)
+            }
+    }, [usersInformation._id])
+
     return (
         <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
             {/* Routes */}
@@ -101,8 +151,8 @@ const Sidebar = () => {
                                 {/* Chats Number */}
                                 {link.routeName === "Chats" && (
                                     <span className={`${tab === "chat" ? "bg-white text-black" : "text-white"} 
-                                        text-xs font-bold bg-black rounded-full w-4 h-4 absolute centered-flex top-0 left-4 unread`}>
-                                        2
+                                        text-xs font-bold ${unreadMessages <= 0 ? "" : "bg-black w-4 h-4"} rounded-full absolute centered-flex top-0 left-4 unread`}>
+                                        {unreadMessages <= 0 ? "" : unreadMessages}
                                     </span>
                                 )}
 

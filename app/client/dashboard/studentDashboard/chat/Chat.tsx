@@ -23,12 +23,6 @@ const Chat = () => {
       {/* Chat Sidebar - slides out on mobile when chat is selected */}
       <motion.div
         className="col-span-16 lg:col-span-5 h-full overflow-hidden"
-        initial={false}
-        animate={{
-          x: selectedChat && isMobile ? '-100%' : 0,
-          opacity: selectedChat && isMobile ? 0 : 1
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <ChatSidebar />
       </motion.div>
@@ -37,10 +31,6 @@ const Chat = () => {
         {(selectedChat || !isMobile) && (
           <motion.div
             className="col-span-16 lg:col-span-11 h-full fixed lg:relative inset-0 bg-white z-10 lg:z-auto"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             {/* Mobile back button */}
             {isMobile && (

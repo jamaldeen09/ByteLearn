@@ -5,18 +5,21 @@ import { sidebarlinks } from "../../utils/utils"
 import { SidebarLinkSchema } from "../../types/types"
 import { xIcon } from "@/app/icons/Icons"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useAppDispatch } from "@/app/redux/essentials/hooks"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
 import axios from "../../utils/config/axios"
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice"
-import { useEffect, useCallback } from "react" // Added useCallback
+import { useEffect, useCallback } from "react"
 import toast from "react-hot-toast"
+import { socket } from "../../utils/config/io"
+import { events } from "../../utils/events"
 
 const MobileSidebar = () => {
     const dispatch = useAppDispatch()
     const router = useRouter();
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab')
+    const usersInformation = useAppSelector(state => state.usersInformation)
 
     // Wrap fetchInfo in useCallback
     const fetchInfo = useCallback(async () => {
@@ -68,6 +71,16 @@ const MobileSidebar = () => {
         }
     };
 
+    useEffect(() => {
+        const data = {
+            room: usersInformation._id.toString()
+        }
+
+        socket.emit(events.JOIN_ROOM, data)
+        return () => {
+            socket.off(events.JOIN_ROOM)
+        }
+    }, [usersInformation._id])
     return (
         <motion.div
             key="mobile-sidebar"

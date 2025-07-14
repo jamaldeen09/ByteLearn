@@ -83,6 +83,7 @@ const NewFriendSidebar = () => {
     useEffect(() => {
         socket.on(events.SEND_NOTIFICATION, ({ msg }) => {
             toast.success(msg)
+            return;
         })
 
         return () => {
