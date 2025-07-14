@@ -60,9 +60,15 @@ const Login = (): React.ReactElement => {
       refresh(setEmail, setEmail, setEmail, setPassword, true);
       localStorage.setItem("bytelearn_token", res.data.token);
 
-      setTimeout(() => {
-        router.push("/client/dashboard");
-      }, 1000);
+      if (res.data.role === "student") {
+        setTimeout(() => {
+           router.push("/client/dashboard/studentDashboard");
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          router.push("/client/dashboard/instructorDashboard");
+        }, 1000)
+      }
 
     }).catch((err) => {
       console.error(err)
