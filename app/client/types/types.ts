@@ -239,7 +239,7 @@ export type ClickedFriendState = {
     avatar: string;
     isOnline: boolean;
     bio: string;
-  } | null;
+  } ;
 }
 
 export type InformationSchema = {
@@ -381,4 +381,9 @@ export type ProfileSidebar = {
   setTrigger: React.Dispatch<React.SetStateAction<boolean>>,
   triggerImgView: React.Dispatch<React.SetStateAction<boolean>>,
   imgView: boolean,
+}
+
+export type PreviewImageTriggerSchema = {
+  clickedImageId: string,
+  activatePreview: boolean,
 }

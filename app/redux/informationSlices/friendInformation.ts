@@ -13,10 +13,13 @@ const friendsReducer = createSlice({
     reducers: {
         getFriends: (state, action: PayloadAction<FriendSchema[]>) => {
             state.friends = action.payload
+        },
+        removeFriend: (state, action: PayloadAction<string>) => {
+            state.friends = state.friends.filter((friend) => friend._id !== action.payload)
         }
     }
 
 })
 
-export const { getFriends } = friendsReducer.actions;
+export const { getFriends, removeFriend } = friendsReducer.actions;
 export default friendsReducer.reducer;

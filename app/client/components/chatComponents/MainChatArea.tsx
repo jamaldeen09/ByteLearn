@@ -17,6 +17,11 @@ import ProfileViewSidebar from "../reusableComponents/ProfileViewSidebar";
 import axios from "../../utils/config/axios"
 import WhiteSpinner from "../reusableComponents/WhiteSpinner";
 import ImageView from "../reusableComponents/ImageView";
+import ImagePreviewComponent from "../reusableComponents/ImagePreviewComponent";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { getFriends, removeFriend } from "@/app/redux/informationSlices/friendInformation";
+import { getClickedFriendId } from "@/app/redux/chatSlices/clickedFriend";
 
 
 const MainChatArea = () => {
@@ -25,19 +30,20 @@ const MainChatArea = () => {
   const currentUserId = useAppSelector(state => state.usersInformation._id);
   const currentUserAvatar = useAppSelector(state => state.usersInformation.avatar);
   const currentUserFullname = useAppSelector(state => state.usersInformation.fullName)
+  const friends = useAppSelector(state => state.friendsContainer.friends)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter()
 
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [messageSendEvent, setMessageSendEvent] = useState<boolean>(false);
-  const isFriends = useAppSelector(state => state.isFriends.isFriends)
-  const [removeFriendEvent, setRemoveFriendEvent] = useState<boolean>(false);
   const [profileViewSidebar, setProfileViewSidebar] = useState<boolean>(false)
   const [isSending, setIsSending] = useState(false);
   const [imgViewTrigger, setImgViewTrigger] = useState<boolean>(false);
-
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
+  const [isFriendTyping, setIsFriendTyping] = useState(false);
 
   const dropDownData: ChatDropDownData[] = [
     {
@@ -47,12 +53,28 @@ const MainChatArea = () => {
     },
     {
       name: "Remove friend", clickFunc: () => {
-        setRemoveFriendEvent(true)
+        handleRemoveFriend(friendInfo._id)
       }
     }
   ]
 
   const dispatch = useAppDispatch()
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleTyping = (text: string) => {
+    setMessage(text);
+
+    socket.emit(events.TYPING, { receiverId: friendId });
+
+    if (typingTimeout) clearTimeout(typingTimeout);
+
+    const timeout = setTimeout(() => {
+      socket.emit(events.STOP_TYPING, { receiverId: friendId });
+    }, 2000)
+
+    setTypingTimeout(timeout);
+  };
+
 
   const handleEmojiClick = useCallback((emojiData: EmojiClickData) => {
     setMessage(prev => prev + emojiData.emoji);
@@ -68,7 +90,7 @@ const MainChatArea = () => {
 
   const handleFileUpload = async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file); // must match 'upload.single("image")'
+    formData.append('image', file);
 
     return axios.post('/api/upload', formData, {
       headers: {
@@ -127,41 +149,108 @@ const MainChatArea = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [message, previewUrl, dispatch]);
 
+  const handleRemoveFriend = async (friendId: string) => {
+    try {
+      const token = localStorage.getItem("bytelearn_token");
+
+      const response = await axios.delete(`/api/friends/${friendId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        toast.success("Friend removed successfully");
+
+        // Optionally update Redux
+        dispatch(removeFriend(friendId));
+        dispatch(setMessages([]));
+        dispatch(getClickedFriendId(""));
+        fetchFriends();
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to remove friend");
+    }
+  };
+
+
+
+  const fetchFriends = () => {
+    axios.get("/api/get-friends", {
+      headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+    }).then((res) => {
+      dispatch(getFriends(res.data.payload));
+    }).catch((err) => {
+      console.error(err);
+      if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
+        router.push("/client/auth/login");
+        return;
+      }
+      toast.error('Server Error');
+    })
+  };
   useEffect(() => {
-    if (!messageSendEvent) return;
-    setIsSending(true);
+    const handleTyping = ({ senderId }: { senderId: string }) => {
+      if (senderId === friendId) {
+        setIsFriendTyping(true);
 
-    const handleMessageHistory = ({ messages }: { messages: IMessage[] }) => {
-      dispatch(setMessages(messages));
-
-      setMessage("");
-      setPreviewUrl(null);
-      setMessageSendEvent(false);
-    };
-
-    const handleReceivedMessage = (data: { message: IMessage }) => {
-      dispatch(addMessage(data.message));
-      setMessageSendEvent(false);
-
-      setMessage("");
-      setPreviewUrl(null);
-      try {
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      } catch (error) {
-        console.error("Error sending message:", error);
-      } finally {
-        setIsSending(false);
+        setTimeout(() => {
+          setIsFriendTyping(false);
+        }, 2500);
       }
     };
 
+    const handleStopTyping = ({ senderId }: { senderId: string }) => {
+      if (senderId === friendId) {
+        setIsFriendTyping(false);
+      }
+    };
+
+    socket.on(events.TYPING, handleTyping);
+    socket.on(events.STOP_TYPING, handleStopTyping);
+
+    return () => {
+      socket.off(events.TYPING, handleTyping);
+      socket.off(events.STOP_TYPING, handleStopTyping);
+    };
+  }, [friendId]);
+
+  useEffect(() => {
+    if (!messageSendEvent) return;
+
+    setIsSending(true);
+    setLoadingMessages(true);
+
+    const handleMessageHistory = ({ messages }: { messages: IMessage[] }) => {
+      dispatch(setMessages(messages));
+      setMessage("");
+      setPreviewUrl(null);
+      setMessageSendEvent(false);
+      setLoadingMessages(false);
+    };
+
     socket.on(events.MESSAGE_HISTORY, handleMessageHistory);
-    socket.on(events.RECEIVED_MESSAGE, handleReceivedMessage);
 
     return () => {
       socket.off(events.MESSAGE_HISTORY, handleMessageHistory);
-      socket.off(events.RECEIVED_MESSAGE, handleReceivedMessage);
     };
   }, [messageSendEvent, dispatch]);
+
+
+  useEffect(() => {
+    const handleReceivedMessage = (data: { message: IMessage }) => {
+      dispatch(addMessage(data.message));
+    };
+
+    socket.on(events.RECEIVED_MESSAGE, handleReceivedMessage);
+
+    return () => {
+      socket.off(events.RECEIVED_MESSAGE, handleReceivedMessage);
+    };
+  }, [dispatch]);
 
 
   useEffect(() => {
@@ -172,46 +261,28 @@ const MainChatArea = () => {
   }, [messages]);
 
   useEffect(() => {
-    const data = {
-      friendId
-    }
-    socket.emit(events.REMOVE_FRIEND, data);
-    socket.on(events.REMOVED_FRIEND, () => {
-      setRemoveFriendEvent(false);
+    socket.on(events.REMOVED_FRIEND_NOTIFICATION, ({ friendId }) => {
+      const friendInfo = friends.find((friend) => friend._id === friendId)
+      toast.success(`${friendInfo?.friendName} successfully unadded you`);
       return;
     })
-
-    return () => {
-      socket.off(events.REMOVE_FRIEND)
-      socket.off(events.REMOVED_FRIEND)
-    }
-  }, [removeFriendEvent])
-
+  }, [])
 
   return (
     !friendInfo ? (
-      <div
-        className="w-full h-full border col-centered gap-4"
-      >
+      // No friend selected
+      <div className="w-full h-full border col-centered gap-4">
         <Image
           src="/manSeated.jpg"
-          alt="An illustration of a man seating while using his laptop"
+          alt="An illustration of a man sitting while using his laptop"
           width={500}
           height={500}
           priority={true}
         />
-        <p className="text-sm text-gray-400">Ready to chat with friends?</p>
-      </div>
-    ) : !isFriends ? (
-      <div
-        className="h-full w-full border centered-flex"
-      >
-        <p className="text-sm text-gray-400">
-          You and this user are no longer friends
-        </p>
+        <p className="text-sm text-gray-400">Start chatting with friends</p>
       </div>
     ) :
-      <div className="h-full w-full border px-2 flex flex-col">
+      <div className="h-full w-full border px-2 py-2 flex flex-col">
         {/* header */}
         <div className="w-full bg-gray-100 h-20 rounded-lg flex items-center justify-between space-x-4 px-4">
           <div className="flex items-center space-x-2">
@@ -226,7 +297,11 @@ const MainChatArea = () => {
 
             <div className="flex flex-col">
               <h1 className="font-extrabold">{friendInfo?.fullName}</h1>
-              <p className="text-gray-400 text-xs">{friendInfo?.isOnline ? "online" : "offline"}</p>
+              <p className="text-gray-400 text-xs">{isFriendTyping
+                ? "typing..."
+                : friendInfo?.isOnline
+                  ? "online"
+                  : "offline"}</p>
             </div>
           </div>
 
@@ -352,7 +427,8 @@ const MainChatArea = () => {
                 {/* Input Field */}
                 <Input
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  // onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => handleTyping(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Type a message..."
                   className="pl-10 pr-12 h-12 rounded-full"
@@ -428,7 +504,14 @@ const MainChatArea = () => {
         <ImageView
           trigger={imgViewTrigger}
           setTrigger={setImgViewTrigger}
+          galleryTrigger={imgViewTrigger}
+          setGalleryTrigger={setImgViewTrigger}
+          profileView={profileViewSidebar}
+          setProfileView={setProfileViewSidebar}
         />
+
+        {/* Image Preview */}
+        <ImagePreviewComponent />
       </div>
   )
 }

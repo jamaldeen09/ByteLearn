@@ -2,20 +2,24 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { XIcon } from "lucide-react"
-import { useAppSelector } from "@/app/redux/essentials/hooks"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import Image from "next/image"
 import { IMessage } from "../../types/types"
-
-
+import { activatePreview, getImageId } from "@/app/redux/triggers/imagePreviewTrigger"
 
 
 type ImagesViewProps = {
     trigger: boolean,
     setTrigger: React.Dispatch<React.SetStateAction<boolean>>,
 
+    galleryTrigger: boolean,
+    setGalleryTrigger:  React.Dispatch<React.SetStateAction<boolean>>,
+    profileView: boolean,
+    setProfileView:  React.Dispatch<React.SetStateAction<boolean>>,
 }
-const ImageView = ({ trigger, setTrigger }: ImagesViewProps) => {
+const ImageView = ({ trigger, setTrigger, galleryTrigger, setGalleryTrigger, profileView, setProfileView }: ImagesViewProps) => {
     const messages = useAppSelector(state => state.messages.messages)
+    const dispatch = useAppDispatch()
     return (
         <AnimatePresence>
             {trigger && (
@@ -25,7 +29,7 @@ const ImageView = ({ trigger, setTrigger }: ImagesViewProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="inset-0 fixed h-full w-full flex justify-end bg-black/70"
+                    className="inset-0 fixed h-full w-full flex justify-end bg-black/1"
                 >
                     {/* Sidebar */}
                     <motion.div
@@ -40,25 +44,34 @@ const ImageView = ({ trigger, setTrigger }: ImagesViewProps) => {
                         }}
                         className="w-full max-w-sm bg-white h-full
                 flex flex-col py-10 px-4 gap-4 ">
-                        <div className="w-full flex items-center justify-end">
-                            <XIcon onClick={() => setTrigger(false)} className="w-4 h-4" />
+                        <div className="w-full flex items-center justify-between">
+                            <p className="font-extrabold text-xl">Gallery</p>
+                            <XIcon onClick={() => setTrigger(false)} className="hover:cursor-pointer" />
                         </div>
-
-                        <div className="flex flex-col gap-4">
-                            {messages.map((msg: IMessage, index: number) => {
-                                return (
+                        <div className="overflow-y-auto flex-grow">
+                            <div className="grid grid-cols-2 gap-4 justify-items-center">
+                                {messages.map((msg: IMessage, index: number) => (
                                     <Image
                                         key={index}
-                                        src={msg?.imageUrl ? msg?.imageUrl : ""}
-                                        alt="An image that was sent to the people particiapting in chat exchange"
-                                        width={100}
-                                        height={100}
-                                        className="rounded-lg"
-                                        unoptimized={true}
+                                        src={msg?.imageUrl || "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg"}
+                                        alt="An image that was sent to the people participating in chat exchange"
+                                        width={180}
+                                        height={180}
+                                        className="rounded-2xl hover:cursor-pointer hover:scale-105 transition-all duration-300 active:scale-90 hover:brightness-75"
+                                        unoptimized
+                                        onClick={() => {
+                                            dispatch(activatePreview())
+                                            setGalleryTrigger(false)
+                                            setTrigger(false)
+                                            setProfileView(false)
+                                            dispatch(getImageId(msg._id))
+                                        }}
                                     />
-                                )
-                            })}
+
+                                ))}
+                            </div>
                         </div>
+
                     </motion.div>
                 </motion.div>
             )}

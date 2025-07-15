@@ -110,16 +110,15 @@ const Sidebar = () => {
     }, [fetchInfo]);
 
     useEffect(() => {
-            const data = {
-                room: usersInformation._id.toString()
-            }
-    
-            socket.emit(events.JOIN_ROOM, data)
-            return () => {
-                socket.off(events.JOIN_ROOM)
-            }
-    }, [usersInformation._id])
+        const data = {
+            room: usersInformation._id.toString()
+        }
 
+        socket.emit(events.JOIN_ROOM, data)
+        return () => {
+            socket.off(events.JOIN_ROOM)
+        }
+    }, [dispatch])
     return (
         <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
             {/* Routes */}

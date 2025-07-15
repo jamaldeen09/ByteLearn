@@ -14,6 +14,7 @@ import notificationReducer from "./chatSlices/notificationSlice"
 import clickedFriendReducer from "./chatSlices/clickedFriend"
 import messagesSlice from "./chatSlices/messagesSlice"
 import isFriendsReducer from "./triggers/isFriendsTrigger";
+import imagePreviewReducer from "./triggers/imagePreviewTrigger"
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     clickedFriend: clickedFriendReducer,
     messages: messagesSlice,
     isFriends: isFriendsReducer,
+    imagePreview: imagePreviewReducer,
   }
 })
 

@@ -44,28 +44,14 @@ const ChatSidebar = (): React.ReactElement => {
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
 
 
+
+
   // Memoized function to generate room ID
   const generateRoomId = useCallback(() => crypto.randomUUID(), [])
-
-  // const handleFriendClick = useCallback((friendId: string) => {
-  //   // First dispatch the friend ID
-  //   dispatch(getClickedFriendId(friendId));
-    
-  //   // Then generate and set the room ID
-  //   const newRoomId = generateRoomId();
-  //   setRoomId(newRoomId);
-  
-  //   // Emit the CREATE_ROOM event with both IDs
-  //   socket.emit(events.CREATE_ROOM, {
-  //     roomId: newRoomId,
-  //     participantId: friendId
-  //   });
-  // }, [dispatch, generateRoomId]);
 
   // Fetch all friends
   useEffect(() => {
     const fetchFriends = () => {
-
       axios.get("/api/get-friends", {
         headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
       }).then((res) => {
@@ -77,11 +63,11 @@ const ChatSidebar = (): React.ReactElement => {
           return;
         }
         toast.error('Server Error');
-      });
+      })
     };
 
     fetchFriends();
-  }, [dispatch, redirectTo]);
+  }, []);
 
   // Handle room creation and events
   useEffect(() => {
@@ -92,21 +78,21 @@ const ChatSidebar = (): React.ReactElement => {
       });
     }
   }, [clickedFriend, roomId]);
-  
+
   useEffect(() => {
     const handleMessagesMarkedAsRead = ({ roomId: incomingRoomId, messages }: { roomId: string, messages: IMessage[] }) => {
-      if (incomingRoomId !== roomId) return; 
-      setUnreadMessages(messages.length); 
+      if (incomingRoomId !== roomId) return;
+      setUnreadMessages(messages.length);
     };
-  
+
     socket.on(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
-  
+
     return () => {
       socket.off(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
     };
   }, [roomId]);
-  
-  
+
+
   useEffect(() => {
     if (!clickedFriend) return
 
@@ -132,7 +118,7 @@ const ChatSidebar = (): React.ReactElement => {
         setRoomId(data?.roomId || null)
       }
     }
-    socket.on(events.NO_LONGER_FRIENDS, ({ isFriends }: {  isFriends: boolean }) => {
+    socket.on(events.NO_LONGER_FRIENDS, ({ isFriends }: { isFriends: boolean }) => {
       if (isFriends) {
         dispatch(setIsFriendsTrue())
       } else {
@@ -151,10 +137,10 @@ const ChatSidebar = (): React.ReactElement => {
 
   const [friendSearch, setFriendSearch] = useState<string>("")
   const foundFriends: FriendSchema[] = friends.filter((friend) => friend.friendName.includes(friendSearch));
- 
+
 
   return (
-    <div 
+    <div
       className="border border-gray-200 h-full col-span-5 overflow-hidden flex flex-col gap-6 relative basic-border"
     >
 
@@ -186,25 +172,26 @@ const ChatSidebar = (): React.ReactElement => {
 
       {/* Filters */}
       <div className="w-full flex items-center space-x-3 px-4">
-        
+
       </div>
 
       {/* Chats Area */}
       <div className="w-full flex flex-col h-full overflow-hidden overflow-y-auto px-2 gap-4 py-4">
-        {friends.length <= 0 ? (
-            <div className="h-full col-centered gap-2 w-full text-center">
-              <Image 
-                src="https://media.istockphoto.com/id/1443485971/video/animated-greeting-man-character.jpg?s=640x640&k=20&c=TiAalsG2gyOQk_XptDUocQigdIEtbYH8D1u9ReU9RaQ="
-                alt="An Illustration of a 2d male character waving"
-                width={400}
-                height={400}
-                className="w-auto h-auto"
-                priority={true}
-                unoptimized={true}
-              />
-              <p className="text-gray-400 text-xs">No friends? Click the plus button to add some friends!</p>
-            </div> 
-        ) :foundFriends ? foundFriends?.map((friend: FriendSchema) => (
+        {friends.length === 0 ? (
+          // Show empty state
+          <div className="h-full col-centered gap-2 w-full text-center">
+            <Image
+              src="https://media.istockphoto.com/id/1443485971/video/animated-greeting-man-character.jpg?s=640x640&k=20&c=TiAalsG2gyOQk_XptDUocQigdIEtbYH8D1u9ReU9RaQ="
+              alt="An Illustration of a 2d male character waving"
+              width={400}
+              height={400}
+              className="w-auto h-auto"
+              priority={true}
+              unoptimized={true}
+            />
+            <p className="text-gray-400 text-xs">No friends? Click the plus button to add some friends!</p>
+          </div>
+        ) : foundFriends ? foundFriends?.map((friend: FriendSchema) => (
           <Friend
             key={friend._id}
             friendImageUrl={friend.friendImageUrl}
@@ -224,7 +211,7 @@ const ChatSidebar = (): React.ReactElement => {
             friendName={friend.friendName}
             bio={friend.bio}
             id={friend._id}
-            createRoom={() =>  dispatch(getClickedFriendId(friend._id))}
+            createRoom={() => dispatch(getClickedFriendId(friend._id))}
             isActive={clickedFriend === friend._id}
             unreadMessages={unreadMessages}
             previousMessage={friend.lastMessage.content}
