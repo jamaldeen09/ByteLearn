@@ -147,7 +147,15 @@ const MainChatArea = () => {
     setMessage("");
     setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [message, previewUrl, dispatch]);
+  }, [ message,
+    previewUrl,
+    dispatch,
+    fileInputRef,
+    currentUserId,
+    currentUserAvatar,
+    currentUserFullname,
+    friendInfo,
+    friendId]);
 
   const handleRemoveFriend = async (friendId: string) => {
     try {
@@ -477,7 +485,7 @@ const MainChatArea = () => {
               <Button
                 onClick={handleSend}
                 disabled={(!message.trim() && !previewUrl) || isSending}
-                className="h-12 w-12 rounded-full bg-black text-white hover:bg-gray-800"
+                className="h-12 w-12 rounded-full bg-black text-white hover:bg-gray-800 hover:cursor-pointer"
               >
                 {isSending ? (
                   <WhiteSpinner />

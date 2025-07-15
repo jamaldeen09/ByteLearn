@@ -61,16 +61,19 @@ export type onGoingCoursesProps = {
   courseName: string,
   currentTopic: string,
   progress: number,
+  countinueLearningLink: string,
+  courseId: string,
 }
 
 export type NewCourseCardProps = {
   category: string,
   title: string,
-  description: string,
   courseImg: string,
   instructorImg: string,
   instructorName: string,
-  dateOfCreation: string,
+  likes: number,
+  getId: (id: string) => void,
+  id: string
 }
 
 export type LatestUpdateProps = {
@@ -160,10 +163,11 @@ export type courseSchema = {
   description: string,
   category: string,
   imageUrl: string,
-  topics: topicSchema[],
-  dateCreated: Date,
+  topics: topicSchema[];
+  dateCreated: string;
   creator: CreatorSchema,
   isPublished: boolean,
+  likes?: number,
 }
 
 export type coursesContainer<T> = {
@@ -263,13 +267,6 @@ export type AddComponentProps = {
   whatTheButtonDoes: () => void;
 }
 
-export type FriendsOnByteLearnProps = {
-  profilePicture: string,
-  name: string,
-  bio: string,
-  createRoom: (id: string) => void
-  id: string,
-}
 
 export type NewFriendTrigger = {
   triggerNewFriend: boolean

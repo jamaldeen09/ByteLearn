@@ -33,7 +33,6 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   const quizResults = searchParams.get("quizResults");
   const router = useRouter();
   const [progressPercentage, setProgressPercentage] = useState<number>(10);
-  const { redirectTo } = useRedirect();
   const dispatch = useAppDispatch();
 
 
@@ -65,6 +64,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
 
   // fetch course details with courseId
   useEffect(() => {
+
     const fetchCourse = async () => {
       try {
         const response = await axios.get(`/api/single-course/${courseId}`, { 
@@ -75,7 +75,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         if (err instanceof Error && 'response' in err && typeof err.response === 'object' && err.response !== null) {
           const response = err.response as { status?: number, data?: { msg?: string } };
           if (response.status === 401 || response.status === 403) {
-            redirectTo("/client/auth/login");
+            router.push("/client/auth/login");
           } else if (response.status === 404) {
             toast.error(response.data?.msg || "Not found");
           } else {
@@ -90,7 +90,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
     };
     
     fetchCourse();
-  }, [courseId, dispatch, redirectTo]);
+  }, [courseId, dispatch]);
 
   useEffect(() => {
     const fetchCourses = async () => {

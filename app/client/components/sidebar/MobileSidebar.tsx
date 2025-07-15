@@ -80,7 +80,7 @@ const MobileSidebar = () => {
         return () => {
             socket.off(events.JOIN_ROOM)
         }
-    }, [usersInformation._id])
+    }, [dispatch])
     return (
         <motion.div
             key="mobile-sidebar"

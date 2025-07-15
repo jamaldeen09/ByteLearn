@@ -1,11 +1,21 @@
-import { ellipseIcon, heartIcon } from "@/app/icons/Icons"
+import { heartIcon } from "@/app/icons/Icons"
 import { onGoingCoursesProps } from "../../types/types"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
+import { ArrowRightIcon } from "@radix-ui/react-icons"
+import { Trash } from "lucide-react"
+import { useRouter } from "next/navigation"
+import axios from "../../utils/config/axios"
+import { useAppDispatch } from "@/app/redux/essentials/hooks"
+import { setEnrolledCourses } from "@/app/redux/coursesSlices/enrolledCoursesSlice"
+import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
+import toast from "react-hot-toast"
 
-const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0 }: onGoingCoursesProps) => {
+const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, countinueLearningLink, courseId }: onGoingCoursesProps) => {
   // Ensure progress is between 0-100
   const clampedProgress = Math.min(100, Math.max(0, progress));
+  const router = useRouter()
+  const dispatch = useAppDispatch()
   
   // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
   const progressColor = clampedProgress >= 70 
@@ -14,8 +24,38 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0 }:
       ? "bg-yellow-500" 
       : "bg-red-500";
 
+    
+const handleDelete = async () => {
+  try {
+    const token = localStorage.getItem("bytelearn_token");
+    await axios.delete(`/api/enrolled-courses/${courseId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Refetch fresh state (you could also optimistically update Redux here)
+    const [coursesRes, progressRes] = await Promise.all([
+      axios.get("/api/enrolled-courses", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      axios.get("/api/progress", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    dispatch(setEnrolledCourses(coursesRes.data.courses));
+    dispatch(setProgress(progressRes.data.progress));
+    toast.success("Course deleted successfully")
+  } catch (err) {
+    console.error("Failed to unenroll:", err);
+    toast.error("Something went wrong trying to delete the course");
+  }
+};
+
+
   return (
-    <div className="w-full flex lg:items-center gap-4 p-2 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer flex-col md:flex-row">
+    <div className="w-full flex lg:items-center gap-4 p-2 rounded-lg transition-colors flex-col md:flex-row">
       <Image 
         src={courseImgURL || "https://miro.medium.com/v2/resize:fit:1400/1*fhtqKw_QQB8o0tj2OXCjlA.png"}
         alt="Course thumbnail"
@@ -34,8 +74,12 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0 }:
             <span className="hover:cursor-pointer hover:text-red-500 transition-colors">
               {heartIcon}
             </span>
-            <span className="hover:cursor-pointer">
-              {ellipseIcon}
+            <span  onClick={() => router.push(countinueLearningLink)} 
+            className="bg-green-500 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
+              <ArrowRightIcon />
+            </span>
+            <span   onClick={handleDelete} className="bg-red-600 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
+              <Trash className="w-4 h-4"/>
             </span>
           </div>
         </div>

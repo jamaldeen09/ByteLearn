@@ -42,8 +42,7 @@ const ChatSidebar = (): React.ReactElement => {
   const clickedFriend = useAppSelector(state => state.clickedFriend.id)
   const [roomId, setRoomId] = useState<string | null>(null);
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
-
-
+  const [isLoadingFriends, setIsLoadingFriends] = useState<boolean>(true);
 
 
   // Memoized function to generate room ID
@@ -51,19 +50,29 @@ const ChatSidebar = (): React.ReactElement => {
 
   // Fetch all friends
   useEffect(() => {
-    const fetchFriends = () => {
-      axios.get("/api/get-friends", {
-        headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
-      }).then((res) => {
+    const fetchFriends = async () => {
+      setIsLoadingFriends(true);
+      try {
+        const res = await axios.get("/api/get-friends", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}`,
+          },
+        });
         dispatch(getFriends(res.data.payload));
-      }).catch((err) => {
+      } catch (err: any) {
         console.error(err);
-        if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
+        if (
+          err.response?.status === 401 ||
+          err.response?.status === 403 ||
+          err.response?.status === 404
+        ) {
           redirectTo("/client/auth/login");
-          return;
+        } else {
+          toast.error("Server Error");
         }
-        toast.error('Server Error');
-      })
+      } finally {
+        setIsLoadingFriends(false);
+      }
     };
 
     fetchFriends();
@@ -177,7 +186,11 @@ const ChatSidebar = (): React.ReactElement => {
 
       {/* Chats Area */}
       <div className="w-full flex flex-col h-full overflow-hidden overflow-y-auto px-2 gap-4 py-4">
-        {friends.length === 0 ? (
+        {isLoadingFriends ? (
+          <div className="h-full w-full centered-flex">
+            <BlackSpinner />
+          </div>
+        ) : friends.length === 0 ? (
           // Show empty state
           <div className="h-full col-centered gap-2 w-full text-center">
             <Image

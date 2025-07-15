@@ -29,12 +29,8 @@ export const  useButtonInformation = (): ButtonProps[] => {
   const { redirectTo } = useRedirect();
   const buttonInformation: ButtonProps[] = [
     {
-      text: "Student",
+      text: "Sign up",
       funcToExecute: () => redirectTo("/client/auth//studentSignup"),
-    },
-    {
-      text: "Instructor",
-      funcToExecute: () => redirectTo("/client/auth/instructorSignup"),
     },
     {
       text: "Sign in",
