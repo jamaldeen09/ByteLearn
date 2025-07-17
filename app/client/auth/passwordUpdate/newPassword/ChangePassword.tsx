@@ -4,9 +4,9 @@ import { invalidInput, passwordValidation, useRedirect } from "@/app/client/util
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { triangleErr } from "@/app/icons/Icons"
-import Spinner from "@/app/client/components/reusableComponents/Spinner"
 import axios from "../../../utils/config/axios"
 import toast from "react-hot-toast"
+import WhiteSpinner from "@/app/client/components/reusableComponents/WhiteSpinner"
 
 
 const ChangePassword = () => {
@@ -69,7 +69,7 @@ const ChangePassword = () => {
       setNewPassword("")
       setPassword("")
       toast.success("Password Changed successfully")
-      redirectTo("/client")
+      redirectTo("/client/dashboard")
       
     }).catch((err) => {
       setLoading(false)
@@ -149,7 +149,7 @@ const ChangePassword = () => {
           type="submit"
           className={` bg-black text-white text-sm font-bold px-4 rounded-lg py-2 centered-flex space-x-4 hover:bg-black/85 hover:cursor-pointer`}>
           <p>Change</p>
-          {loading && <Spinner />}
+          {loading && <WhiteSpinner />}
         </button>}
       </div>
     </form>

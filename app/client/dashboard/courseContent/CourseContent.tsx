@@ -1,8 +1,7 @@
 "use client"
 import { MyCoursesProp } from "@/app/client/types/types"
-import axios from "../../../utils/config/axios"
+import axios from "../../utils/config/axios"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useRedirect } from "@/app/client/utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { getSingleCourse } from "@/app/redux/coursesSlices/singleCourseSlice"
@@ -95,7 +94,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("/api/courses");
+        const response = await axios.get("/api/courses",  { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} `} });
         dispatch(getCourses(response.data.courses));
       } catch (err) {
         console.error(err);
@@ -151,49 +150,102 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
 
   useEffect(() => {
     fetchProgressData();
-  }, [fetchProgressData]);
+  }, [dispatch]);
 
   const progressData = useAppSelector(state =>
     state.progress.find(p => p.course === courseId)
   );
 
-  const handleContinueLearning = async () => {
+  // const handleContinueLearning = async () => {
+  //   try {
+  //     if (progressData?.lastVisitedSkill) {
+  //       router.push(
+  //         `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
+  //       );
+  //       return;
+  //     }
+
+  //     const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => ({
+  //       ...topic.skills.map((skill: SkillsSchema) => ({
+  //         skillId: skill._id,
+  //         topicId: topic._id,
+  //         isCompleted: completedSkillsContainer.some(c => c._id === skill._id)
+  //       }))
+  //     }));
+
+  //     const nextSkill = allSkills.find(skill => !skill.isCompleted) || allSkills[0];
+
+  //     if (nextSkill) {
+  //       router.push(
+  //         `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${nextSkill.skillId}`
+  //       );
+
+  //       await axios.post('/api/update-last-visited', {
+  //         courseId,
+  //         skillId: nextSkill.skillId,
+  //         topicId: nextSkill.topicId
+  //       }, {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.error(err)
+  //     toast.error("Failed to navigate to continue learning");
+  //     console.error(err);
+  //   }
+  // };
+  const handleContinueLearning = useCallback(async () => {
     try {
+      // If we have progress data with last visited skill, use that
       if (progressData?.lastVisitedSkill) {
         router.push(
-          `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
+          `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
         );
         return;
       }
-
-      const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => ({
-        ...topic.skills.map((skill: SkillsSchema) => ({
+  
+      // Otherwise find the next skill to continue with
+      if (!singleCourseInformation?.topics || !completedSkillsContainer) {
+        toast.error("Course data not loaded yet");
+        return;
+      }
+  
+      // Flatten all skills with completion status
+      const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => 
+        topic.skills.map((skill: SkillsSchema) => ({
           skillId: skill._id,
           topicId: topic._id,
           isCompleted: completedSkillsContainer.some(c => c._id === skill._id)
         }))
-      }));
-
+      );
+  
+      // Find first uncompleted skill or fall back to first skill
       const nextSkill = allSkills.find(skill => !skill.isCompleted) || allSkills[0];
-
-      if (nextSkill) {
-        router.push(
-          `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&skillId=${nextSkill.skillId}`
-        );
-
-        await axios.post('/api/update-last-visited', {
-          courseId,
-          skillId: nextSkill.skillId,
-          topicId: nextSkill.topicId
-        }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
-        });
+  
+      if (!nextSkill) {
+        toast.error("No skills available in this course");
+        return;
       }
+  
+      // Update last visited skill in backend
+      await axios.post('/api/update-last-visited', {
+        courseId,
+        skillId: nextSkill.skillId,
+        topicId: nextSkill.topicId
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
+      });
+  
+      // Navigate to the skill
+      router.push(
+        `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${nextSkill.skillId}`
+      );
+  
     } catch (err) {
-      toast.error("Failed to navigate to continue learning");
-      console.error(err);
+      console.error("Continue learning error:", err);
+      toast.error("Failed to navigate. Please try again.");
     }
-  };
+  }, [courseId, progressData, singleCourseInformation, completedSkillsContainer, router]);
 
   if (!courseId) {
     return (

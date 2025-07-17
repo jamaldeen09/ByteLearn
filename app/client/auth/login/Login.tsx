@@ -1,13 +1,13 @@
 "use client"
 import { useState, useEffect } from "react"
 import { emailValidation, passwordValidation } from "../../utils/utils";
-import Spinner from "../../components/reusableComponents/Spinner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { invalidInput, refresh } from "../../utils/utils";
 import { triangleErr } from "@/app/icons/Icons";
 import axios from "axios"
 import { useRouter } from "next/navigation";
+import WhiteSpinner from "../../components/reusableComponents/WhiteSpinner";
 
 
 const Login = (): React.ReactElement => {
@@ -59,17 +59,8 @@ const Login = (): React.ReactElement => {
       setLoading(false)
       refresh(setEmail, setEmail, setEmail, setPassword, true);
       localStorage.setItem("bytelearn_token", res.data.token);
-
-      if (res.data.role === "student") {
-        setTimeout(() => {
-           router.push("/client/dashboard/studentDashboard");
-        }, 1000);
-      } else {
-        setTimeout(() => {
-          router.push("/client/dashboard/instructorDashboard");
-        }, 1000)
-      }
-
+      router.push("/client/dashboard");
+      return;
     }).catch((err) => {
       console.error(err)
       setLoading(false)
@@ -129,7 +120,6 @@ const Login = (): React.ReactElement => {
               } else {
                 invalidInput(false, "", setShowPasswordErr, setPasswordError)
               }
-
               setPassword(e.target.value)
             }}
             className={`h-12 ${showPasswordErr && "border-destructive focus-visible:ring-destructive focus:border-0"}`}
@@ -147,7 +137,7 @@ const Login = (): React.ReactElement => {
           type="submit"
           className={` bg-black text-white text-sm font-bold px-5 rounded-lg py-2 centered-flex space-x-4 hover:bg-black/85 hover:cursor-pointer`}>
           <p>Next</p>
-          {loading && <Spinner />}
+          {loading && <WhiteSpinner />}
         </button>}
       </div>
 

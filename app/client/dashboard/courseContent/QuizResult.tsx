@@ -121,7 +121,7 @@ const QuizResult = () => {
               <button
                 onClick={() =>
                   router.push(
-                    `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}`
+                    `/client/dashboard?tab=my-courses&courseId=${courseId}`
                   )
                 }
                 className="mt-6 bg-black text-white hover:cursor-pointer px-6 py-3 rounded-md hover:bg-gray-800 transition-colors text-xs sm:text-[1rem]"

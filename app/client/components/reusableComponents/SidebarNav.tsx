@@ -45,7 +45,7 @@ const SidebarNav = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 relative w-full justify-end">
+                <div className="flex items-center space-x-2 sm:space-x-4 relative w-full justify-end">
                     <Image 
                         onClick={() => setTriggerDropdown(true)} 
                         className="w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:cursor-pointer" 
@@ -55,45 +55,8 @@ const SidebarNav = () => {
                         height={40}
                         unoptimized={true}
                     />
-                    <p className="text-sm sm:text-md">{usersInformation.fullName}</p>
+                    <p className="text-[0.6rem] sm:text-[0.8rem]">{usersInformation.fullName}</p>
                 </div>
-
-                {/* Dropdown */}
-                <AnimatePresence>
-                    {triggerDropdown && (
-                       <div className="inset-0 fixed flex justify-end px-6 md:px-16 py-20">
-                         <motion.div
-                            key="dropdown"
-                            exit={{ y: -20, opacity: 0 }}
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ duration: 0.1, type: "spring", damping: 10, stiffness: 100 }}
-                            className="rounded-lg border h-fit z-50 w-[50vw] md:w-[14vw] bg-white 
-                            flex flex-col justify-between px-2 py-2 shadow-lg gap-3"
-                        >
-                            {/* MAIN */}
-                            <div className="w-full flex items-center border-b border-gray-200 px-4 py-2 space-x-4">
-                                <Image 
-                                    className="w-8 h-8 rounded-full hover:cursor-pointer" 
-                                    src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"} 
-                                    alt={`${usersInformation.fullName}'s profile picture`}
-                                    width={32}
-                                    height={32}
-                                    unoptimized={true}
-                                />
-                                <p className="text-sm">{usersInformation.fullName}</p>
-                            </div>
-                            <div className="flex flex-col space-y-4 w-full">
-                                {sidebarDropdownLinks.map((link: SidebarDropdownLinks) => (
-                                    <p key={link.name} className={link.styles} onClick={link.routingFunc}>
-                                        {link.name}
-                                    </p>
-                                ))}
-                            </div>
-                        </motion.div>
-                       </div>
-                    )}
-                </AnimatePresence>
             </div>
         </nav>
     )

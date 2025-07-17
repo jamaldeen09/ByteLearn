@@ -76,7 +76,7 @@ const Sidebar = () => {
             default:
                 tabParam = "";
         }
-        router.push(`/client/dashboard/studentDashboard${tabParam}`);
+        router.push(`/client/dashboard${tabParam}`);
     };
 
     const isActive = (value: string) => {

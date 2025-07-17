@@ -1,9 +1,10 @@
 "use client"
-import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
+import { useAppSelector } from "@/app/redux/essentials/hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { XIcon } from "lucide-react";
+import { Heart, XIcon } from "lucide-react";
 import Image from "next/image";
 import { courseSchema, topicSchema } from "../../types/types";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import axios from "@/app/client/utils/config/axios"
 import toast from "react-hot-toast";
@@ -12,40 +13,32 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import WhiteSpinner from "./WhiteSpinner";
 import FeedBackSidebar from "./FeedBackSidebar";
-import OtherWork from "./OtherWork";
-import { getCourses } from "@/app/redux/coursesSlices/courseSlice";
-import BasicSpinner from "./BasicSpinner";
-
+import CardInfoDisplayModal from "./CardInfoDisplayModal";
 
 type cardInfoDisplayProps = {
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    openClickedWork: boolean;
+    setOpenClickedWork: React.Dispatch<React.SetStateAction<boolean>>;
     courseId: string;
 };
 
-const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps) => {
+const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDisplayProps) => {
     const courses = useAppSelector(state => state.coursesSlice.courses);
-    const foundCourse: courseSchema | undefined = courses.find((course: courseSchema) => course._id === courseId);
+    const foundCourse = courses.find((course: courseSchema) => course._id === courseId);
+    const [creatorsWork, setCreatorsWork] = useState<courseSchema[]>([]);
     const [enrollLoading, setEnrollLoading] = useState<boolean>(false);
     const [loadingCreatorsWork, setLoadingCreatorsWork] = useState<boolean>(true);
-    const [clickedWork, setClickedWork] = useState<string>("");
-    const [clickedWorkModal, setClickedWorkModal] = useState<boolean>(false);
-    const router = useRouter();
-    const handleClose = () => {
-        setOpen(false);
-    };
-    const [creatorsWork, setCreatorsWork] = useState<courseSchema[]>([]);
-    const dispatch = useAppDispatch()
-    const enrolledCourses = useAppSelector(state =>
-        state.enrolledCourses.enrolledCourses
-    );
-    const isEnrolled = enrolledCourses.some(course => course._id === foundCourse?._id);
+    const enrolledCoursesData = useAppSelector(state => state.usersInformation.enrolledCourses);
+    const enrolledCourses = new Set(enrolledCoursesData.map(course => course._id));
+    const router = useRouter()
 
     const filteredCreatorsWork: courseSchema[] = creatorsWork.filter((work: courseSchema) => work._id !== courseId)
 
+    const [open, setOpen] = useState<boolean>(false);
+    const [clicked, setClicked] = useState<string>("")
+
     useEffect(() => {
-        if (!open || !foundCourse) return;
-        setLoadingCreatorsWork(true); // Start loading
+        if (!openClickedWork || !foundCourse) return;
+        setLoadingCreatorsWork(true);
         axios
             .get(`/api/creators-work/${foundCourse.creator.fullName}`)
             .then((res) => {
@@ -58,8 +51,9 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
             .finally(() => {
                 setLoadingCreatorsWork(false);
             });
-    }, [open, courseId, foundCourse]);
+    }, [openClickedWork, courseId, foundCourse]);
 
+    const handleClose = () => setOpenClickedWork(false);
     const enroll = (id: string) => {
         console.log("Enrolling in course with id:", id);
         setEnrollLoading(true);
@@ -67,7 +61,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
             setEnrollLoading(false);
             router.push(`/client/dashboard?tab=my-courses&courseId=${id}`);
             toast.success(res.data.msg);
-            setOpen(false);
+            setOpenClickedWork(false);
             return;
         }).catch((err) => {
             console.error(err)
@@ -89,42 +83,12 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
         })
     }
 
-    const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
-    const [likes, setLikes] = useState<number>(foundCourse?.likes || 0);
-    const [loadingAnim, setloadingAnim] = useState(false);
-
-    const toggleLike = async () => {
-        if (loadingAnim) return;
-
-        setloadingAnim(true);
-
-        try {
-            const token = localStorage.getItem("bytelearn_token");
-            const endpoint = isLike ? "/api/unlike-course" : "/api/like-course";
-
-            await axios.post(endpoint, { courseId: foundCourse?._id }, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            // Update UI state
-            setIsLike(!isLike);
-            setLikes(prev => isLike ? prev - 1 : prev + 1);
-
-            toast.success(
-                `${foundCourse?.title} has been ${isLike ? "unliked" : "liked"}`
-            );
-        } catch (err) {
-            console.error(err);
-            toast.error("A server error occurred, please try again.");
-        } finally {
-            setloadingAnim(false);
-        }
-    };
+    if (!foundCourse) return null;
 
     return (
         <>
             <AnimatePresence>
-                {open && (
+                {openClickedWork && (
                     <>
                         {/* Backdrop - invisible click target */}
                         <motion.div
@@ -143,7 +107,6 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={handleClose}
-
                         >
                             {/* Top bar */}
                             <div className="h-16 w-full bg-black bg-opacity-40 flex items-center justify-end px-4">
@@ -153,55 +116,52 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                 />
                             </div>
 
-
+                            {/* Content area */}
                             <motion.div
                                 initial={{ y: 140, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 140, opacity: 1 }}
                                 transition={{ duration: 0.6, type: "spring" }}
-                                className="bg-white rounded-2xl overflow-hidden flex flex-col lg:flex-row lg:space-x14"
+                                className="flex-1 bg-white rounded-2xl overflow-y-auto flex justify-center space-x-14
+                                max-lg:px-6 lg:px-2"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                {/* Main content container - will be scroll parent on mobile */}
-                                <div className="flex-1 overflow-y-auto max-lg:h-[calc(100vh-200px)] lg:overflow-y-auto lg:h-full">
-
-                                    {/* Content area - scrollable only on desktop */}
-                                    <div className="w-full  min-h-fit p-6">
-                                        <div className="w-full h-fit py-10 flex flex-col gap-6 ">
-
+                                <div className="w-full max-w-6xl overflow-y-auto h-full p-6">
+                                    <div className="w-full max-w-6xl min-h-fit overflow-y-auto">
+                                        {/* Rest of your original content remains exactly the same */}
+                                        <div className="w-full max-w-6xl h-fit py-10 flex flex-col gap-6">
                                             <div className="w-full">
-                                                <h1 className="text-sm max-lg:text-xl lg:text-3xl font-extrabold">{foundCourse?.title || "React Typescript"}</h1>
+                                                <h1 className="text-3xl font-extrabold">{foundCourse?.title || "React Typescript"}</h1>
                                             </div>
 
                                             <div className="w-full flex items-center justify-between h-fit">
-                                                <div className="flex items-center space-x-6 iphone:flex-col sm:flex-row">
+                                                <div className="flex items-center space-x-6">
                                                     <Image
                                                         src={foundCourse?.creator.profilePicture || "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"}
                                                         alt={`${foundCourse?.creator.fullName}'s avatar`}
                                                         width={0}
                                                         height={0}
-                                                        className="rounded-full h-14 w-14 object-cover mx-auto sm:m-0"
+                                                        className="rounded-full h-14 w-14 object-cover"
                                                         unoptimized={true}
                                                     />
-                                                    <p className="">{foundCourse?.creator.fullName}</p>
+                                                    <p className="">{foundCourse?.creator.fullName || "Olatunji Labubu"}</p>
                                                 </div>
 
                                                 <div className="w-fit flex space-x-4 items-center">
                                                     <button
-                                                        onClick={toggleLike}
-                                                        className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300 w-8 h-8 centered-flex"
+                                                        className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300"
                                                     >
-                                                        {loadingAnim ?
-                                                            <BasicSpinner />
-                                                            : <FontAwesomeIcon icon={faHeart} className={`w-4 h-4 ${isLike && "text-red-600"}`} />}
+                                                        <Heart className="w-4 h-4" />
                                                     </button>
-                                                    {isEnrolled ? <button
+
+                                                    {enrolledCourses.has(foundCourse?._id ? foundCourse?._id : "") ? <button
                                                         className={`bg-gray-300 text-gray-400 font-extrabold px-8 py-3 rounded-full cursor-not-allowed
-                ${enrollLoading && "centered-flex space-x-4"}`}>
+                                    ${enrollLoading && "centered-flex space-x-4"}`}>
                                                         <p>Enrolled</p>
+
                                                     </button> : <button onClick={() => enroll(foundCourse?._id ? foundCourse._id : "")}
                                                         className={`bg-black text-white font-extrabold px-8 py-3 hover:cursor-pointer rounded-full hover:bg-black/90
-                ${enrollLoading && "centered-flex space-x-4"}`}>
+                                    ${enrollLoading && "centered-flex space-x-4"}`}>
                                                         <p>Enroll</p>
                                                         {enrollLoading && <WhiteSpinner />}
                                                     </button>}
@@ -225,7 +185,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                         backgroundPosition: "center",
                                                         backgroundRepeat: "no-repeat",
                                                     }}
-                                                    className="w-full md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
+                                                    className="w-full h-[80vh] rounded-2xl"
                                                 ></div>
                                             </div>
 
@@ -243,8 +203,9 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                     <h1 className="font-extrabold text-xl">More from {foundCourse?.creator.fullName}</h1>
                                                 </div>
 
-                                                <div className="flex flex-wrap w-full gap-10 ">
+                                                <div className="flex flex-wrap w-full gap-6">
                                                     {loadingCreatorsWork ? (
+                                                        // Show 3 skeleton cards while loading
                                                         Array.from({ length: 3 }).map((_, idx) => (
                                                             <div key={idx} className="w-full max-w-[20rem] rounded-lg overflow-hidden animate-pulse space-y-2">
                                                                 <div className="w-full h-64 bg-gray-200 rounded-lg" />
@@ -257,18 +218,18 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                                 </div>
                                                             </div>
                                                         ))
-                                                    ) : (
-                                                        filteredCreatorsWork.map((work: courseSchema) => (
+                                                    ) : filteredCreatorsWork.map((work: courseSchema) => {
+                                                        return (
                                                             <div
                                                                 onClick={() => {
-                                                                    setClickedWork(work._id);
-                                                                    setOpen(false);
-                                                                    setClickedWorkModal(true);
+                                                                    setClicked(work._id)
+                                                                    setOpenClickedWork(false)
+                                                                    setOpen(true)
                                                                 }}
-                                                                key={work._id}
-                                                                className="w-full md:max-w-[20rem] max-lg:w-[18rem] lg:max-w-[20rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer"
-                                                            >
+                                                                key={work._id} className="w-full max-w-[20rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
+                                                                {/* Card content */}
                                                                 <div>
+                                                                    {/* Top: Image + Gradient Overlay */}
                                                                     <div className="relative w-full h-64 group">
                                                                         <Image
                                                                             src={work?.imageUrl || "https://craftsnippets.com/articles_images/placeholder/placeholder.jpg"}
@@ -278,11 +239,13 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                                             height={0}
                                                                             unoptimized={true}
                                                                         />
+                                                                        {/* Gradient Overlay */}
                                                                         <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
                                                                             <h1 className="text-sm text-white font-bold">{work?.title}</h1>
                                                                         </div>
                                                                     </div>
 
+                                                                    {/* Bottom: Text or Details */}
                                                                     <div className="py-2 flex items-center justify-between">
                                                                         <div className="flex items-center gap-2">
                                                                             <Image
@@ -302,37 +265,29 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        ))
-                                                    )}
+                                                        )
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Feedback sidebar - appears below content on mobile */}
-                                    <div className="w-full lg:hidden">
-                                        <FeedBackSidebar courseId={foundCourse?._id} />
-                                    </div>
                                 </div>
-
-                                {/* Feedback sidebar - appears on right on desktop */}
-                                <div className="hidden lg:block w-full max-w-sm overflow-y-auto h-full py-6">
-                                    <FeedBackSidebar courseId={foundCourse?._id} />
+                                <div className="w-full max-w-sm h-full overflow-y-auto py-6">
+                                    <FeedBackSidebar courseId={foundCourse?._id}/>
                                 </div>
 
                             </motion.div>
-
                         </motion.div>
                     </>
                 )}
             </AnimatePresence>
-            <OtherWork
-                openClickedWork={clickedWorkModal}
-                setOpenClickedWork={setClickedWorkModal}
-                courseId={clickedWork}
+            <CardInfoDisplayModal
+                open={open}
+                setOpen={setOpen}
+                courseId={clicked}
             />
         </>
     );
 };
 
-export default CardInfoDisplayModal;
+export default OtherWork;

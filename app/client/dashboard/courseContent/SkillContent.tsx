@@ -2,9 +2,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAppSelector } from '@/app/redux/essentials/hooks';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import axios from "../../../utils/config/axios"
+import axios from "../../utils/config/axios"
 import QuizComponent from './QuizComponent';
 
 const SkillContent = ({ skillId }: { skillId: string }) => {
@@ -16,6 +16,8 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
 
   const quiz = searchParams.get('quiz');
   const topicId = searchParams.get('topicId');
+  const questionContainerRef = useRef<HTMLDivElement | null>(null)
+  const [activateRef, setActivateRef] = useState<boolean>(false);
 
 
   // Get all skills from all topics
@@ -41,9 +43,12 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
   // Navigation handlers
   const goToNextSkill = () => {
     setCompleted(false);
+    setActivateRef(true);
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
     if (currentIndex < totalSkills - 1) {
       const nextSkillId = allSkills[currentIndex + 1]._id;
-      router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&skillId=${nextSkillId}`);
+      router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&skillId=${nextSkillId}`);
     } else {
 
       const parentTopic = topics.find(topic =>
@@ -52,7 +57,7 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
       const topicId = parentTopic?._id;
       
       if (topicId) {
-        router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&topicId=${topicId}&quiz=true`);
+        router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&topicId=${topicId}&quiz=true`);
       } else {
         toast.error("Topic not found for quiz routing");
       }
@@ -61,12 +66,13 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
 
   const goToPrevSkill = () => {
     setCompleted(false);
+    setActivateRef(true);
     if (currentIndex > 0) {
       const prevSkillId = allSkills[currentIndex - 1]._id;
-      router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}&skillId=${prevSkillId}`);
+      router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&skillId=${prevSkillId}`);
     } else {
       // If on first skill, go back to course overview
-      router.push(`/client/dashboard/studentDashboard?tab=${currentTab}&courseId=${courseId}`);
+      router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}`);
     }
   };
 
@@ -102,13 +108,27 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
     setCompleted(true);
   };
 
+  useEffect(() => {
+    // Scroll to top on initial load or when skill changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    
+    if (questionContainerRef.current && activateRef) {
+      questionContainerRef.current.scrollIntoView({ 
+        behavior: "smooth",
+        block: "start"
+      });
+      setActivateRef(false);
+    }
+  }, [skillId, activateRef]);
+
   if (quiz === "true" && topicId) {
     return <QuizComponent topicId={topicId} />
   }
 
  
   return (
-    <div className="col-span-14 min-h-[90vh] flex md:justify-center py-6 
+    <div  ref={questionContainerRef}  className="col-span-14 min-h-[90vh] flex md:justify-center py-6 
     overflow-x-hidden sm:px-0 md:px-6 lg:px-0">
       <div className="w-full max-w-5xl flex flex-col gap-10">
         {/* Header with progress */}
@@ -135,6 +155,7 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
         {/* Content renderer */}
         <div className="w-full py-4 flex flex-col items-center justify-between space-y-10">
           <div
+           
             className="prose w-full iphone:px-4 sm:px-4 md:max-w-none md:px-0"
             dangerouslySetInnerHTML={{ __html: currentSkill?.content || '' }}
           />

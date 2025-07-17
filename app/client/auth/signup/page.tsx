@@ -16,7 +16,7 @@ const Page = (): React.ReactElement => {
       showDontHaveAnAcc={false}
       googleAuthReq={() => {
         try {
-          router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google?role=student`)
+          router.push(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)
         } catch (err) {
           console.error(err)
           toast.error("Unable to initiate Google sign in at the moment. Please try again later.")

@@ -1,6 +1,6 @@
 "use client"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useRef, useEffect } from "react"
 import { useAppSelector } from "@/app/redux/essentials/hooks"
 import { quizComponentprops } from "@/app/client/types/types"
 import QuizComponentItem from "@/app/client/components/reusableComponents/QuizComponentItem"
@@ -13,6 +13,8 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
   
   const findTopic = useAppSelector((state) => state.singleCourse.topics).find(topic => topic._id === topicId)
   const quiz = findTopic?.quiz || []
+
+
   
   // State management
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -81,7 +83,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
         questions: quiz // Include all questions for review
       }))
       
-      router.push(`/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&quizResults=true`)
+      router.push(`/client/dashboard?tab=my-courses&courseId=${courseId}&quizResults=true`)
     }
   }
   
@@ -111,7 +113,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
           </div>
 
           {/* Progress indicator */}
-          <div className="w-full text-center">
+          <div className="w-full text-center text-xs max-lg:text-[0.9rem]">
             Question {currentQuestionIndex + 1} of {quiz.length}
           </div>
 

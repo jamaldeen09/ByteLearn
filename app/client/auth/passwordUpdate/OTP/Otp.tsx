@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/input-otp"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { deactivateTimeReset } from "@/app/redux/triggers/timerResetTrigger"
-import Spinner from "@/app/client/components/reusableComponents/Spinner"
 import { triangleErr } from "@/app/icons/Icons"
 import { useRedirect } from "@/app/client/utils/utils"
+import WhiteSpinner from "@/app/client/components/reusableComponents/WhiteSpinner"
 
 const Otp = (): React.ReactElement => {
 
@@ -134,7 +134,7 @@ const Otp = (): React.ReactElement => {
                 <button onClick={() => verifyOTP()}
                 className={` bg-black text-white font-bold px-4 rounded-lg py-2 centered-flex space-x-4 hover:bg-black/85 hover:cursor-pointer`}>
                     <p>Verify your account</p>
-                    {loading && <Spinner />}
+                    {loading && <WhiteSpinner />}
                 </button>
             </div>
         </div>

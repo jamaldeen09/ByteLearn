@@ -30,12 +30,9 @@ export const  useButtonInformation = (): ButtonProps[] => {
   const buttonInformation: ButtonProps[] = [
     {
       text: "Sign up",
-      funcToExecute: () => redirectTo("/client/auth//studentSignup"),
+      funcToExecute: () => redirectTo("/client/auth/signup"),
     },
-    {
-      text: "Sign in",
-      funcToExecute: () => redirectTo("/client/auth/login"),
-    },
+   
   ];
 
   return buttonInformation;

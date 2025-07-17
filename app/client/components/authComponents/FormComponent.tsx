@@ -47,7 +47,7 @@ const FormComponent = ({
         <div className="w-full flex flex-col space-y-4">
           <h1 className="text-xl font-extrabold">{context || "Sign up as a student"}</h1>
           {showAlreadyHaveAnAcc ? <p className="text-sm">Already have an account? <span onClick={() => redirectTo("/client/auth/login")} className="text-blue-500 hover:cursor-pointer">Login</span></p> :
-            showDontHaveAnAcc ? <p className="text-sm">Dont have an account? <span onClick={() => redirectTo("/client/auth/studentSignup")} className="text-blue-500 hover:cursor-pointer">Signup as a student</span> or  <span onClick={() => redirectTo("/client/auth/instructorSignup")} className="text-blue-500 hover:cursor-pointer">Signup as an instructor</span> </p> : null}
+            showDontHaveAnAcc ? <p className="text-sm">Dont have an account? <span onClick={() => redirectTo("/client/auth/signup")} className="text-blue-500 hover:cursor-pointer">Signup</span></p>: null}
         </div>
 
         {/* oAuth */}

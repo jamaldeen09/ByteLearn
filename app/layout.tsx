@@ -13,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "School Management App",
+  title: "Online Learning Platform",
   description: "",
 };
 

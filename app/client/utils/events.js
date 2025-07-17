@@ -37,4 +37,12 @@ export const events = {
   REMOVED_FRIEND_NOTIFICATION: "removed-friend-notification",
   TYPING: "TYPING",
   STOP_TYPING: "STOP_TYPING",
+  SEND_FEEDBACK: "send-feedback",
+  FEEDBACK_SENT: "feedback-sent",
+  
+  GET_FEEDBACK_HISTORY: "get-feedback-history",
+  FEEDBACK_HISTORY_SENT: "feedback-history-sent",
+
+  JOIN_COURSE_ROOM: "join-course-room",
+  LEAVE_COURSE_ROOM: "leave-course-room"
 };

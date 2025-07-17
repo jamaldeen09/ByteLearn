@@ -2,151 +2,137 @@
 import { motion } from "framer-motion"
 import { MyCoursesCardProps } from "../../types/types"
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/app/redux/essentials/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { useRouter } from "next/navigation";
 import Image from "next/image"; // Added Image import
+import { useEffect } from "react";
+import axios from "@/app/client/utils/config/axios"
+import { getCourses } from "@/app/redux/coursesSlices/courseSlice";
 
-const MyCoursesCard = ({ 
-    imgUrl, 
-    instructorImg, 
-    title, 
-    desc, 
+const MyCoursesCard = ({
+    imgUrl,
+    instructorImg,
+    title,
+    desc,
     progress,
     instructorsName,
     courseId,
     category
-  }: MyCoursesCardProps & { courseId: string }) => {  
-  
+}: MyCoursesCardProps & { courseId: string }) => {
+
     const router = useRouter();
     const clampedProgress = Math.min(100, Math.max(0, progress));
-  
-    const progressColor = clampedProgress >= 70
-      ? "bg-green-500"
-      : clampedProgress >= 40
-        ? "bg-yellow-500"
-        : "bg-red-500";
+    const dispatch = useAppDispatch()
+    useEffect(() => {
+        axios.get("/api/courses",  { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} `} }).then((res) => {
+            dispatch(getCourses(res.data.courses));
+        }).catch((err) => {
+            console.error(err);
+        })
+    }, [dispatch])
 
-    const progressData = useAppSelector(state => 
+    const progressColor = clampedProgress >= 70
+        ? "bg-green-500"
+        : clampedProgress >= 40
+            ? "bg-yellow-500"
+            : "bg-red-500";
+
+    const progressData = useAppSelector(state =>
         state.progress.find(p => p.course === courseId)
     );
-    const course = useAppSelector(state => 
-        state.coursesSlice.courses.find(c => c.id === courseId)
+    const course = useAppSelector(state =>
+        state.coursesSlice.courses.find(c => c._id === courseId)
     );
-  
+
     const getLastVisitedTopic = () => {
         if (!progressData?.lastVisitedSkill || !course) return "Start Learning";
-        
+
         for (const topic of course.topics) {
-          const skill = topic.skills.find(s => s._id === progressData.lastVisitedSkill);
-          if (skill) return topic.title;
+            const skill = topic.skills.find(s => s._id === progressData.lastVisitedSkill);
+            if (skill) return topic.title;
         }
         return "Continue Learning";
     };
-  
+
     const lastTopic = getLastVisitedTopic();
 
     const handleContinueCourse = async () => {
-      try {
-        if (progressData?.lastVisitedSkill) {
-          router.push(
-            `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
-          );
-          return;
+        try {
+            if (progressData?.lastVisitedSkill) {
+                router.push(
+                    `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
+                );
+                return;
+            }
+
+            router.push(
+                `/client/dashboard?tab=my-courses&courseId=${courseId}`
+            );
+
+        } catch (err) {
+            console.error("Failed to navigate to continue learning:", err);
         }
-  
-        router.push(
-          `/client/dashboard/studentDashboard?tab=my-courses&courseId=${courseId}`
-        );
-        
-      } catch (err) {
-        console.error("Failed to navigate to continue learning:", err);
-      }
     };
 
     return (
         <motion.div
-            whileHover={{ y: -5}}
-            className="rounded-xl w-full sm:mx-auto max-lg:mx-0 sm:max-w-lg md:max-w-xl max-lg:max-w-lg mb-6 hover:cursor-pointer border border-gray-300"
-        >
-            {/* Image Area */}
-            <div
-                style={{
-                    backgroundImage: `url(${imgUrl})`,
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover"
-                }}
-                className="h-56 rounded-t-xl">
-            </div>
-            
-            {/* Body */}
-            <div className="bg-white px-4 flex flex-col gap-3 py-4 rounded-b-xl">
-
-                {/* category */}
-                <div className="flex items-start">
-                    <div className="bg-black h-5 rounded-full min-w-16 iphone:text-[0.5rem] sm:text-xs centered-flex px-2 py-3 text-white">
-                        <p>{category}</p>
-                    </div>
-                </div>
-
-                {/* Title */}
-                <div className="flex flex-col gap-2">
-                    <h1 className="font-extrabold text-md sm:text-xl">{title || "What's Up . April 2020"}</h1>
-                    <p className="text-gray-400 iphone:text-[0.7rem] text-xs">Last Topic: {lastTopic}</p>
-                </div>
-
-                {/* Description */}
-                <div className="">
-                    <p className="text-gray-400 text-sm ">
-                        {desc}
-                    </p>
-                </div>
-
-                {/* Progress bar with percentage */}
-                <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                        <span className="font-medium">{clampedProgress}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                            className={cn(
-                                "h-full rounded-full transition-all duration-700",
-                                progressColor
-                            )}
-                            style={{ width: `${clampedProgress}%` }}
-                        />
-                    </div>
-                </div>
-
-                {/* Instructor Info */}
-                <div className="flex items-center space-x-3 ">
+            onClick={handleContinueCourse}
+            className="w-full md:max-w-[27rem] max-lg:max-w-[30rem] rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
+            {/* Card content */}
+            <div>
+                {/* Top: Image + Gradient Overlay */}
+                <div className="relative w-full h-72 group">
                     <Image
-                        src={instructorImg || "https://media.istockphoto.com/id/515264642/photo/happy-teacher-at-desk-talking-to-adult-education-students.jpg?s=612x612&w=0&k=20&c=cpcqqIE9WgVgirdpelsjl2GqwhPFMu5UajW2QG-MOrM="}
-                        alt={`The avatar of ${title}'s instructor`}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full"
-                        priority={false}
+                        src={imgUrl}
+                        alt={title}
+                        className="w-full h-full object-cover rounded-lg"
+                        width={0}
+                        height={0}
                         unoptimized={true}
                     />
+                    {/* Gradient Overlay */}
+                    <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
+                        <h1 className="text-xl text-white font-bold">{title}</h1>
+                    </div>
+                </div>
 
-                    <div className="flex items-center justify-between w-full">
-                        {/* Name */}
-                        <div className="centered-flex">
-                            <h1 className="font-bold iphone:text-md sm:text-lg">
-                                {instructorsName || "Eric Michell"}
-                            </h1>
-                        </div>
-
-                        {/* continue */}
-                        <div className="">
-                            <p onClick={handleContinueCourse}
-                            className="underline text-sm font-extrabold hover:cursor-pointer hover:brightness-90 transition-all duration-300">Continue</p>
-                        </div>
+                {/* Bottom: Text or Details */}
+                <div className="py-2 flex items-center flex-col gap-2 md:flex-col md:gap-2 md:mt-4 md:justify-start mt-4 sm:gap-0 sm:justify-between sm:flex-row
+                max-lg:gap-0 max-lg:justify-between max-lg:flex-row max-lg:m-0">
+                    <div className="flex items-center gap-2">
+                        <Image
+                            unoptimized={true}
+                            src={instructorImg}
+                            alt="Instructor"
+                            width={30}
+                            height={30}
+                            className="rounded-full"
+                        />
+                        <p className="text-sm">{instructorsName}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <p className="text-gray-400 iphone:text-[0.7rem] text-xs">Last Topic: {lastTopic}</p>
                     </div>
                 </div>
             </div>
+
+            <div className="space-y-1 w-full">
+                <div className="flex justify-between text-xs">
+                    <span className="font-medium">{clampedProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full">
+                    <div
+                        className={cn(
+                            "h-full rounded-full transition-all duration-700",
+                            progressColor
+                        )}
+                        style={{ width: `${clampedProgress}%` }}
+                    />
+                </div>
+            </div>
+
         </motion.div>
+
     )
 }
 

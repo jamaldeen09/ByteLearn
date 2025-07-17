@@ -5,7 +5,8 @@ import { UserInfoSchema } from './../../client/types/types';
 const initialState: UserInfoSchema = {
     email: "",
     fullName: "",
-    courses: [],
+    enrolledCourses: [],
+    createdCourses: [],
     friends: [],
     role: "",
     _id: "",
@@ -22,7 +23,8 @@ const usersInformationSlice = createSlice({
             state.fullName = action.payload.fullName
             state.friends = action.payload.friends
             state.role = action.payload.role
-            state.courses = action.payload.courses
+            state.enrolledCourses = action.payload.enrolledCourses
+            state.createdCourses = action.payload.createdCourses
             state._id = action.payload._id
             state.bio = action.payload.bio
             state.avatar = action.payload.avatar

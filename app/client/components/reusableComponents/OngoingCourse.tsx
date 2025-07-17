@@ -6,57 +6,93 @@ import { ArrowRightIcon } from "@radix-ui/react-icons"
 import { Trash } from "lucide-react"
 import { useRouter } from "next/navigation"
 import axios from "../../utils/config/axios"
-import { useAppDispatch } from "@/app/redux/essentials/hooks"
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { setEnrolledCourses } from "@/app/redux/coursesSlices/enrolledCoursesSlice"
-import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
 import toast from "react-hot-toast"
 
-const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, countinueLearningLink, courseId }: onGoingCoursesProps) => {
+import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
+import { useState } from "react"
+import BasicSpinner from "./BasicSpinner"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faHeart } from "@fortawesome/free-solid-svg-icons"
+
+const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, countinueLearningLink, courseId }: onGoingCoursesProps
+) => {
   // Ensure progress is between 0-100
   const clampedProgress = Math.min(100, Math.max(0, progress));
   const router = useRouter()
   const dispatch = useAppDispatch()
-  
+  const courses = useAppSelector(state => state.coursesSlice.courses)
+
+  const foundCourse = courses.find(course => course._id === courseId)
+
+  const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
+
+  const [loadingAnim, setloadingAnim] = useState(false);
+
+  const toggleLike = async () => {
+    if (loadingAnim) return;
+
+    setloadingAnim(true);
+
+    try {
+      const token = localStorage.getItem("bytelearn_token");
+      const endpoint = isLike ? "/api/unlike-course" : "/api/like-course";
+
+      await axios.post(endpoint, { courseId }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Update UI state
+      setIsLike(!isLike);
+
+      toast.success(
+        `${courseName} has been ${isLike ? "unliked" : "liked"}`
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("A server error occurred, please try again.");
+    } finally {
+      setloadingAnim(false);
+    }
+  };
+
   // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
-  const progressColor = clampedProgress >= 70 
-    ? "bg-green-500" 
-    : clampedProgress >= 40 
-      ? "bg-yellow-500" 
+  const progressColor = clampedProgress >= 70
+    ? "bg-green-500"
+    : clampedProgress >= 40
+      ? "bg-yellow-500"
       : "bg-red-500";
 
-    
-const handleDelete = async () => {
-  try {
-    const token = localStorage.getItem("bytelearn_token");
-    await axios.delete(`/api/enrolled-courses/${courseId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
 
-    // Refetch fresh state (you could also optimistically update Redux here)
-    const [coursesRes, progressRes] = await Promise.all([
-      axios.get("/api/enrolled-courses", {
+  const handleDelete = async () => {
+    try {
+      const token = localStorage.getItem("bytelearn_token");
+      await axios.delete(`/api/enrolled-courses/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      }),
-      axios.get("/api/progress", {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    ]);
+      });
 
-    dispatch(setEnrolledCourses(coursesRes.data.courses));
-    dispatch(setProgress(progressRes.data.progress));
-    toast.success("Course deleted successfully")
-  } catch (err) {
-    console.error("Failed to unenroll:", err);
-    toast.error("Something went wrong trying to delete the course");
-  }
-};
+      // Update both enrolled courses AND main courses list
+      const [enrolledRes, coursesRes] = await Promise.all([
+        axios.get("/api/enrolled-courses", {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get("/api/courses", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} ` } })
+      ]);
+
+      dispatch(setEnrolledCourses(enrolledRes.data.courses));
+      dispatch(getCourses(coursesRes.data.courses));
+      toast.success("Course deleted successfully");
+    } catch (err) {
+      console.error("Failed to unenroll:", err);
+      toast.error("Failed to delete course");
+    }
+  };
 
 
   return (
     <div className="w-full flex lg:items-center gap-4 p-2 rounded-lg transition-colors flex-col md:flex-row">
-      <Image 
+      <Image
         src={courseImgURL || "https://miro.medium.com/v2/resize:fit:1400/1*fhtqKw_QQB8o0tj2OXCjlA.png"}
         alt="Course thumbnail"
         className="w-24 h-24 rounded-lg object-cover"
@@ -70,16 +106,18 @@ const handleDelete = async () => {
         {/* Header */}
         <div className="w-full flex sm:items-center sm:flex-row justify-between iphone:flex-col iphone:gap-4 sm:gap-0">
           <h1 className="font-extrabold text-lg line-clamp-1">{courseName || "Art History"}</h1>
-          <div className="flex items-center gap-2">
-            <span className="hover:cursor-pointer hover:text-red-500 transition-colors">
-              {heartIcon}
+          <div className="flex items-center gap-2 ">
+            <span onClick={toggleLike}
+              className="hover:cursor-pointer hover:text-red-500 transition-colors">
+
+               {loadingAnim ? <BasicSpinner /> : <FontAwesomeIcon icon={faHeart} className={`text-xl ${isLike && "text-red-600"}`} />}
             </span>
-            <span  onClick={() => router.push(countinueLearningLink)} 
-            className="bg-green-500 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
+            <span onClick={() => router.push(countinueLearningLink)}
+              className="bg-green-500 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
               <ArrowRightIcon />
             </span>
-            <span   onClick={handleDelete} className="bg-red-600 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
-              <Trash className="w-4 h-4"/>
+            <span onClick={handleDelete} className="bg-red-600 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
+              <Trash className="w-4 h-4" />
             </span>
           </div>
         </div>

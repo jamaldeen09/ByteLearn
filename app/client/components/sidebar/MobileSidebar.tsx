@@ -30,11 +30,11 @@ const MobileSidebar = () => {
                 console.error(err)
                 toast.error(err)
             })
-    }, [dispatch]) // Add dependencies here
+    }, [dispatch])
 
     useEffect(() => {
         fetchInfo();
-    }, [fetchInfo]) // Now fetchInfo is stable between renders
+    }, [fetchInfo])
 
     const handleRouteChange = (value: string) => {
         let tabParam = "";
@@ -57,7 +57,7 @@ const MobileSidebar = () => {
             default:
                 tabParam = "";
         }
-        router.push(`/client/dashboard/studentDashboard${tabParam}`);
+        router.push(`/client/dashboard${tabParam}`);
     };
 
     const isActive = (value: string) => {

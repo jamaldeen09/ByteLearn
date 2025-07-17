@@ -7,10 +7,6 @@ import Image from "next/image"
 
 const LandingPage = (): React.ReactElement => {
   const buttonInformation: ButtonProps[] = useButtonInformation();
-  const buttonLinks: ButtonProps[] = [
-    buttonInformation[0],
-    buttonInformation[1],
-  ]
   return (
     <div className="h-fit">
       {/* Nav Bar */}
@@ -19,7 +15,7 @@ const LandingPage = (): React.ReactElement => {
       {/* Hero Section */}
       <div className="h-fit max-lg:space-x-10 lg:space-x-20 py-10 flex flex-col items-center lg:flex-row lg:items-center lg:justify-center">
         {/* Hero Section image - Replaced img with Image */}
-        <div className="sm:w-[85vw] md:w-[60vw] max-lg:w-[46vw] rounded-full relative aspect-square">
+        <div className="w-[80vw] max-sm:w-[70vw] sm:w-[85vw] md:w-[60vw] max-lg:w-[46vw] rounded-full relative aspect-square">
           <Image
             src="/TechPerson.jpg"
             alt="Illustration of a person coding on a laptop"
@@ -41,7 +37,7 @@ const LandingPage = (): React.ReactElement => {
 
           {/* Buttons */}
           <div className="fit w-full space-x-6 flex items-center justify-center lg:items-start lg:justify-start">
-            {buttonLinks.map((link: ButtonProps, index: number): React.ReactElement => {
+            {buttonInformation.map((link: ButtonProps, index: number): React.ReactElement => {
               return <LandingPageButton key={index} text={link.text} funcToExecute={link.funcToExecute}/>
             })}
           </div>

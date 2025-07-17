@@ -2,17 +2,17 @@
 import { useAppDispatch, useAppSelector } from '@/app/redux/essentials/hooks'
 import { Input } from '@/components/ui/input'
 import React, { useState, useEffect, useCallback } from 'react'
-import axios from "../../../utils/config/axios"
+import axios from "../../utils/config/axios"
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { NotificationSchema, NotifSenderInformationSchema } from '@/app/client/types/types'
 import { getNotifications } from '@/app/redux/chatSlices/notificationSlice'
 import BlackSpinner from '@/app/client/components/reusableComponents/BlackSpinner'
 import { getTimeAgo } from '@/app/client/utils/utils'
-import { socket } from "../../../utils/config/io"
+import { socket } from "../../utils/config/io"
 import { events } from '@/app/client/utils/events'
 import { Trash2Icon } from 'lucide-react'
-import { generateFriendRequest } from '../../../utils/utils'
+import { generateFriendRequest } from '../../utils/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 

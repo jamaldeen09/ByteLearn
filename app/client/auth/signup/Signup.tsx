@@ -1,15 +1,15 @@
 "use client"
-import React, { useState, useEffect } from "react";
-import { emailValidation, firstNameValidation, lastNameValidation, passwordValidation, refresh } from "../../utils/utils";
-import { invalidInput } from "../../utils/utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { triangleErr } from "@/app/icons/Icons";
-import Spinner from "../../components/reusableComponents/Spinner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import { emailValidation, firstNameValidation, lastNameValidation, passwordValidation, useRedirect } from "../../utils/utils";
 import axios from "../../utils/config/axios"
-import { useRouter } from "next/navigation";
+import { invalidInput } from "../../utils/utils";
+import { refresh } from "../../utils/utils";
+import WhiteSpinner from "../../components/reusableComponents/WhiteSpinner";
 
-const InstructorSignup = (): React.ReactElement => {
+const Signup = () => {
     // local states
 
     // strings (values)
@@ -17,7 +17,6 @@ const InstructorSignup = (): React.ReactElement => {
     const [lastName, setLastName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const router = useRouter()
 
     // booleans
     const [showFirstNameErr, setShowFirstNameErr] = useState<boolean>(false);
@@ -34,7 +33,7 @@ const InstructorSignup = (): React.ReactElement => {
     const [passwordError, setPasswordError] = useState<string>("")
 
     // utility functions
-   
+    const { redirectTo } = useRedirect();
 
     useEffect(() => {
         const firstnameValidity = firstNameValidation(firstName)
@@ -58,18 +57,20 @@ const InstructorSignup = (): React.ReactElement => {
         password
     ])
 
-    // Post req to backend
-    const instructorSignup = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    // POST req to backend
+    const signup = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-        axios.post("/api/instructorSignup", {
+        setLoading(true);
+        axios.post("/api/signup", {
             firstName,
             lastName,
             email,
             password
-        }).then(() => {
+        }).then((res) => {
             refresh(setFirstName, setLastName, setEmail, setPassword, false);
-            router.push("/client/dashboard/instructorDashboard");
+            localStorage.setItem("bytelearn_token", res.data.token);
+            redirectTo("/client/dashboard");
         }).catch((err) => {
             setLoading(false);
             console.error(err)
@@ -87,9 +88,10 @@ const InstructorSignup = (): React.ReactElement => {
             }
         })
     }
+
     return (
         <form
-            onSubmit={instructorSignup}
+            onSubmit={signup}
             method="POST"
             className="w-full flex flex-col space-y-6"
         >
@@ -189,18 +191,18 @@ const InstructorSignup = (): React.ReactElement => {
             </div>
 
             <div className="w-full">
-            {disableBtn ? <button
+                {disableBtn ? <button
                     className={` bg-gray-200 text-gray-500 px-5 py-2 rounded-lg text-sm`}>
                     <p>Next</p>
                 </button> : <button
                     type="submit"
                     className={` bg-black text-white text-sm font-bold px-5 rounded-lg py-2 centered-flex space-x-4 hover:bg-black/85 hover:cursor-pointer`}>
                     <p>Next</p>
-                    {loading && <Spinner />}
+                    {loading && <WhiteSpinner />}
                 </button>}
             </div>
         </form>
     )
 }
 
-export default InstructorSignup
+export default Signup

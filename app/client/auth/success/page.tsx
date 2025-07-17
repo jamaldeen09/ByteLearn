@@ -19,20 +19,16 @@ const SuccessPage = (): React.ReactElement => {
 
       axios.get("/api/get-information", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
         .then((res) => {
-          if (res.data.payload.role === "student") {
-            redirectTo("/client/dashboard/studentDashboard");
-          } else {
-            redirectTo("/client/dashboard/instructorDashboard");
-          }
+          redirectTo("/client/dashboard");
           dispatch(getInformation(res.data.payload));
         })
-        .catch(() => {  // Removed unused 'err' parameter
+        .catch(() => {  
           redirectTo("/client/auth/login")
         })
     } else {
       redirectTo("/client/auth/login")
     }
-  }, [dispatch, redirectTo]);  // Added missing dependency
+  }, [dispatch, redirectTo]);
 
   return (
     <div className="h-screen centered-flex">

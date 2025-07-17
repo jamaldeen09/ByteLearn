@@ -1,15 +1,15 @@
 "use client"
-import Sidebar from "../../components/sidebar/Sidebar"
+import Sidebar from "../components/sidebar/Sidebar"
 import MainDashboard from "./content/MainDashboard";
-import SidebarNav from "../../components/reusableComponents/SidebarNav";
-import MobileSidebar from "../../components/sidebar/MobileSidebar";
+import SidebarNav from "../components/reusableComponents/SidebarNav";
+import MobileSidebar from "../components/sidebar/MobileSidebar";
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import MyCourses from "./content/MyCourses";
 import Courses from "./content/Courses";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import axios from "../../utils/config/axios"
+import axios from "../utils/config/axios"
 import toast from "react-hot-toast";
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice";
 import Chat from "./chat/Chat";

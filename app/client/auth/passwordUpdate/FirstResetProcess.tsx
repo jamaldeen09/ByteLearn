@@ -5,10 +5,10 @@ import { triangleErr } from "@/app/icons/Icons";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Spinner from "../../components/reusableComponents/Spinner";
 import axios  from "@/app/client/utils/config/axios"
 import { useAppDispatch } from "@/app/redux/essentials/hooks";
 import { activateTimeReset } from "@/app/redux/triggers/timerResetTrigger";
+import WhiteSpinner from "../../components/reusableComponents/WhiteSpinner";
 
 const FirstResetProcess = (): React.ReactElement => {
     // local states
@@ -115,7 +115,7 @@ const FirstResetProcess = (): React.ReactElement => {
                     type="submit"
                     className={`centered-flex space-x-4 hover:cursor-pointer hover:shadow-2xl w-20`}>
                     <p>Next</p>
-                    {loading && <Spinner />}
+                    {loading && <WhiteSpinner />}
                 </Button>}
             </div>
         </form>
