@@ -9,9 +9,11 @@ import {
   chatIcon,
   dashboardIcon,
   profileIcon,
-  settingsIcon,
 } from "@/app/icons/Icons";
 import { EnvelopeClosedIcon } from '@radix-ui/react-icons';
+
+
+
 
 // routing
 export const useRedirect = () => {
@@ -119,12 +121,7 @@ export const sidebarlinks: SidebarLinkSchema[] = [
     value: "d",
     isActive: false,
   },
-  {
-    routeName: "Profile",
-    icon: profileIcon,
-    value: "f",
-    isActive: false,
-  },
+
   {
     routeName: "Inbox",
     icon: <EnvelopeClosedIcon className="w-5 h-5"/>,
@@ -132,10 +129,10 @@ export const sidebarlinks: SidebarLinkSchema[] = [
     isActive: false
   },
   {
-    routeName: "Settings",
-    icon: settingsIcon,
-     value: "h",
-     isActive: false,
+    routeName: "Profile",
+    icon: profileIcon,
+    value: "g",
+    isActive: false,
   },
 ];
 

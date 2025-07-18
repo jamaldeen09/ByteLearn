@@ -35,7 +35,6 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
         setOpen(false);
     };
     const [creatorsWork, setCreatorsWork] = useState<courseSchema[]>([]);
-    const dispatch = useAppDispatch()
     const enrolledCourses = useAppSelector(state =>
         state.enrolledCourses.enrolledCourses
     );
@@ -128,7 +127,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                     <>
                         {/* Backdrop - invisible click target */}
                         <motion.div
-                            className="fixed inset-0 z-40 w-full h-full rounded-2xl"
+                            className="fixed inset-0 z-40 w-full h-full rounded-2xl bg-black"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -146,7 +145,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
 
                         >
                             {/* Top bar */}
-                            <div className="h-16 w-full bg-black bg-opacity-40 flex items-center justify-end px-4">
+                            <div className="h-20 w-full bg-black bg-opacity-40 flex items-center justify-end px-4">
                                 <XIcon
                                     className="text-white w-6 h-6 hover:text-gray-300 transition-colors cursor-pointer"
                                     onClick={handleClose}
@@ -159,7 +158,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 140, opacity: 1 }}
                                 transition={{ duration: 0.6, type: "spring" }}
-                                className="bg-white rounded-2xl overflow-hidden flex flex-col lg:flex-row lg:space-x14"
+                                className="bg-white rounded-2xl overflow-hidden flex flex-col lg:flex-row lg:space-x-14 gap-10"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {/* Main content container - will be scroll parent on mobile */}
@@ -174,7 +173,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                             </div>
 
                                             <div className="w-full flex items-center justify-between h-fit">
-                                                <div className="flex items-center space-x-6 iphone:flex-col sm:flex-row">
+                                                <div className="flex items-center iphone:gap-2 sm:gap-4 iphone:flex-col sm:flex-row">
                                                     <Image
                                                         src={foundCourse?.creator.profilePicture || "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"}
                                                         alt={`${foundCourse?.creator.fullName}'s avatar`}

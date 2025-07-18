@@ -2,7 +2,7 @@ import { useEffect, useCallback, useState } from "react"
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import axios from "../../utils/config/axios"
 import toast from "react-hot-toast"
@@ -10,6 +10,9 @@ import { getInformation } from "@/app/redux/informationSlices/usersInformationSl
 import { getNotifications } from "@/app/redux/chatSlices/notificationSlice"
 import { socket } from "../../utils/config/io"
 import { events } from "../../utils/events"
+import { motion } from "framer-motion"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faMagicWandSparkles } from "@fortawesome/free-solid-svg-icons"
 
 const Sidebar = () => {
     const router = useRouter();
@@ -20,6 +23,9 @@ const Sidebar = () => {
     const notSeenNotifs = notifications.filter((notif) => !notif.isSeen);
     const [unreadMessages, setUnreadMessages] = useState<number>(0);
     const usersInformation = useAppSelector(state => state.usersInformation)
+    const currentTab = searchParams.get('tab');
+
+    const isActiveButton = currentTab === 'course-creation';
 
     const fetchNotifs = useCallback(() => {
         axios.get("/api/get-notifications", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
@@ -36,7 +42,7 @@ const Sidebar = () => {
 
     const fetchChatNotifications = useCallback(() => {
         axios.get("/api/unread-messages", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
-           setUnreadMessages(res.data.count);
+            setUnreadMessages(res.data.count);
         }).catch((err) => {
             console.error(err)
             if (err.response.status === 401 || err.response.status === 403) {
@@ -73,6 +79,7 @@ const Sidebar = () => {
             case "e":
                 tabParam = "?tab=inbox";
                 break;
+
             default:
                 tabParam = "";
         }
@@ -171,11 +178,53 @@ const Sidebar = () => {
                                 before:content-[''] before:absolute before:top-full before:left-1/2 
                                 before:-translate-x-1/2 before:border-4 before:border-transparent 
                                 before:border-t-black z-50 ml-4 lg:m-0
+                                ${link.routeName === "Course Creation" ? "mr-4" : ""}
                             `}>
                                 {link.routeName}
                             </span>
                         </li>
                     ))}
+
+                    <motion.button
+                        whileHover={isActiveButton ? {} : {
+                            scale: 1.1,
+                            cursor: "pointer",
+                            filter: "saturate(150%)"
+                        }}
+                        whileTap={isActiveButton ? {} : {
+                            scale: 0.9,
+                            cursor: "pointer"
+                        }}
+                        transition={{
+                            type: "spring",
+                            damping: 10,
+                            stiffness: 100,
+                            duration: 0.3
+                        }}
+                        className={`rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 via-sky-500
+    text-white w-14 h-14 centered-flex mx-auto shadow-lg
+    relative group`}
+                        animate={{
+                            scale: isActiveButton ? 1.1 : 1,
+                            filter: isActiveButton ? "saturate(150%)" : "saturate(100%)"
+                        }}
+                        onClick={() => router.push('/client/dashboard?tab=course-creation')}
+                    >
+                        <FontAwesomeIcon icon={faMagicWandSparkles} className="text-xl" />
+
+                        {/* Tooltip */}
+                        <span className="
+    absolute -top-10 left-1/2 transform -translate-x-1/2
+    bg-black text-white text-xs font-medium py-1 px-2 rounded
+    opacity-0 group-hover:opacity-100 transition-opacity duration-300
+    whitespace-nowrap pointer-events-none
+    before:content-[''] before:absolute before:top-full before:left-1/2 
+    before:-translate-x-1/2 before:border-4 before:border-transparent 
+    before:border-t-black z-50
+  ">
+                            Create Course
+                        </span>
+                    </motion.button>
                 </ul>
             </div>
         </div>

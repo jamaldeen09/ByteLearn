@@ -193,15 +193,6 @@ const ChatSidebar = (): React.ReactElement => {
         ) : friends.length === 0 ? (
           // Show empty state
           <div className="h-full col-centered gap-2 w-full text-center">
-            <Image
-              src="https://media.istockphoto.com/id/1443485971/video/animated-greeting-man-character.jpg?s=640x640&k=20&c=TiAalsG2gyOQk_XptDUocQigdIEtbYH8D1u9ReU9RaQ="
-              alt="An Illustration of a 2d male character waving"
-              width={400}
-              height={400}
-              className="w-auto h-auto"
-              priority={true}
-              unoptimized={true}
-            />
             <p className="text-gray-400 text-xs">No friends? Click the plus button to add some friends!</p>
           </div>
         ) : foundFriends ? foundFriends?.map((friend: FriendSchema) => (

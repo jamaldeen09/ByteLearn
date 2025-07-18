@@ -13,6 +13,8 @@ import { useEffect, useCallback } from "react"
 import toast from "react-hot-toast"
 import { socket } from "../../utils/config/io"
 import { events } from "../../utils/events"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faMagicWandSparkles } from "@fortawesome/free-solid-svg-icons"
 
 const MobileSidebar = () => {
     const dispatch = useAppDispatch()
@@ -20,6 +22,9 @@ const MobileSidebar = () => {
     const searchParams = useSearchParams();
     const tab = searchParams.get('tab')
     const usersInformation = useAppSelector(state => state.usersInformation)
+    const currentTab = searchParams.get('tab');
+
+    const isActiveButton = currentTab === 'course-creation';
 
     // Wrap fetchInfo in useCallback
     const fetchInfo = useCallback(async () => {
@@ -54,6 +59,7 @@ const MobileSidebar = () => {
             case "e":
                 tabParam = "?tab=inbox";
                 break;
+
             default:
                 tabParam = "";
         }
@@ -67,6 +73,7 @@ const MobileSidebar = () => {
             case "c": return tab === "courses";
             case "d": return tab === "chat";
             case "e": return tab === "inbox";
+
             default: return false;
         }
     };
@@ -145,6 +152,26 @@ const MobileSidebar = () => {
                         </li>
                     )
                 })}
+
+
+                <div onClick={() => router.push('/client/dashboard?tab=course-creation')}
+                className={`flex items-center space-x-4 hover:cursor-pointer
+                bg-gradient-to-r hover:from-blue-500 hover:to-cyan-400 hover:via-sky-500 rounded-full hover:text-white transition-colors duration-200
+                ${isActiveButton && "from-blue-500 to-cyan-400 via-sky-500 text-white"}`}>
+                <motion.button
+    
+                    className={`rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 via-sky-500
+                    text-white w-14 h-14 centered-flex shadow-lg
+                    relative group`}
+                   
+                
+                >
+                    <FontAwesomeIcon icon={faMagicWandSparkles} className="text-xl" />
+
+                   
+                </motion.button>
+                <p className="">Create Course</p>
+                </div>
             </ul>
 
         </motion.div>

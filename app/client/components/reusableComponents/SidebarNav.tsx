@@ -48,7 +48,7 @@ const SidebarNav = () => {
                 <div className="flex items-center space-x-2 sm:space-x-4 relative w-full justify-end">
                     <Image 
                         onClick={() => setTriggerDropdown(true)} 
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:cursor-pointer" 
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" 
                         src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"} 
                         alt={`${usersInformation.fullName}'s profile picture`}
                         width={40}

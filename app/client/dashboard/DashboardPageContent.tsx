@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { getInformation } from "@/app/redux/informationSlices/usersInformationSlice";
 import Chat from "./chat/Chat";
 import Inbox from "./chat/Inbox";
+import CourseCreation from "./courseCreation/CourseCreation";
 
 const DashboardPageContent = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
@@ -28,7 +29,8 @@ const DashboardPageContent = (): React.ReactElement => {
   const route = tab === "my-courses" ? "b" : 
               tab === "courses" ? "c" : 
               tab === "chat" ? "d" : 
-              tab === "inbox" ? "e" : "a";
+              tab === "inbox" ? "e" :
+              tab === "course-creation" ? "f": "a";
 
   // fetch usersInformation
   useEffect(() => {
@@ -102,7 +104,8 @@ const DashboardPageContent = (): React.ReactElement => {
             {route === "c" && <Courses />}
             {route === "d" && <Chat />} 
             {route === "e" && <Inbox />}
-            {!(route === "a" || route === "b" || route === "c" || route === "d" || route === "e") && (
+            {route === "f" && <CourseCreation />}
+            {!(route === "a" || route === "b" || route === "c" || route === "d" || route === "e" || route === "f") && (
               <div>Coming soon</div>
             )}
           </div>

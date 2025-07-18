@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import WhiteSpinner from "./WhiteSpinner";
 import FeedBackSidebar from "./FeedBackSidebar";
 import CardInfoDisplayModal from "./CardInfoDisplayModal";
+import BasicSpinner from "./BasicSpinner";
 
 type cardInfoDisplayProps = {
     openClickedWork: boolean;
@@ -27,8 +28,10 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
     const [creatorsWork, setCreatorsWork] = useState<courseSchema[]>([]);
     const [enrollLoading, setEnrollLoading] = useState<boolean>(false);
     const [loadingCreatorsWork, setLoadingCreatorsWork] = useState<boolean>(true);
-    const enrolledCoursesData = useAppSelector(state => state.usersInformation.enrolledCourses);
-    const enrolledCourses = new Set(enrolledCoursesData.map(course => course._id));
+    const enrolledCourses = useAppSelector(state =>
+        state.enrolledCourses.enrolledCourses
+    );
+    const isEnrolled = enrolledCourses.some(course => course._id === foundCourse?._id);
     const router = useRouter()
 
     const filteredCreatorsWork: courseSchema[] = creatorsWork.filter((work: courseSchema) => work._id !== courseId)
@@ -83,6 +86,38 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
         })
     }
 
+    const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
+    const [likes, setLikes] = useState<number>(foundCourse?.likes || 0);
+    const [loadingAnim, setloadingAnim] = useState(false);
+
+    const toggleLike = async () => {
+        if (loadingAnim) return;
+
+        setloadingAnim(true);
+
+        try {
+            const token = localStorage.getItem("bytelearn_token");
+            const endpoint = isLike ? "/api/unlike-course" : "/api/like-course";
+
+            await axios.post(endpoint, { courseId: foundCourse?._id }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            // Update UI state
+            setIsLike(!isLike);
+            setLikes(prev => isLike ? prev - 1 : prev + 1);
+
+            toast.success(
+                `${foundCourse?.title} has been ${isLike ? "unliked" : "liked"}`
+            );
+        } catch (err) {
+            console.error(err);
+            toast.error("A server error occurred, please try again.");
+        } finally {
+            setloadingAnim(false);
+        }
+    };
+
     if (!foundCourse) return null;
 
     return (
@@ -107,6 +142,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={handleClose}
+
                         >
                             {/* Top bar */}
                             <div className="h-16 w-full bg-black bg-opacity-40 flex items-center justify-end px-4">
@@ -116,52 +152,55 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                 />
                             </div>
 
-                            {/* Content area */}
+
                             <motion.div
                                 initial={{ y: 140, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 140, opacity: 1 }}
                                 transition={{ duration: 0.6, type: "spring" }}
-                                className="flex-1 bg-white rounded-2xl overflow-y-auto flex justify-center space-x-14
-                                max-lg:px-6 lg:px-2"
+                                className="bg-white rounded-2xl overflow-hidden flex flex-col lg:flex-row lg:space-x14"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="w-full max-w-6xl overflow-y-auto h-full p-6">
-                                    <div className="w-full max-w-6xl min-h-fit overflow-y-auto">
-                                        {/* Rest of your original content remains exactly the same */}
-                                        <div className="w-full max-w-6xl h-fit py-10 flex flex-col gap-6">
+                                {/* Main content container - will be scroll parent on mobile */}
+                                <div className="flex-1 overflow-y-auto max-lg:h-[calc(100vh-200px)] lg:overflow-y-auto lg:h-full">
+
+                                    {/* Content area - scrollable only on desktop */}
+                                    <div className="w-full  min-h-fit p-6">
+                                        <div className="w-full h-fit py-10 flex flex-col gap-6 ">
+
                                             <div className="w-full">
-                                                <h1 className="text-3xl font-extrabold">{foundCourse?.title || "React Typescript"}</h1>
+                                                <h1 className="text-sm max-lg:text-xl lg:text-3xl font-extrabold">{foundCourse?.title || "React Typescript"}</h1>
                                             </div>
 
                                             <div className="w-full flex items-center justify-between h-fit">
-                                                <div className="flex items-center space-x-6">
+                                                <div className="flex items-center iphone:gap-2 sm:gap-4 iphone:flex-col sm:flex-row">
                                                     <Image
                                                         src={foundCourse?.creator.profilePicture || "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"}
                                                         alt={`${foundCourse?.creator.fullName}'s avatar`}
                                                         width={0}
                                                         height={0}
-                                                        className="rounded-full h-14 w-14 object-cover"
+                                                        className="rounded-full h-14 w-14 object-cover mx-auto sm:m-0"
                                                         unoptimized={true}
                                                     />
-                                                    <p className="">{foundCourse?.creator.fullName || "Olatunji Labubu"}</p>
+                                                    <p className="">{foundCourse?.creator.fullName}</p>
                                                 </div>
 
                                                 <div className="w-fit flex space-x-4 items-center">
                                                     <button
-                                                        className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300"
+                                                        onClick={toggleLike}
+                                                        className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300 w-8 h-8 centered-flex"
                                                     >
-                                                        <Heart className="w-4 h-4" />
+                                                        {loadingAnim ?
+                                                            <BasicSpinner />
+                                                            : <FontAwesomeIcon icon={faHeart} className={`w-4 h-4 ${isLike && "text-red-600"}`} />}
                                                     </button>
-
-                                                    {enrolledCourses.has(foundCourse?._id ? foundCourse?._id : "") ? <button
+                                                    {isEnrolled ? <button
                                                         className={`bg-gray-300 text-gray-400 font-extrabold px-8 py-3 rounded-full cursor-not-allowed
-                                    ${enrollLoading && "centered-flex space-x-4"}`}>
+                ${enrollLoading && "centered-flex space-x-4"}`}>
                                                         <p>Enrolled</p>
-
                                                     </button> : <button onClick={() => enroll(foundCourse?._id ? foundCourse._id : "")}
                                                         className={`bg-black text-white font-extrabold px-8 py-3 hover:cursor-pointer rounded-full hover:bg-black/90
-                                    ${enrollLoading && "centered-flex space-x-4"}`}>
+                ${enrollLoading && "centered-flex space-x-4"}`}>
                                                         <p>Enroll</p>
                                                         {enrollLoading && <WhiteSpinner />}
                                                     </button>}
@@ -185,7 +224,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                         backgroundPosition: "center",
                                                         backgroundRepeat: "no-repeat",
                                                     }}
-                                                    className="w-full h-[80vh] rounded-2xl"
+                                                    className="w-full md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
                                                 ></div>
                                             </div>
 
@@ -203,9 +242,8 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                     <h1 className="font-extrabold text-xl">More from {foundCourse?.creator.fullName}</h1>
                                                 </div>
 
-                                                <div className="flex flex-wrap w-full gap-6">
+                                                <div className="flex flex-wrap w-full gap-10 ">
                                                     {loadingCreatorsWork ? (
-                                                        // Show 3 skeleton cards while loading
                                                         Array.from({ length: 3 }).map((_, idx) => (
                                                             <div key={idx} className="w-full max-w-[20rem] rounded-lg overflow-hidden animate-pulse space-y-2">
                                                                 <div className="w-full h-64 bg-gray-200 rounded-lg" />
@@ -218,18 +256,18 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                                 </div>
                                                             </div>
                                                         ))
-                                                    ) : filteredCreatorsWork.map((work: courseSchema) => {
-                                                        return (
+                                                    ) : (
+                                                        filteredCreatorsWork.map((work: courseSchema) => (
                                                             <div
                                                                 onClick={() => {
                                                                     setClicked(work._id)
                                                                     setOpenClickedWork(false)
                                                                     setOpen(true)
                                                                 }}
-                                                                key={work._id} className="w-full max-w-[20rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
-                                                                {/* Card content */}
+                                                                key={work._id}
+                                                                className="w-full md:max-w-[20rem] max-lg:w-[18rem] lg:max-w-[20rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer"
+                                                            >
                                                                 <div>
-                                                                    {/* Top: Image + Gradient Overlay */}
                                                                     <div className="relative w-full h-64 group">
                                                                         <Image
                                                                             src={work?.imageUrl || "https://craftsnippets.com/articles_images/placeholder/placeholder.jpg"}
@@ -239,13 +277,11 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                                             height={0}
                                                                             unoptimized={true}
                                                                         />
-                                                                        {/* Gradient Overlay */}
                                                                         <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
                                                                             <h1 className="text-sm text-white font-bold">{work?.title}</h1>
                                                                         </div>
                                                                     </div>
 
-                                                                    {/* Bottom: Text or Details */}
                                                                     <div className="py-2 flex items-center justify-between">
                                                                         <div className="flex items-center gap-2">
                                                                             <Image
@@ -265,18 +301,26 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        )
-                                                    })}
+                                                        ))
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Feedback sidebar - appears below content on mobile */}
+                                    <div className="w-full lg:hidden">
+                                        <FeedBackSidebar courseId={foundCourse?._id} />
+                                    </div>
                                 </div>
-                                <div className="w-full max-w-sm h-full overflow-y-auto py-6">
-                                    <FeedBackSidebar courseId={foundCourse?._id}/>
+
+                                {/* Feedback sidebar - appears on right on desktop */}
+                                <div className="hidden lg:block w-full max-w-sm overflow-y-auto h-full py-6">
+                                    <FeedBackSidebar courseId={foundCourse?._id} />
                                 </div>
 
                             </motion.div>
+
                         </motion.div>
                     </>
                 )}
@@ -291,3 +335,4 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
 };
 
 export default OtherWork;
+
