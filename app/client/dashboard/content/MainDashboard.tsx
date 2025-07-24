@@ -129,7 +129,7 @@ const MainDashboard = () => {
                     initial={{ y: -30, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.4, type: "spring", damping: 14, stiffness: 100 }}
-                    className="bg-white h-[52vh] rounded-2xl w-full border border-gray-400 px-6 py-4 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                    className="bg-white iphone:h-[52vh] max-sm:h-[54vh] sm:h-[52vh] rounded-2xl w-full border border-gray-400 px-6 py-4 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
                     <p className="text-gray-400 flex items-center gap-1 font-bold">
                         Ongoing Courses <span>{arrowDown}</span>
