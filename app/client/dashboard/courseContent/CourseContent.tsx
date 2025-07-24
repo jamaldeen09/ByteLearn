@@ -359,66 +359,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
 
   if (!singleCourseInformation || !singleCourseInformation.topics) {
     return (
-      <div className="col-span-14 py-6 min-h-[90vh]">
-        {/* Centralized skeleton area */}
-        <div className="h-full flex flex-col space-y-8 justify-center items-center">
-          {/* Course overview text skeleton */}
-          <div className="w-48 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-
-          {/* Course details + topics skeleton */}
-          <div className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10 max-lg:flex-row">
-            {/* Left card skeleton */}
-            <div className="w-full max-w-sm border border-gray-200 rounded-xl hover:bg-black/10 h-fit transition-all duration-200 flex flex-col space-y-4 px-6 py-4">
-              {/* Course image skeleton */}
-              <div className="w-full centered-flex min-h-fit py-6">
-                <div className="w-32 h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-              </div>
-
-              {/* Title + date skeleton */}
-              <div className="space-y-3">
-                <div className="w-3/4 h-5 bg-gray-200 rounded-full animate-pulse"></div>
-                <div className="w-1/2 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-              </div>
-
-              {/* Progress percentage skeleton */}
-              <div className="space-y-1">
-                <div className="w-1/4 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                <div className="w-1/3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-              </div>
-
-              {/* Progress bar skeleton */}
-              <div className="space-y-1 mt-2">
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-gray-300 rounded-full animate-pulse" style={{ width: "30%" }}></div>
-                </div>
-              </div>
-
-              {/* Continue Learning button skeleton */}
-              <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
-            </div>
-
-            {/* Right topics skeleton */}
-            <div className="overflow-y-auto h-[90vh] w-full max-w-4xl flex flex-col space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="border border-gray-200 rounded-xl p-6">
-                  {/* Topic title skeleton */}
-                  <div className="w-1/2 h-6 bg-gray-200 rounded-full animate-pulse mb-4"></div>
-
-                  {/* Skills list skeleton */}
-                  <div className="space-y-3 pl-4">
-                    {[...Array(4)].map((_, j) => (
-                      <div key={j} className="flex items-center space-x-3">
-                        <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
-                        <div className="w-3/4 h-4 bg-gray-200 rounded-full animate-pulse"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <LoadingSkeleton />
     );
   }
 
@@ -521,6 +462,75 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
                 topicsSkillsTitle={topic.skills}
                 selectedSkillId={skillId}
               />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const LoadingSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 col-span-16">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Skeleton */}
+        <div className="mb-8 text-center">
+          <div className="h-10 bg-gray-200 rounded-full w-1/3 mx-auto animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded-full w-1/4 mx-auto mt-4 animate-pulse"></div>
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Course Card Skeleton */}
+          <div className="w-full lg:w-1/3">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              {/* Image Skeleton */}
+              <div className="h-48 bg-gray-200 animate-pulse"></div>
+              
+              {/* Content Skeleton */}
+              <div className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <div className="h-6 bg-gray-200 rounded-full w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded-full w-1/2 animate-pulse"></div>
+                </div>
+                
+                {/* Progress Skeleton */}
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-5 bg-gray-200 rounded-full w-1/4 animate-pulse"></div>
+                    <div className="h-5 bg-gray-200 rounded-full w-1/6 animate-pulse"></div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="h-2.5 bg-gray-300 rounded-full w-1/3 animate-pulse"></div>
+                  </div>
+                </div>
+                
+                {/* Button Skeleton */}
+                <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Topics List Skeleton */}
+          <div className="w-full lg:w-2/3 space-y-4">
+            <div className="h-8 bg-gray-200 rounded-full w-1/4 animate-pulse"></div>
+            
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="p-6 space-y-4">
+                  <div className="h-6 bg-gray-200 rounded-full w-1/2 animate-pulse"></div>
+                  <div className="space-y-3 pl-4">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="flex items-center space-x-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded-full w-3/4 animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>

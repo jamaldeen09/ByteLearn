@@ -103,6 +103,7 @@ const MobileSidebarDropdown = () => {
     }
 
     const isActive = (value: string) => {
+        
         const tabMap: Record<string, string> = {
             "a": "",
             "b": "my-courses",
@@ -142,7 +143,10 @@ const MobileSidebarDropdown = () => {
                             {sidebarlinks.map((link: SidebarLinkSchema) => (
                                 <li key={link.value} className="rounded-xl">
                                     <button
-                                        onClick={() => handleRouteChange(link.value)}
+                                        onClick={() => {
+                                            handleRouteChange(link.value)
+                                            dispatch(untriggerCanvas())
+                                        }}
                                         className={`w-full text-left px-4 py-3 flex items-center space-x-3 transition-colors 
                                             ${isActive(link.value)
                                                 ? "bg-gray-100 text-black font-medium"

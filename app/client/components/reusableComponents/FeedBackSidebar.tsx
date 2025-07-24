@@ -433,7 +433,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
                                                     unoptimized
                                                 />
                                             </div>
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col ">
                                                 <div className="flex items-center gap-2">
                                                     <h1 className="font-semibold text-sm text-gray-900">
                                                         {msg.sender.fullName}
@@ -446,7 +446,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
                                                     )}
                                                 </div>
                                                 <p className="text-sm text-gray-700 mt-1">{msg.text}</p>
-                                                <div className="flex items-center gap-3 mt-2 justify-between">
+                                                <div className="flex gap-3 mt-2 justify-between flex-col items-start sm:items-center sm:flex-row">
                                                     {/* Like Button - Hidden for own messages */}
 
                                                     <span className={`text-xs ${isLiked ? "text-gray-600 font-medium" : "text-gray-400"}`}>

@@ -24,8 +24,6 @@ type cardInfoDisplayProps = {
 };
 
 
-
-
 const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps) => {
 
     const courses = useAppSelector(state => state.coursesSlice.courses);
@@ -271,7 +269,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                         backgroundPosition: "center",
                                                         backgroundRepeat: "no-repeat",
                                                     }}
-                                                    className="w-full md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
+                                                    className="w-full h-[40vh] border md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
                                                 ></div>
                                             </div>
 

@@ -1,8 +1,8 @@
 "use client"
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { QuestionMarkIcon } from "@radix-ui/react-icons"
-import { CheckIcon, X } from "lucide-react";
+import { Trophy, BookOpen, AlertCircle, ArrowLeft, Check, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface QuizResults {
   totalQuestions: number;
@@ -18,119 +18,140 @@ const QuizResult = () => {
   const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
 
   useEffect(() => {
-    // Get results from localStorage
     const results = localStorage.getItem('quizResults');
     if (results) {
       setQuizResults(JSON.parse(results));
-      localStorage.removeItem('quizResults'); // Clean up
+      localStorage.removeItem('quizResults');
     }
   }, []);
 
   if (!quizResults) {
     return (
-      <div className="col-span-14 min-h-[90vh] centered-flex">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-          <p>Loading results...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-8 w-8 bg-gray-200 rounded-full mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="col-span-14 min-h-screen flex justify-center py-2 overflow-x-hidden">
-      <div className="w-full max-w-6xl bg-gray-50 min-h-full rounded-2xl flex flex-col items-center py-20 gap-20 px-6 sm:px-10 md:px-6 lg:px-0">
-        {/* Header */}
-        <div className="w-fit flex items-center space-x-4 flex-wrap gap-6 lg:gap-0">
-          {/* total questions */}
-          <div className="h-32 rounded-2xl bg-white w-48 shadow-lg px-6 py-4 flex flex-col justify-between">
-            <div className="w-full flex justify-between items-center">
-              <p className="font-bold text-xl">{quizResults.totalQuestions}</p>
-              <span className="bg-gray-400 text-white centered-flex w-6 h-6 rounded-full">
-                <QuestionMarkIcon />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 col-span-16">
+      <div className="max-w-4xl mx-auto">
+        {/* Header with back button */}
+        <button 
+          onClick={() => router.push(`/client/dashboard?tab=my-courses&courseId=${courseId}`)}
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to course
+        </button>
+
+        {/* Main result card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className={`bg-white rounded-3xl shadow-xl overflow-hidden ${quizResults.passed ? 'border-t-4 border-green-500' : 'border-t-4 border-red-500'}`}
+        >
+          {/* Result banner */}
+          <div className={`${quizResults.passed ? 'bg-green-50' : 'bg-red-50'} p-6 text-center`}>
+            <div className="flex justify-center mb-4">
+              <div className={`p-4 rounded-full ${quizResults.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                {quizResults.passed ? (
+                  <Trophy className="w-10 h-10" strokeWidth={1.5} />
+                ) : (
+                  <AlertCircle className="w-10 h-10" strokeWidth={1.5} />
+                )}
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {quizResults.passed ? 'Quiz Passed!' : 'Quiz Failed'}
+            </h1>
+            <div className="text-5xl font-extrabold mb-4">
+              <span className={quizResults.passed ? 'text-green-600' : 'text-red-600'}>
+                {quizResults.percentage}%
               </span>
             </div>
-            <div className="w-full text-gray-500">
-              <p>Total Questions</p>
-            </div>
+            <p className="text-gray-600">
+              {quizResults.correctAnswers} out of {quizResults.totalQuestions} correct answers
+            </p>
           </div>
 
-          {/* correct answer */}
-          <div className="h-32 rounded-2xl bg-white w-48 shadow-lg px-6 py-4 flex flex-col justify-between">
-            <div className="w-full flex justify-between items-center">
-              <p className="font-bold text-xl">{quizResults.correctAnswers}</p>
-              <span className="bg-gray-400 text-white centered-flex w-6 h-6 rounded-full">
-                <CheckIcon className="w-4 h-4" />
-              </span>
+          {/* Stats grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            <div className="bg-gray-50 rounded-xl p-5 text-center">
+              <div className="flex justify-center mb-3">
+                <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                {quizResults.totalQuestions}
+              </h3>
+              <p className="text-gray-500">Total Questions</p>
             </div>
-            <div className="w-full text-gray-500">
-              <p>Correct Answers</p>
-            </div>
-          </div>
 
-          {/* Wrong answers */}
-          <div className="h-32 rounded-2xl bg-white w-48 shadow-lg px-6 py-4 flex flex-col justify-between">
-            <div className="w-full flex justify-between items-center">
-              <p className="font-bold text-xl">
+            <div className="bg-gray-50 rounded-xl p-5 text-center">
+              <div className="flex justify-center mb-3">
+                <div className="bg-green-100 text-green-600 p-3 rounded-full">
+                  <Check className="w-6 h-6" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                {quizResults.correctAnswers}
+              </h3>
+              <p className="text-gray-500">Correct Answers</p>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-5 text-center">
+              <div className="flex justify-center mb-3">
+                <div className="bg-red-100 text-red-600 p-3 rounded-full">
+                  <X className="w-6 h-6" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">
                 {quizResults.totalQuestions - quizResults.correctAnswers}
-              </p>
-              <span className="bg-gray-400 text-white centered-flex w-6 h-6 rounded-full">
-                <X className="w-4 h-4" />
-              </span>
-            </div>
-            <div className="w-full text-gray-500">
-              <p>Wrong answers</p>
+              </h3>
+              <p className="text-gray-500">Wrong Answers</p>
             </div>
           </div>
 
-          {/* Total Percentage */}
-          <div
-            className={`${
-              quizResults.passed ? "bg-green-500" : "bg-red-600"
-            } text-white font-bold w-80 sm:w-96 h-40 rounded-2xl centered-flex`}
-          >
-            <div className="w-fit flex flex-col px-10">
-              <h1 className="text-5xl mb-2 sm:m-0">{quizResults.percentage}%</h1>
-              {quizResults.passed
-                ? "You passed the quiz with a score of"
-                : "You failed the quiz with a score of"}
-            </div>
-          </div>
-        </div>
-
-        {/* General Feedback */}
-        <div className="w-full bg-white border border-gray-200 rounded-2xl shadow-lg flex flex-col px-10 py-10 max-w-5xl">
-          <div className="w-full flex flex-col gap-4">
-            <h1 className="text-xl font-bold">General Feedback</h1>
-
+          {/* Feedback section */}
+          <div className="border-t border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Feedback</h2>
             {quizResults.passed ? (
-              <p className="text-sm">
-                Excellent job! You have demonstrated a strong understanding of the material. Keep up
-                the great work, and you&apos;ll continue to excel in your learning journey. This
-                level of performance shows your hard work and dedication paying off.
-              </p>
+              <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                <p className="text-green-800">
+                  <span className="font-medium">Congratulations!</span> You've demonstrated excellent 
+                  understanding of the material. This performance shows your dedication 
+                  to learning. Keep up the great work!
+                </p>
+              </div>
             ) : (
-              <p className="text-xs sm:text-sm">
-                Don&apos;t be discouraged by this score. Everyone starts somewhere, and this is just
-                the beginning of your learning journey. Take this as an opportunity to review the
-                material and strengthen your understanding. With perseverance and practice,
-                you&apos;ll get better!
-              </p>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                <p className="text-red-800">
+                  <span className="font-medium">Don't worry!</span> This is just a learning opportunity. 
+                  Review the material and try again. Every expert was once a beginner - 
+                  persistence is key to mastery.
+                </p>
+              </div>
             )}
 
-            <div className="w-full">
+            <div className="mt-8 flex justify-center">
               <button
-                onClick={() =>
-                  router.push(
-                    `/client/dashboard?tab=my-courses&courseId=${courseId}`
-                  )
-                }
-                className="mt-6 bg-black text-white hover:cursor-pointer px-6 py-3 rounded-md hover:bg-gray-800 transition-colors text-xs sm:text-[1rem]"
+                onClick={() => router.push(`/client/dashboard?tab=my-courses&courseId=${courseId}`)}
+                className="px-8 py-3 hover:cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-medium hover:shadow-lg transition-all hover:scale-105"
               >
-                Back to Course
+                Continue Learning
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -263,7 +263,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                         backgroundPosition: "center",
                                                         backgroundRepeat: "no-repeat",
                                                     }}
-                                                    className="w-full md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
+                                                    className="w-full h-[40vh] md:h-[60vh] max-lg:h-[70vh] lg:h-[80vh] rounded-2xl"
                                                 ></div>
                                             </div>
 
