@@ -181,7 +181,7 @@ const EnrollmentsPage = () => {
                           <div className="space-y-2">
                             <h3 className="text-lg font-medium text-gray-900">No matching enrollments</h3>
                             <p className="text-sm text-gray-500 max-w-md">
-                              No enrollments found for "{searchTerm}". Try a different search term.
+                              No enrollments found for &quot;{searchTerm}&quot;. Try a different search term.
                             </p>
                           </div>
                           <button

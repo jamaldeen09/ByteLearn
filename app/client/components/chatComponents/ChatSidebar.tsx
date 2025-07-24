@@ -20,6 +20,7 @@ import { setMessages } from "@/app/redux/chatSlices/messagesSlice"
 import { setIsFriendsFalse, setIsFriendsTrue } from "@/app/redux/triggers/isFriendsTrigger"
 import { useRouter } from "next/navigation"
 import { useUnread } from "../../utils/context"
+import { AxiosError } from "axios"
 
 
 interface ChatroomData {
@@ -49,7 +50,7 @@ const ChatSidebar = (): React.ReactElement => {
   const dispatch = useAppDispatch()
   const friends = useAppSelector(state => state.friendsContainer.friends)
 
-    const { setTotalUnread } = useUnread();
+  const { setTotalUnread } = useUnread();
 
 
   const clickedFriend = useAppSelector(state => state.clickedFriend.id)
@@ -60,7 +61,7 @@ const ChatSidebar = (): React.ReactElement => {
   const [isLoadingFriends, setIsLoadingFriends] = useState<boolean>(true);
   const [showFriends, setShowFriends] = useState<boolean>(true);
   const router = useRouter()
-  
+
 
 
   // Memoized function to generate room ID
@@ -77,16 +78,20 @@ const ChatSidebar = (): React.ReactElement => {
           },
         });
         dispatch(getFriends(res.data.payload));
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        if (
-          err.response?.status === 401 ||
-          err.response?.status === 403 ||
-          err.response?.status === 404
-        ) {
-          redirectTo("/client/auth/login");
+        if (err instanceof AxiosError) {
+          if (
+            err.response?.status === 401 ||
+            err.response?.status === 403 ||
+            err.response?.status === 404
+          ) {
+            redirectTo("/client/auth/login");
+          } else {
+            toast.error("Server Error");
+          }
         } else {
-          toast.error("Server Error");
+          console.error('Unexpected error', err);
         }
       } finally {
         setIsLoadingFriends(false);
@@ -94,7 +99,7 @@ const ChatSidebar = (): React.ReactElement => {
     };
 
     fetchFriends();
-  }, []);
+  }, [dispatch, redirectTo]);
 
   const fetchChatNotifications = useCallback(() => {
     axios.get("/api/unread-messages", {
@@ -107,7 +112,7 @@ const ChatSidebar = (): React.ReactElement => {
           return { ...prev, ...res.data.unreadCounts };
         });
       } else {
-        setUnreadMessages({}); 
+        setUnreadMessages({});
       }
     }).catch((err) => {
       console.error(err);
@@ -151,47 +156,27 @@ const ChatSidebar = (): React.ReactElement => {
     }
   }, [clickedFriend, roomId]);
 
-  // useEffect(() => {
-  //   const handleMessagesMarkedAsRead = ({ friendId }: { friendId: string }) => {
-  //     setUnreadMessages(prev => {
-  //       const newUnreads = { ...prev };
-  //       if (newUnreads[friendId]) {
-
-  //         setTotalUnread(prevTotal => prevTotal - newUnreads[friendId]);
-  //         delete newUnreads[friendId];
-  //       }
-  //       return newUnreads;
-  //     });
-  //   };
-
-  //   socket.on(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
-
-  //   return () => {
-  //     socket.off(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
-  //   };
-  // }, []);
-
   useEffect(() => {
     const handleMessagesMarkedAsRead = ({ friendId }: { friendId: string }) => {
       setUnreadMessages(prev => {
         const newUnreads = { ...prev };
         const removedCount = newUnreads[friendId] || 0;
-  
+
         if (removedCount) {
           delete newUnreads[friendId];
-  
-       
+
+
           setTimeout(() => {
             setTotalUnread(prevTotal => Math.max(prevTotal - removedCount, 0));
           }, 0);
         }
-  
+
         return newUnreads;
       });
     };
-  
+
     socket.on(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
-  
+
     return () => {
       socket.off(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
     };
@@ -237,7 +222,7 @@ const ChatSidebar = (): React.ReactElement => {
       socket.off(events.CHATROOM_FOUND, handleChatroomFound)
       socket.off(events.CHATROOM_CREATED, handleChatroomCreated)
     }
-  }, [clickedFriend, dispatch, generateRoomId])
+  }, [clickedFriend, dispatch, generateRoomId, setTotalUnread])
 
   const [friendSearch, setFriendSearch] = useState<string>("")
   const foundFriends: FriendSchema[] = friends.filter((friend) => friend.friendName.includes(friendSearch));

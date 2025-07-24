@@ -147,7 +147,7 @@ const MainChatArea = () => {
     const newMessage: IMessage = {
       _id: tempId,
       sender: { _id: currentUserId, avatar: currentUserAvatar, fullName: currentUserFullname },
-      receiver: { _id: friendInfo?._id!, avatar: friendInfo?.avatar, fullName: friendInfo?.fullName! },
+      receiver: { _id: friendInfo?._id, avatar: friendInfo?.avatar, fullName: friendInfo?.fullName },
       content: message,
       imageUrl,
       sentAt: now,
@@ -275,7 +275,7 @@ const MainChatArea = () => {
   }, [messages]);
 
   useEffect(() => {
-    let gotMessages: IMessage[] = []
+    const gotMessages: IMessage[] = []
     const handleReceivedMessage = (data: { message: IMessage }) => {
       const incoming = data.message;
       gotMessages.push(data.message);
@@ -304,7 +304,7 @@ const MainChatArea = () => {
     return () => {
       socket.off(events.RECEIVED_MESSAGE);
     };
-  }, [currentUserId]);
+  }, [currentUserId, dispatch, setTotalUnread]);
 
 
   useEffect(() => {
@@ -663,9 +663,7 @@ const MainChatArea = () => {
         <ImageView
           trigger={imgViewTrigger}
           setTrigger={setImgViewTrigger}
-          galleryTrigger={imgViewTrigger}
           setGalleryTrigger={setImgViewTrigger}
-          profileView={profileViewSidebar}
           setProfileView={setProfileViewSidebar}
         />
 

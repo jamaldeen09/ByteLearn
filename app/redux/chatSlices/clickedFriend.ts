@@ -18,14 +18,14 @@ const clickedFriendReducer = createSlice({
             state.id = action.payload
         },
         resetClickedFriend: (state) => {
-            state.id = "",
+            state.id = "";
             state.information = {
                 _id: "",
                 fullName: "", 
                 avatar: "",  
                 isOnline: false, 
                 bio: "",
-            }
+            };
         },
     }
 })

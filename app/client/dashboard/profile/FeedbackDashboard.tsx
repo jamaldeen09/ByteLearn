@@ -1,6 +1,6 @@
 "use client"
 
-import { FiMessageSquare, FiHeart, FiTrendingUp, FiUsers, FiRefreshCw, FiBarChart2, FiActivity, FiChevronDown } from 'react-icons/fi';
+import { FiMessageSquare, FiHeart, FiTrendingUp, FiUsers, FiRefreshCw, FiBarChart2, FiActivity } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title } from 'chart.js';
 import { Doughnut, Line } from 'react-chartjs-2';
@@ -10,25 +10,10 @@ import * as React from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FeedbackDashboardSkeleton from '../../components/profileComponents/FeedbackDashboardSkeleton';
 
-
-
-
 ChartJS.register(
   ArcElement, Tooltip, Legend, CategoryScale,
   LinearScale, BarElement, PointElement, LineElement, Title
 );
-
-
-// 1. Define strict types
-
-
-interface ChartConfig {
-  [key: string]: {
-    label: string
-    color: string
-  }
-}
-
 
 interface FeedbackMetrics {
   overview: {
@@ -154,7 +139,7 @@ const FeedbackDashboard = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [router]);
 
 
   if (loading) {

@@ -1,15 +1,12 @@
 "use client"
-
 import { FiAward, FiMessageSquare, FiBarChart2, FiUsers, FiHeart, FiBook, FiPlus, FiUpload, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import ProfileSkeleton from '../../components/profileComponents/ProfileSkeleton';
-
 import EnrollmentsPage from './Enrollments';
 import { useAppDispatch, useAppSelector } from '@/app/redux/essentials/hooks';
-
 import { courseSchema } from '../../types/types';
 import axios from "@/app/client/utils/config/axios"
 import FeedbackDashboard from './FeedbackDashboard';
@@ -17,12 +14,9 @@ import Image from 'next/image';
 import FeedbackItem from './FeedbackItem';
 import toast from 'react-hot-toast';
 import { getNewAvatar } from '@/app/redux/informationSlices/usersInformationSlice';
-import { TruckElectric } from 'lucide-react';
 import DeepseekSpinner from '../../components/reusableComponents/DeepseekSpinner';
 
 const Profile = () => {
-
-
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,8 +67,7 @@ const Profile = () => {
     })
   }, [router])
 
-  const fetchFeedbacks = () => {
-
+  const fetchFeedbacks = useCallback(() => {
     axios.get("/api/most-recent-feedback", {
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`
@@ -91,17 +84,18 @@ const Profile = () => {
         return;
       }
     })
-  }
+  }, [router])
+
   useEffect(() => {
     fetchFeedbacks();
-  }, [router, fetchFeedbacks])
+  }, [fetchFeedbacks])
 
-  
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     // Validate file
     if (!file.type.match('image.*')) {
       toast.error('Please select an image file (JPEG, PNG)');
@@ -112,11 +106,11 @@ const Profile = () => {
       return;
     }
     setIsChangingImage(true)
-  
+
     try {
       const formData = new FormData();
       formData.append('image', file);
-  
+
       const response = await axios.put("/api/change-avatar", formData, {
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`,
@@ -128,16 +122,15 @@ const Profile = () => {
       setIsChangingImage(false)
       dispatch(getNewAvatar(response.data.avatarUrl));
       toast.success("Profile picture updated!");
-      
-    } catch (err: any) {
+
+    } catch (err: unknown) {
       console.error("Upload error:", err);
-      toast.error(err.response?.data?.msg || "Failed to update avatar");
-      if (err.response?.status === 401) {
-        router.push("/client/auth/login");
+      if (err instanceof Error) {
+        toast.error(err.message || "Failed to update avatar");
       }
     }
   };
-  
+
 
   if (subTab === "feedback") return <FeedbackDashboard />;
   if (subTab === "enrollments") return <EnrollmentsPage />;
@@ -158,8 +151,8 @@ const Profile = () => {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden border-2 border-white shadow-md">
                 {isChangingImage ? (
                   <div
-                   className="rounded-full w-full h-full centered-flex"
-                  > 
+                    className="rounded-full w-full h-full centered-flex"
+                  >
                     <DeepseekSpinner />
                   </div>
                 ) : profileImage || usersInformation?.avatar ? (
@@ -239,6 +232,7 @@ const Profile = () => {
             value={metricsManager?.engagementRatio ? `${metricsManager.engagementRatio}x` : "N/A"}
             icon={<FiBarChart2 className="text-indigo-500" />}
             trend="up"
+
           />
           <StatCard
             title="Avg Completion"
@@ -276,7 +270,7 @@ const Profile = () => {
           </div>
         </div>
 
-      
+
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Student Engagement</h2>
           <div className="space-y-5">
@@ -386,7 +380,7 @@ const StatPill = ({ icon, value, label }: { icon: React.ReactNode, value?: numbe
   </div>
 );
 
-const StatCard = ({ title, value, icon, trend, isText }: {
+const StatCard = ({ title, value, icon, isText }: {
   title: string, value: string, icon: React.ReactNode,
   trend?: 'up' | 'down', isText?: boolean
 }) => (
@@ -418,33 +412,5 @@ const ActionButton = ({ icon, label, onClick, primary }: {
     <FiChevronRight size={16} />
   </button>
 );
-
-const MilestoneItem = ({ title, progress, isComplete, badge }: {
-  title: string, progress: number, isComplete: boolean, badge?: string
-}) => (
-  <div>
-    <div className="flex justify-between text-sm mb-1.5">
-      <span className={isComplete ? 'font-medium' : ''}>{title}</span>
-      <span className={isComplete ? 'text-green-600' : 'text-gray-500'}>
-        {Math.round(progress)}%
-      </span>
-    </div>
-    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-      <motion.div
-        className={`h-full rounded-full ${isComplete ? 'bg-gradient-to-r from-green-400 to-teal-500' : 'bg-gray-300'}`}
-        initial={{ width: 0 }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.8 }}
-      />
-    </div>
-    {isComplete && badge && (
-      <div className="flex items-center gap-2 mt-2 text-xs text-green-600">
-        <FiAward size={14} />
-        <span>{badge}</span>
-      </div>
-    )}
-  </div>
-);
-
 
 export default Profile;

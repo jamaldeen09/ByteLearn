@@ -26,7 +26,7 @@ const Courses = () => {
         })
     }, [dispatch])
 
-    
+
     return (
         <div className="lg:col-span-16 px-4 flex flex-col gap-4 h-[90vh] justify-items-center">
 
@@ -85,10 +85,10 @@ const Courses = () => {
 
                     <h3 className="text-xl font-medium text-gray-700 mb-2">No courses available</h3>
                     <p className="text-gray-500 max-w-md mb-6">
-                        It looks like there aren't any courses here yet. Be the first to create one!
+                        It looks like there aren&apos;t any courses here yet. Be the first to create one!
                     </p>
 
-                    <button  onClick={() => router.push('/client/dashboard?tab=course-creation')} className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200
+                    <button onClick={() => router.push('/client/dashboard?tab=course-creation')} className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200
                     hover:cursor-pointer">
                         Create New Course
                     </button>

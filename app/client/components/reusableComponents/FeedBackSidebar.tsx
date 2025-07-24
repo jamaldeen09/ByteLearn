@@ -121,7 +121,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
         return () => {
             socket.off(events.FEEDBACK_SENT);
         };
-    }, []);
+    }, [courseId]);
 
     // Load Feedback History
     useEffect(() => {
@@ -154,7 +154,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
             socket.off(events.JOIN_ROOM)
             socket.off(events.GET_FEEDBACK_HISTORY)
         };
-    }, [courseId]);
+    }, [courseId, userId]);
 
     useEffect(() => {
         if (!courseId) return;
@@ -236,7 +236,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
             socket.off(events.GET_FEEDBACK_HISTORY);
             socket.off(events.FEEDBACK_HISTORY_SENT);
         }
-    }, [handleMsgEditing])
+    }, [handleMsgEditing, clickedMsg?.msgContent, clickedMsg?.msgId, courseId])
 
     useEffect(() => {
         const handleFeedbackLiked = ({ messageId, likes, liked }: { messageId: string, likes: number, liked: boolean }) => {
@@ -276,7 +276,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
                 {isCreator ? <div
                     className="w-full h-full centered-flex"
                 >
-                    <p className="text-gray-400 text-xs">As the creator, you can't review your own course</p>
+                  <p className="text-gray-400 text-xs">As the creator, you can&apos;t review your own course</p>
                 </div> : <>
                     <h1 className="font-extrabold text-xl">Write a Feedback</h1>
                     <div className="flex flex-col gap-2">
@@ -453,7 +453,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
                                                         {likeCount} {likeCount === 1 ? "like" : "likes"}
                                                     </span>
                                                     {!isOwnMessage && existingCourseData?.creator._id !== userId && (
-                                                       
+
                                                         <button
                                                             onClick={() => handleLike(msg._id)}
                                                             className="text-gray-400 hover:text-gray-600 transition-colors"

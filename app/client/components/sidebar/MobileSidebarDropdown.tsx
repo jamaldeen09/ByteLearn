@@ -20,7 +20,6 @@ import { useUnread } from "../../utils/context"
 
 
 const MobileSidebarDropdown = () => {
-    const [isOpen, setIsOpen] = useState(false)
     const dispatch = useAppDispatch()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -31,8 +30,8 @@ const MobileSidebarDropdown = () => {
     const notifications = useAppSelector(state => state.notificationContainer.notifications);
     const notSeenNotifs = notifications.filter((notif) => !notif.isSeen);
 
-  
-   const { totalUnread, setTotalUnread } = useUnread()
+
+    const { totalUnread, setTotalUnread } = useUnread()
 
     const fetchNotifs = useCallback(() => {
         axios.get("/api/get-notifications", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
@@ -50,7 +49,7 @@ const MobileSidebarDropdown = () => {
     const fetchChatNotifications = useCallback(() => {
         axios.get("/api/unread-messages", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
             setTotalUnread(res.data.totalUnread);
-   
+
         }).catch((err) => {
             console.error(err)
             if (err.response.status === 401 || err.response.status === 403) {
@@ -59,15 +58,15 @@ const MobileSidebarDropdown = () => {
             }
             toast.error("A server error occurred. Please bare with us")
         })
-    }, [dispatch, router])
+    }, [dispatch, router, setTotalUnread])
 
     useEffect(() => {
         fetchNotifs()
-    }, [dispatch])
+    }, [dispatch, fetchNotifs])
 
     useEffect(() => {
         fetchChatNotifications()
-    }, [dispatch])
+    }, [dispatch, fetchChatNotifications])
 
 
     const fetchInfo = useCallback(async () => {
@@ -100,7 +99,8 @@ const MobileSidebarDropdown = () => {
         }
         const tabParam = tabMap[value] ? `?tab=${tabMap[value]}` : ""
         router.push(`/client/dashboard${tabParam}`)
-        setIsOpen(false)
+
+
     }
 
     const isActive = (value: string) => {
@@ -132,7 +132,7 @@ const MobileSidebarDropdown = () => {
                         <div className="border-b border-gray-100 px-4 py-3 flex justify-between items-center">
                             <h3 className="font-medium">Navigation</h3>
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => dispatch(untriggerCanvas())}
                                 className="text-gray-500 hover:text-gray-700"
                             >
                                 <X size={18} />
@@ -156,7 +156,7 @@ const MobileSidebarDropdown = () => {
                                         <span>{link.routeName}</span>
                                         {link.routeName === "Chats" && (
                                             <span className={`ml-auto ${totalUnread <= 0 ? "bg-transparent" : isNaN(totalUnread) ? "bg-transparent" : "bg-black"} text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
-                                                  {totalUnread <= 0 ? "" : isNaN(totalUnread) ? "" : totalUnread}
+                                                {totalUnread <= 0 ? "" : isNaN(totalUnread) ? "" : totalUnread}
                                             </span>
                                         )}
 

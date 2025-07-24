@@ -11,13 +11,10 @@ import { activatePreview, getImageId } from "@/app/redux/triggers/imagePreviewTr
 type ImagesViewProps = {
     trigger: boolean,
     setTrigger: React.Dispatch<React.SetStateAction<boolean>>,
-
-    galleryTrigger: boolean,
     setGalleryTrigger:  React.Dispatch<React.SetStateAction<boolean>>,
-    profileView: boolean,
     setProfileView:  React.Dispatch<React.SetStateAction<boolean>>,
 }
-const ImageView = ({ trigger, setTrigger, galleryTrigger, setGalleryTrigger, profileView, setProfileView }: ImagesViewProps) => {
+const ImageView = ({ trigger, setTrigger, setGalleryTrigger, setProfileView }: ImagesViewProps) => {
     const messages = useAppSelector(state => state.messages.messages)
     const dispatch = useAppDispatch()
 

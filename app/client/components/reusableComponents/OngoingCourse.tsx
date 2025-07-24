@@ -1,4 +1,3 @@
-import { heartIcon } from "@/app/icons/Icons"
 import { onGoingCoursesProps } from "../../types/types"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
@@ -8,7 +7,6 @@ import axios from "../../utils/config/axios"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { setEnrolledCourses } from "@/app/redux/coursesSlices/enrolledCoursesSlice"
 import toast from "react-hot-toast"
-
 import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
 import { useState } from "react"
 import BasicSpinner from "./BasicSpinner"
@@ -57,7 +55,7 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
     }
   };
 
-  // Determine color based on progress (red < 40%, yellow < 70%, green >= 70%)
+
   const progressColor = clampedProgress >= 70
     ? "bg-green-500"
     : clampedProgress >= 40
@@ -67,6 +65,7 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setItemBeingDeleted(courseId)
     try {
       const token = localStorage.getItem("bytelearn_token");
       await axios.delete(`/api/enrolled-courses/${courseId}`, {
@@ -121,7 +120,9 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
               <ArrowRightIcon />
             </span>
             <span
-              onClick={handleDelete}
+              onClick={
+                handleDelete
+              }
               className="group relative p-2 rounded-full transition-all duration-200 hover:bg-red-50 active:bg-red-50/50 hover:cursor-pointer"
               aria-label="Delete"
             >
@@ -153,6 +154,7 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
                 </div>
               ) : (
                 <svg
+
                   className="w-4 h-4 text-red-400 group-hover:text-red-500 transition-colors duration-200"
                   viewBox="0 0 24 24"
                   fill="none"

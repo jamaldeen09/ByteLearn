@@ -94,9 +94,7 @@ export type NotificationCardProps = {
 
 export type MyCoursesCardProps = {
   imgUrl: string;
-  category?: string;
   title: string;
-  desc: string;
   instructorImg: string;
   progress: number;
   instructorsName: string;

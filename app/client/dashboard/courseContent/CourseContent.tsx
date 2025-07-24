@@ -88,7 +88,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     };
 
     fetchCourse();
-  }, [courseId, dispatch]);
+  }, [courseId, dispatch, router]);
   useEffect(() => {
     const checkEnrollment = async () => {
       try {
@@ -148,11 +148,13 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
   }, [singleCourseInformation, completedSkillsContainer]);
 
   const fetchProgressData = useCallback(async () => {
+    setIsRefreshingProgress(true);
     try {
       const response = await axios.get("/api/progress", {
         headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` },
       });
       dispatch(setProgress(response.data.progress));
+      setIsRefreshingProgress(false);
     } catch (err) {
       console.error("Failed to fetch progress data:", err);
     }
@@ -182,7 +184,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
 
   useEffect(() => {
     fetchProgressData();
-  }, [dispatch]);
+  }, [dispatch, fetchProgressData]);
 
   const progressData = useAppSelector(state =>
     state.progress.find(p => p.course === courseId)
@@ -483,13 +485,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
             {/* Progress bar */}
             <div className="space-y-1 mt-2">
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                {/* <div
-                  className={cn(
-                    "h-full rounded-full transition-all duration-700",
-                    progressColor
-                  )}
-                  style={{ width: `${clampedProgress}%` }}
-                /> */}
+
                 {isRefreshingProgress ? (
                   <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
                 ) : (

@@ -69,7 +69,7 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
         fetchData()
     }, [fetchData])
 
-   
+
 
     if (enrolledCourses.length === 0) {
         return (
@@ -99,7 +99,7 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
 
                 <h3 className="text-2xl font-bold text-gray-900 mb-3 md:text-3xl">Your learning journey starts here</h3>
                 <p className="text-gray-600 mb-8 max-w-md text-sm md:text-base">
-                    You haven't enrolled in any courses yet. Discover our collection and start expanding your skills today.
+                    You haven&apos;t enrolled in any courses yet. Discover our collection and start expanding your skills today.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto px-4 sm:px-0">
@@ -112,68 +112,66 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
                     </button>
                 </div>
             </div>
-                
-              
+
+
         )
-      }
+    }
 
-return (
-    isLoading ? <div className="lg:col-span-16 overflow-y-auto h-full flex flex-col space-y-6">
+    return (
+        isLoading ? <div className="lg:col-span-16 overflow-y-auto h-full flex flex-col space-y-6">
 
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-6 justify-items-center">
-        {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="w-full h-90 md:max-w-[30rem] animate-pulse rounded-lg shadow-md px-4 py-1 space-y-4 bg-white">
-                {/* Image skeleton */}
-                <div className="w-full h-48 bg-gray-200 rounded-lg" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-6 justify-items-center">
+                {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="w-full h-90 md:max-w-[30rem] animate-pulse rounded-lg shadow-md px-4 py-1 space-y-4 bg-white">
+                        {/* Image skeleton */}
+                        <div className="w-full h-48 bg-gray-200 rounded-lg" />
 
-                {/* Title skeleton */}
-                <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                        {/* Title skeleton */}
+                        <div className="h-4 w-3/4 bg-gray-200 rounded" />
 
-                {/* Instructor section */}
-                <div className="flex items-center gap-2 mt-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full" />
-                    <div className="h-3 w-1/2 bg-gray-200 rounded" />
-                </div>
+                        {/* Instructor section */}
+                        <div className="flex items-center gap-2 mt-2">
+                            <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                            <div className="h-3 w-1/2 bg-gray-200 rounded" />
+                        </div>
 
-                {/* Last topic */}
-                <div className="h-3 w-1/3 bg-gray-200 rounded" />
+                        {/* Last topic */}
+                        <div className="h-3 w-1/3 bg-gray-200 rounded" />
 
-                {/* Progress bar */}
-                <div className="space-y-1 mt-2">
-                    <div className="h-3 w-12 bg-gray-200 rounded" />
-                    <div className="w-full h-2 bg-gray-200 rounded-full" />
+                        {/* Progress bar */}
+                        <div className="space-y-1 mt-2">
+                            <div className="h-3 w-12 bg-gray-200 rounded" />
+                            <div className="w-full h-2 bg-gray-200 rounded-full" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div> : courseId ? <CourseContent courseId={courseId} /> :
+            <div className="lg:col-span-16 overflow-y-auto h-full flex flex-col space-y-6">
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-12 ">
+                    <motion.div
+                        variants={container}
+                        initial="hidden"
+                        animate="visible"
+                        className="contents"
+                    >
+                        {enrolledCourses.map((course) => (
+                            <motion.div key={course._id} variants={item}>
+                                <MyCoursesCard
+                                    imgUrl={course.imageUrl || "https://i.pinimg.com/736x/9d/3b/e7/9d3be76d616a58069ccadd8d949cca72.jpg"}
+                                    title={course.title}
+                                    progress={calculateCourseProgress(course)}
+                                    courseId={course._id}
+                                    instructorsName={course.creator.fullName}
+                                    instructorImg={course.creator.profilePicture}
+                                />
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </div>
-        ))}
-    </div>
-</div> : courseId ? <CourseContent courseId={courseId} /> :
-        <div className="lg:col-span-16 overflow-y-auto h-full flex flex-col space-y-6">
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-12 ">
-                <motion.div
-                    variants={container}
-                    initial="hidden"
-                    animate="visible"
-                    className="contents"
-                >
-                    {enrolledCourses.map((course) => (
-                        <motion.div key={course._id} variants={item}>
-                            <MyCoursesCard
-                                imgUrl={course.imageUrl || "https://i.pinimg.com/736x/9d/3b/e7/9d3be76d616a58069ccadd8d949cca72.jpg"}
-                                title={course.title}
-                                desc={course.description}
-                                progress={calculateCourseProgress(course)}
-                                courseId={course._id}
-                                instructorsName={course.creator.fullName}
-                                instructorImg={course.creator.profilePicture}
-                                category={course.category}
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </div>
-        </div>
-)
+    )
 }
 
 export default MyCourses

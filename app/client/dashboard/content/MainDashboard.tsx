@@ -10,10 +10,8 @@ import { useCallback, useEffect, useState } from "react"
 import axios from "../../utils/config/axios"
 import { setEnrolledCourses } from "@/app/redux/coursesSlices/enrolledCoursesSlice"
 import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
-import Image from "next/image"
 import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import toast from "react-hot-toast"
 
 export const container: Variants = {
@@ -79,7 +77,7 @@ const MainDashboard = () => {
         fetchDashboardData()
     }, [fetchDashboardData])
 
-    const fetchMostLikedCourses = () => {
+    const fetchMostLikedCourses = useCallback(() => {
         axios.get("/api/most-popular-courses", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
             .then((res) => {
                 setMostLikedCourses(res.data.mostLikedCourses)
@@ -93,10 +91,11 @@ const MainDashboard = () => {
                     return;
                 }
             })
-    }
+    }, [router])
+    
     useEffect(() => {
         fetchMostLikedCourses();
-    }, [router, fetchMostLikedCourses])
+    }, [fetchMostLikedCourses])
 
     const calculateCourseProgress = useCallback((course: courseSchema): number => {
         if (!course?.topics || course.topics.length === 0) return 0

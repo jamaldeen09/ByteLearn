@@ -1,8 +1,8 @@
-import { useEffect, useCallback, useState } from "react"
+import { useEffect, useCallback } from "react"
 import { SidebarLinkSchema } from "../../types/types"
 import { sidebarlinks } from "../../utils/utils"
 import Logo from "../reusableComponents/Logo"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import axios from "../../utils/config/axios"
 import toast from "react-hot-toast"
@@ -54,15 +54,15 @@ const Sidebar = () => {
             }
             toast.error("A server error occurred. Please bare with us")
         })
-    }, [dispatch, router])
+    }, [dispatch, router, setTotalUnread])
 
     useEffect(() => {
         fetchNotifs()
-    }, [dispatch])
+    }, [dispatch, fetchNotifs])
 
     useEffect(() => {
         fetchChatNotifications()
-    }, [dispatch])
+    }, [dispatch, fetchChatNotifications])
 
     const handleRouteChange = (value: string) => {
         let tabParam = "";
@@ -83,7 +83,7 @@ const Sidebar = () => {
                 tabParam = "?tab=inbox";
                 break;
             case "g":
-                tabParam ="?tab=profile";
+                tabParam = "?tab=profile";
                 break;
 
             default:
@@ -132,7 +132,7 @@ const Sidebar = () => {
         return () => {
             socket.off(events.JOIN_ROOM)
         }
-    }, [dispatch])
+    }, [dispatch, usersInformation._id])
     return (
         <div className="col-span-1 hidden max-lg:col-span-3 py-4 md:flex flex-col bg-white/40 border border-gray-300 h-full">
             {/* Routes */}

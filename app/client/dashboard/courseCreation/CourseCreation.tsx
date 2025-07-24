@@ -181,7 +181,7 @@ const CourseCreation = (): React.ReactElement => {
                 console.error(err);
                 toast.error("Error occurred in getting creator's work");
             })
-    }, []);
+    }, [usersinfo.fullName]);
     return (
         <>
             <div className="col-span-16 min-h-screen p-6 flex flex-col">
@@ -328,7 +328,7 @@ const CourseCreation = (): React.ReactElement => {
                 {/* Created Courses Section */}
                 <div className="w-full min-h-fit flex flex-col gap-4 py-10">
                     <div className="w-full md:max-w-[440px] sm:mx-auto md:m-0 md:w-full">
-                      <h1 className="text-xl max-lg:text-2xl">Manage Courses</h1>
+                        <h1 className="text-xl max-lg:text-2xl">Manage Courses</h1>
                     </div>
                     <div className={`w-full h-fit grid md:grid-cols-2 lg:grid-cols-3 py-10 gap-6`}>
                         {loadingUsersCreatedCourse ? (
@@ -380,7 +380,7 @@ const CourseCreation = (): React.ReactElement => {
                                 </div>
                                 <h3 className="text-lg font-medium text-gray-700 mb-1">No courses created yet</h3>
                                 <p className="text-gray-500 text-center max-w-md">
-                                    You haven't created any courses. Get started by following the instructions to generate a course.
+                                    You haven&apos;t created any courses. Get started by following the instructions to generate a course.
                                 </p>
                             </div>
                         ) : usersCreatedCourse.map((course: courseSchema) => (

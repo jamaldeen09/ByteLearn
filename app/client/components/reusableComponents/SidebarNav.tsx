@@ -1,32 +1,15 @@
 "use client"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
-import { SidebarDropdownLinks } from "../../types/types"
 import { harmBurgerMenu } from "@/app/icons/Icons"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { triggerCanvas, untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
-import { sidebarDropdownLinks } from "../../utils/utils"
 import Image from 'next/image'
 
 const SidebarNav = () => {
     // trigger dropdown
-    const [triggerDropdown, setTriggerDropdown] = useState<boolean>(false)
     const dispatch = useAppDispatch()
     const usersInformation = useAppSelector(state => state.usersInformation)
-        
-    useEffect(() => {
-        document.body.addEventListener("click", () => {
-            setTriggerDropdown(false)
-            dispatch(untriggerCanvas())
-        })
-        return () => {
-            document.body.removeEventListener("click", () => {
-                setTriggerDropdown(false)
-                dispatch(untriggerCanvas())
-            })
-        }
-    }, [dispatch])
-
     return (
         <nav className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -47,7 +30,6 @@ const SidebarNav = () => {
 
                 <div className="flex items-center space-x-2 sm:space-x-4 relative w-full justify-end">
                     <Image 
-                        onClick={() => setTriggerDropdown(true)} 
                         className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" 
                         src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"} 
                         alt={`${usersInformation.fullName}'s profile picture`}

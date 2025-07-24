@@ -87,7 +87,6 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
     }
 
     const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
-    const [likes, setLikes] = useState<number>(foundCourse?.likes || 0);
     const [loadingAnim, setloadingAnim] = useState(false);
 
     const toggleLike = async () => {
@@ -105,7 +104,6 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
 
             // Update UI state
             setIsLike(!isLike);
-            setLikes(prev => isLike ? prev - 1 : prev + 1);
 
             toast.success(
                 `${foundCourse?.title} has been ${isLike ? "unliked" : "liked"}`

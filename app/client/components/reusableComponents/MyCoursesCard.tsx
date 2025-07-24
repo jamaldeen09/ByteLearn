@@ -4,7 +4,7 @@ import { MyCoursesCardProps } from "../../types/types"
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // Added Image import
+import Image from "next/image";
 import { useEffect } from "react";
 import axios from "@/app/client/utils/config/axios"
 import { getCourses } from "@/app/redux/coursesSlices/courseSlice";
@@ -13,18 +13,16 @@ const MyCoursesCard = ({
     imgUrl,
     instructorImg,
     title,
-    desc,
     progress,
     instructorsName,
     courseId,
-    category
 }: MyCoursesCardProps & { courseId: string }) => {
 
     const router = useRouter();
     const clampedProgress = Math.min(100, Math.max(0, progress));
     const dispatch = useAppDispatch()
     useEffect(() => {
-        axios.get("/api/courses",  { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} `} }).then((res) => {
+        axios.get("/api/courses", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} ` } }).then((res) => {
             dispatch(getCourses(res.data.courses));
         }).catch((err) => {
             console.error(err);
