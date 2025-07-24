@@ -1,9 +1,8 @@
 "use client"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
 import { harmBurgerMenu } from "@/app/icons/Icons"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
-import { triggerCanvas, untriggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
+import { triggerCanvas } from "@/app/redux/triggers/canvasTriggerSlice"
 import Image from 'next/image'
 
 const SidebarNav = () => {

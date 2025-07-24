@@ -1,6 +1,5 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
 import { X } from "lucide-react"
 import { sidebarlinks } from "../../utils/utils"
 import { SidebarLinkSchema } from "../../types/types"
@@ -58,7 +57,7 @@ const MobileSidebarDropdown = () => {
             }
             toast.error("A server error occurred. Please bare with us")
         })
-    }, [dispatch, router, setTotalUnread])
+    }, [router, setTotalUnread])
 
     useEffect(() => {
         fetchNotifs()

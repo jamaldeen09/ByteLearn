@@ -33,7 +33,6 @@ const MainChatArea = () => {
   const currentUserId = useAppSelector(state => state.usersInformation._id);
   const currentUserAvatar = useAppSelector(state => state.usersInformation.avatar);
   const currentUserFullname = useAppSelector(state => state.usersInformation.fullName)
-  const friends = useAppSelector(state => state.friendsContainer.friends)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter()
 

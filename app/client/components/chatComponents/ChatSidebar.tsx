@@ -180,7 +180,7 @@ const ChatSidebar = (): React.ReactElement => {
     return () => {
       socket.off(events.MESSAGES_MARKED_AS_READ, handleMessagesMarkedAsRead);
     };
-  }, []);
+  }, [setTotalUnread]);
 
   useEffect(() => {
     if (!clickedFriend) return

@@ -54,7 +54,7 @@ const Sidebar = () => {
             }
             toast.error("A server error occurred. Please bare with us")
         })
-    }, [dispatch, router, setTotalUnread])
+    }, [router, setTotalUnread])
 
     useEffect(() => {
         fetchNotifs()
