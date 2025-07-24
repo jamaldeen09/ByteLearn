@@ -17,13 +17,13 @@ export const enrolledCoursesSlice = createSlice({
       state.enrolledCourses = action.payload;
     },
     addEnrolledCourse: (state, action: PayloadAction<courseSchema>) => {
-      if (!state.enrolledCourses.some(course => course.id === action.payload.id)) {
+      if (!state.enrolledCourses.some(course => course._id === action.payload._id)) {
         state.enrolledCourses.push(action.payload);
       }
     },
     removeEnrolledCourse: (state, action: PayloadAction<string>) => {
       state.enrolledCourses = state.enrolledCourses.filter(
-        course => course.id !== action.payload
+        course => course._id !== action.payload
       );
     }
   }
