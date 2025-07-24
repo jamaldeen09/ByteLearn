@@ -28,9 +28,12 @@ const usersInformationSlice = createSlice({
             state._id = action.payload._id
             state.bio = action.payload.bio
             state.avatar = action.payload.avatar
+        },
+        getNewAvatar: (state, action: PayloadAction<string>) => {
+            state.avatar = action.payload
         }
     }
 })
 
-export const { getInformation } = usersInformationSlice.actions;
+export const { getInformation, getNewAvatar } = usersInformationSlice.actions;
 export default usersInformationSlice.reducer;

@@ -4,12 +4,12 @@ import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PaperPlaneIcon, FaceIcon } from "@radix-ui/react-icons";
+import { PaperPlaneIcon, FaceIcon, ArrowLeftIcon } from "@radix-ui/react-icons";
 import { EllipsisVerticalIcon, PaperclipIcon, XIcon } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { socket } from "../../utils/config/io";
 import { events } from "../../utils/events";
-import { addMessage, setMessages } from "@/app/redux/chatSlices/messagesSlice";
+import { addMessage, replaceMessage, setMessages } from "@/app/redux/chatSlices/messagesSlice";
 import { ChatDropDownData, IMessage } from "../../types/types";
 import Image from "next/image";
 import ProperDropdown from "../reusableComponents/ProperDropdown";
@@ -21,7 +21,10 @@ import ImagePreviewComponent from "../reusableComponents/ImagePreviewComponent";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { getFriends, removeFriend } from "@/app/redux/informationSlices/friendInformation";
-import { getClickedFriendId } from "@/app/redux/chatSlices/clickedFriend";
+import { getClickedFriendId, resetClickedFriend } from "@/app/redux/chatSlices/clickedFriend";
+import { motion } from "framer-motion";
+import BlackOrbitalLoader from "../reusableComponents/OrbitalLoader";
+import { useUnread } from "../../utils/context";
 
 
 const MainChatArea = () => {
@@ -34,6 +37,8 @@ const MainChatArea = () => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter()
 
+  const { setTotalUnread } = useUnread();
+
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -44,6 +49,8 @@ const MainChatArea = () => {
   const [imgViewTrigger, setImgViewTrigger] = useState<boolean>(false);
   const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
   const [isFriendTyping, setIsFriendTyping] = useState(false);
+  const [renderEmptyState, setRenderEmptyState] = useState<boolean>(false)
+  const [disableSendBtn, setDisabledSendBtn] = useState<boolean>(true);
 
   const dropDownData: ChatDropDownData[] = [
     {
@@ -81,10 +88,19 @@ const MainChatArea = () => {
     setShowEmojiPicker(false);
   }, []);
 
+  // const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file && file.type.startsWith('image/')) {
+  //     setPreviewUrl(URL.createObjectURL(file));
+  //     setDisabledSendBtn(false);
+  //   }
+  // }, []);
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
     }
   }, []);
 
@@ -115,13 +131,16 @@ const MainChatArea = () => {
   }, []);
 
   const handleSend = useCallback(async () => {
-    if (!message.trim() && !previewUrl) return;
+    if (!message.trim() && !previewUrl) {
+      return;
+    };
+
+    setIsSending(true);
 
     let imageUrl = null;
     if (fileInputRef.current?.files?.[0]) {
       imageUrl = await handleFileUpload(fileInputRef.current.files[0]);
     }
-
     const tempId = Date.now().toString();
     const now = new Date().toISOString();
 
@@ -135,7 +154,7 @@ const MainChatArea = () => {
       status: "sent",
       roomId: "",
     };
-
+    setIsSending(false);
     dispatch(addMessage(newMessage));
 
     socket.emit(events.SEND_MESSAGE, {
@@ -146,8 +165,13 @@ const MainChatArea = () => {
 
     setMessage("");
     setPreviewUrl(null);
+
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [ message,
+    return () => {
+      socket.off(events.SEND_MESSAGE)
+    }
+  }, [
+    message,
     previewUrl,
     dispatch,
     fileInputRef,
@@ -155,12 +179,12 @@ const MainChatArea = () => {
     currentUserAvatar,
     currentUserFullname,
     friendInfo,
-    friendId]);
+    friendId
+  ]);
 
   const handleRemoveFriend = async (friendId: string) => {
     try {
       const token = localStorage.getItem("bytelearn_token");
-
       const response = await axios.delete(`/api/friends/${friendId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -170,7 +194,7 @@ const MainChatArea = () => {
       if (response.data.success) {
         toast.success("Friend removed successfully");
 
-        // Optionally update Redux
+
         dispatch(removeFriend(friendId));
         dispatch(setMessages([]));
         dispatch(getClickedFriendId(""));
@@ -228,8 +252,6 @@ const MainChatArea = () => {
 
   useEffect(() => {
     if (!messageSendEvent) return;
-
-    setIsSending(true);
     setLoadingMessages(true);
 
     const handleMessageHistory = ({ messages }: { messages: IMessage[] }) => {
@@ -247,18 +269,42 @@ const MainChatArea = () => {
     };
   }, [messageSendEvent, dispatch]);
 
+  const messagesRef = useRef<IMessage[]>(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
+    let gotMessages: IMessage[] = []
     const handleReceivedMessage = (data: { message: IMessage }) => {
-      dispatch(addMessage(data.message));
-    };
+      const incoming = data.message;
+      gotMessages.push(data.message);
 
+
+      // Ignore if from current user
+      if (String(incoming.sender._id) === String(currentUserId)) return;
+
+      setTotalUnread((prev) => prev + 1);
+      // Replace temp message if it matches content + time + sender
+      const matchIndex = messagesRef.current.findIndex(msg =>
+        msg.content === incoming.content &&
+        new Date(msg.sentAt).getTime() === new Date(incoming.sentAt).getTime() &&
+        msg.sender._id === incoming.sender._id &&
+        msg.receiver._id === incoming.receiver._id
+      );
+
+      if (matchIndex !== -1) {
+        dispatch(replaceMessage({ index: matchIndex, newMessage: incoming }));
+      } else {
+        dispatch(addMessage(incoming));
+      }
+    };
     socket.on(events.RECEIVED_MESSAGE, handleReceivedMessage);
 
     return () => {
-      socket.off(events.RECEIVED_MESSAGE, handleReceivedMessage);
+      socket.off(events.RECEIVED_MESSAGE);
     };
-  }, [dispatch]);
+  }, [currentUserId]);
 
 
   useEffect(() => {
@@ -266,33 +312,102 @@ const MainChatArea = () => {
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, dispatch]);
 
   useEffect(() => {
-    socket.on(events.REMOVED_FRIEND_NOTIFICATION, ({ friendId }) => {
-      const friendInfo = friends.find((friend) => friend._id === friendId)
-      toast.success(`${friendInfo?.friendName} successfully unadded you`);
-      return;
-    })
-  }, [])
+    const container = scrollContainerRef.current;
+    if (container && messages.length > 0) {
+
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+  }, [messages]);
+
+
+
+
+  useEffect(() => {
+    const shouldEnable = message.trim() !== "" || previewUrl !== null;
+    setDisabledSendBtn(!shouldEnable);
+  }, [message, previewUrl]);
+
+  useEffect(() => {
+    if (friendId) {
+      setLoadingMessages(true);
+
+      setTimeout(() => {
+        setLoadingMessages(false)
+        setRenderEmptyState(false)
+      }, 2000)
+    } else {
+      setRenderEmptyState(true)
+    }
+  }, [friendId])
 
   return (
-    !friendInfo ? (
-      // No friend selected
-      <div className="w-full h-full border col-centered gap-4">
-        <Image
-          src="/manSeated.jpg"
-          alt="An illustration of a man sitting while using his laptop"
-          width={500}
-          height={500}
-          priority={true}
-        />
-        <p className="text-sm text-gray-400">Start chatting with friends</p>
+    loadingMessages ? (
+      <div
+        className="centered-flex h-screen w-full border lg:rounded-2xl border-gray-300"
+      >
+        <BlackOrbitalLoader />
+      </div>
+    ) : renderEmptyState ? (
+      <div className="w-full h-screen lg:rounded-2xl bg-gray-50 flex flex-col items-center justify-center p-8">
+        <div className="relative w-64 h-64 mb-6">
+          <div className="absolute inset-0 bg-white rounded-full shadow-sm"></div>
+          <div className="relative flex items-center justify-center w-full h-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="96"
+              height="96"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-gray-300"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <circle cx="9" cy="9" r="1" fill="currentColor"></circle>
+              <circle cx="15" cy="9" r="1" fill="currentColor"></circle>
+            </svg>
+          </div>
+        </div>
+
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-medium text-gray-700">No conversation selected</h3>
+          <p className="text-gray-400 max-w-md">
+            Choose a friend from your list to start messaging
+          </p>
+        </div>
+
+        <div className="mt-8 w-full max-w-xs border-t border-gray-200 pt-6 flex justify-center">
+          <div className="flex items-center space-x-1 text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span className="text-sm">Add new friend</span>
+          </div>
+        </div>
       </div>
     ) :
-      <div className="h-full w-full border px-2 py-2 flex flex-col">
+      <div className="w-full border px-2 py-2 flex flex-col h-full lg:rounded-2xl">
         {/* header */}
-        <div className="w-full bg-gray-100 h-20 rounded-lg flex items-center justify-between space-x-4 px-4">
+        <div className="w-full bg-gradient-to-br from-black to-black/70 text-white h-20 rounded-3xl flex items-center justify-between space-x-4 px-4
+        shadow-xl hover:shadow-2xl transition-shadow duration-300">
           <div className="flex items-center space-x-2">
             <Image
               src={friendInfo?.avatar || "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg"}
@@ -304,7 +419,7 @@ const MainChatArea = () => {
             />
 
             <div className="flex flex-col">
-              <h1 className="font-extrabold">{friendInfo?.fullName}</h1>
+              <h1 className="font-extrabold text-[0.8rem] sm:text-[1rem]">{friendInfo?.fullName}</h1>
               <p className="text-gray-400 text-xs">{isFriendTyping
                 ? "typing..."
                 : friendInfo?.isOnline
@@ -313,13 +428,20 @@ const MainChatArea = () => {
             </div>
           </div>
 
-          <div className="fit">
+          <div className="fit flex items-center space-x-4">
             <ProperDropdown
               dropdownTitle={friendInfo?.fullName}
               dropdownItems={dropDownData}
             >
               <EllipsisVerticalIcon className="hover:cursor-pointer" />
             </ProperDropdown>
+            <button
+              className="bg-white text-back rounded-full w-5 h-5 justify-center items-center hover:scale-105 active:scale-90 duration-300 hover:cursor-pointer flex lg:hidden"
+            >
+              <ArrowLeftIcon onClick={() => {
+                dispatch(resetClickedFriend());
+              }} className="text-black" />
+            </button>
           </div>
         </div>
 
@@ -363,7 +485,7 @@ const MainChatArea = () => {
                           {message.content && (
                             <p className="text-sm">{message.content}</p>
                           )}
-                          <p className="text-xs text-gray-500 text-right mt-1">
+                          <p className="text-xs text-black text-right mt-1">
                             {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -396,11 +518,11 @@ const MainChatArea = () => {
                           className="w-8 h-8 rounded-full"
                           unoptimized={true}
                         />
-                        <div className="bg-black px-4 py-2 rounded-lg rounded-bl-none text-white">
+                        <div className="bg-gradient-to-br from-black to-black/70 px-4 py-2 rounded-lg rounded-bl-none text-white">
                           {message.content && (
                             <p className="text-sm">{message.content}</p>
                           )}
-                          <p className="text-xs text-gray-500 text-right mt-1">
+                          <p className="text-xs text-white text-right mt-1">
                             {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -421,25 +543,42 @@ const MainChatArea = () => {
               </div>
             )}
 
-            <div className="flex items-center gap-2 h-16">
+            <div className="flex items-center gap-2 iphone:h-18 sm:h-16">
               {/* Input Container */}
               <div className="relative flex-1">
                 <button
                   type="button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute left-3 top-6 sm:top-6 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
                   <FaceIcon className="h-5 w-5" />
                 </button>
 
-                {/* Input Field */}
+
+                {/* Desktop Input */}
                 <Input
                   value={message}
-                  // onChange={(e) => setMessage(e.target.value)}
                   onChange={(e) => handleTyping(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (!disableSendBtn || previewUrl)) {
+                      handleSend();
+                    }
+                  }}
                   placeholder="Type a message..."
-                  className="pl-10 pr-12 h-12 rounded-full"
+                  className="pl-10 pr-12 h-12 rounded-full hidden sm:block"
+                />
+
+                {/* Mobile Input */}
+                <Input
+                  value={message}
+                  onChange={(e) => handleTyping(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (!disableSendBtn || previewUrl)) {
+                      handleSend();
+                    }
+                  }}
+                  placeholder="message..."
+                  className="pl-10 pr-12 h-12 rounded-full block sm:hidden"
                 />
 
                 {/* File Preview (inside input, right side) */}
@@ -481,18 +620,30 @@ const MainChatArea = () => {
                 />
               </Button>
 
-              {/* Send Button (outside input) */}
-              <Button
-                onClick={handleSend}
-                disabled={(!message.trim() && !previewUrl) || isSending}
-                className="h-12 w-12 rounded-full bg-black text-white hover:bg-gray-800 hover:cursor-pointer"
-              >
-                {isSending ? (
+
+
+              {isSending ? (
+                <button className={`bg-gray-300 h-12 w-12 rounded-full text-white cursor-not-allowed centered-flex`}>
                   <WhiteSpinner />
-                ) : (
+                </button>
+              ) : (
+                <motion.button
+                  onClick={handleSend}
+                  disabled={disableSendBtn}
+                  whileHover={!disableSendBtn ? {
+                    scale: 1.1,
+                    filter: "brightness(80%)"
+                  } : {}}
+                  whileTap={!disableSendBtn ? { scale: 0.9 } : {}}
+                  transition={{ duration: 0.3, type: "spring", damping: 10, stiffness: 100 }}
+                  className={`h-12 w-12 rounded-full ${disableSendBtn
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-gradient-to-br from-black to-black/70 hover:cursor-pointer"
+                    } text-white centered-flex`}
+                >
                   <PaperPlaneIcon className="h-5 w-5" />
-                )}
-              </Button>
+                </motion.button>
+              )}
             </div>
           </div>
         </div>
@@ -523,5 +674,4 @@ const MainChatArea = () => {
       </div>
   )
 }
-
 export default MainChatArea

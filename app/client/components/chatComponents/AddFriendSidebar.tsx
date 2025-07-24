@@ -2,22 +2,16 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { AddComponentProps, EnableAddFriendProps } from "../../types/types"
 import { ArrowLeftIcon } from "@radix-ui/react-icons"
-import { newContact, newGroup } from "@/app/icons/Icons"
+import { newContact } from "@/app/icons/Icons"
 import AddComponent from "./AddComponent"
-
 import { useAppDispatch } from "@/app/redux/essentials/hooks"
 import { newFriend } from "@/app/redux/triggers/newFriendTrigger"
-import { newGroupTrigger } from "@/app/redux/triggers/groupCreationTrigger"
 
 
 const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFriendProps) => {
     const dispatch = useAppDispatch()
     const addButtonUtils: AddComponentProps[] = [
-        {
-            icon: newGroup, purpose: "New Group", whatTheButtonDoes: () => {
-                dispatch(newGroupTrigger())
-            }
-        },
+      
         {
             icon: newContact, purpose: "New Friend", whatTheButtonDoes: () => {
                 dispatch(newFriend())
@@ -57,7 +51,6 @@ const AddFriendSidebar = ({ triggerAddFriend, setTriggerAddFriend }: EnableAddFr
                                             icon={addComponent.icon}
                                             purpose={addComponent.purpose}
                                             whatTheButtonDoes={addComponent.whatTheButtonDoes}
-
                                         />
                                     )
                                 })}

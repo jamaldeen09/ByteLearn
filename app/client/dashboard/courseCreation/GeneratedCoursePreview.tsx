@@ -2,20 +2,22 @@
 "use client"
 import { courseSchema } from "../../types/types";
 
-const GeneratedCoursePreview = ({ course }: { course: courseSchema }) => {
+type generatedCoursePreview = {
+  course: courseSchema,
+  onPublish: (id: string) => void;
+  onDraft: (id: string) => void;
+}
+
+const GeneratedCoursePreview = ({ course, onPublish, onDraft }: generatedCoursePreview) => {
     // Mock data in case no course is provided (for design purposes)
   
     return (
       <div className="flex-1">
         <div className="h-full bg-white rounded-xl md:rounded-3xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300">
           {/* Course Header - Mobile Optimized */}
-          <div className="relative h-40 sm:h-48 bg-gray-900 overflow-hidden">
-            <img 
-              src={course?.imageUrl} 
-              alt={course?.title}
-              className="w-full h-full object-cover opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent p-4 sm:p-6 flex flex-col justify-end">
+          <div className="relative h-36  bg-gray-900 overflow-hidden">
+            <div className="absolute inset-0 bg-gray-900  p-4 sm:p-6 flex flex-col justify-end
+              h-fit">
               <div className="flex items-center space-x-2 mb-1 sm:mb-2">
                 <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">
                   {course?.category}
@@ -52,7 +54,7 @@ const GeneratedCoursePreview = ({ course }: { course: courseSchema }) => {
                           </span>
                           <div>
                             <p className="font-medium text-gray-900 text-sm sm:text-base">{skill.skillTitle}</p>
-                            {/* <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">{skill.content}</p> */}
+            
                           </div>
                         </li>
                       ))}
@@ -64,10 +66,13 @@ const GeneratedCoursePreview = ({ course }: { course: courseSchema }) => {
   
             {/* Action Buttons - Stacked on Mobile */}
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-3 sm:pt-4">
-              <button className="w-full sm:flex-1 bg-gray-900 text-white py-2 sm:py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm sm:text-base">
-                Publish Course
+              <button onClick={() => onPublish(course?._id)}
+              className={`w-full sm:flex-1 bg-gray-900 text-white py-2 sm:py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm sm:text-base`}>
+                <p>Publish Course</p>
               </button>
-              <button className="w-full sm:flex-1 border border-gray-300 py-2 sm:py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base">
+              <button 
+              onClick={() => onDraft(course?._id)}
+              className="w-full sm:flex-1 border border-gray-300 py-2 sm:py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base">
                 Save Draft
               </button>
             </div>

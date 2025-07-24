@@ -2,7 +2,7 @@
 import Sidebar from "../components/sidebar/Sidebar"
 import MainDashboard from "./content/MainDashboard";
 import SidebarNav from "../components/reusableComponents/SidebarNav";
-import MobileSidebar from "../components/sidebar/MobileSidebar";
+import MobileSidebarDropdown from "../components/sidebar/MobileSidebarDropdown";
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import MyCourses from "./content/MyCourses";
@@ -15,6 +15,7 @@ import { getInformation } from "@/app/redux/informationSlices/usersInformationSl
 import Chat from "./chat/Chat";
 import Inbox from "./chat/Inbox";
 import CourseCreation from "./courseCreation/CourseCreation";
+import Profile from "./profile/Profile";
 
 const DashboardPageContent = (): React.ReactElement => {
   const canvas = useAppSelector((state) => state.canvasTrigger.canvas)
@@ -26,11 +27,12 @@ const DashboardPageContent = (): React.ReactElement => {
   const tab = searchParams.get('tab');
   const courseId = searchParams.get('courseId');
 
-  const route = tab === "my-courses" ? "b" : 
-              tab === "courses" ? "c" : 
-              tab === "chat" ? "d" : 
-              tab === "inbox" ? "e" :
-              tab === "course-creation" ? "f": "a";
+  const route = tab === "my-courses" ? "b" :
+    tab === "courses" ? "c" :
+      tab === "chat" ? "d" :
+        tab === "inbox" ? "e" :
+          tab === "course-creation" ? "f" :
+            tab === "profile" ? "g" : "a";
 
   // fetch usersInformation
   useEffect(() => {
@@ -43,13 +45,13 @@ const DashboardPageContent = (): React.ReactElement => {
       }
 
       setIsLoading(true)
-      axios.get(`/api/get-information`, { headers: { "Authorization": `Bearer ${token}` }} )
+      axios.get(`/api/get-information`, { headers: { "Authorization": `Bearer ${token}` } })
         .then((res) => {
           dispatch(getInformation(res.data.payload))
         })
         .catch((err) => {
           console.error(err)
-          if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404){
+          if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
             router.push("/client/auth/login");
             return;
           }
@@ -89,23 +91,24 @@ const DashboardPageContent = (): React.ReactElement => {
             />
 
             {/* Mobile Sidebar */}
-            <MobileSidebar/>
+            <MobileSidebarDropdown />
           </>
         )}
       </AnimatePresence>
 
       <div className="md:col-span-9 max-lg:col-span-13 bg-white overflow-y-auto">
-        <div className="min-h-fit flex flex-col gap-10">
+        <div className="min-h-fit flex flex-col ">
           <SidebarNav />
 
           <div className="grid lg:grid-cols-14">
             {route === "a" && <MainDashboard />}
             {route === "b" && <MyCourses courseId={courseId} />}
             {route === "c" && <Courses />}
-            {route === "d" && <Chat />} 
+            {route === "d" && <Chat />}
             {route === "e" && <Inbox />}
             {route === "f" && <CourseCreation />}
-            {!(route === "a" || route === "b" || route === "c" || route === "d" || route === "e" || route === "f") && (
+            {route === "g" && <Profile />}
+            {!(route === "a" || route === "b" || route === "c" || route === "d" || route === "e" || route === "f" || route === "g") && (
               <div>Coming soon</div>
             )}
           </div>

@@ -9,7 +9,7 @@ import { XIcon } from "lucide-react"
 
 
 
-const ProfileViewSidebar = ({ fullName, bio, trigger, setTrigger, avatar, imgView, triggerImgView }: ProfileSidebar) => {
+const ProfileViewSidebar = ({ fullName, bio, trigger, setTrigger, avatar, triggerImgView }: ProfileSidebar) => {
     
     return (
         <AnimatePresence>

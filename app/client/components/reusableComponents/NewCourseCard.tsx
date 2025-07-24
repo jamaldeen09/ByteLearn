@@ -16,11 +16,11 @@ const NewCourseCard = ({ courseImg, instructorImg, instructorName, title, likes,
     
 
     return (
-        <div className="w-full max-w-[27rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
+        <div className="w-full md:max-w-[27rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
             {/* Card content */}
             <div onClick={handleCardClick}>
                 {/* Top: Image + Gradient Overlay */}
-                <div className="relative w-full h-72 group">
+                <div className="relative w-full h-90 md:h-76 group">
                     <Image
                         src={courseImg}
                         alt={title}
@@ -31,7 +31,7 @@ const NewCourseCard = ({ courseImg, instructorImg, instructorName, title, likes,
                     />
                     {/* Gradient Overlay */}
                     <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
-                        <h1 className="text-xl text-white font-bold">{title}</h1>
+                        <h1 className="text-md max-lg:text-xl text-white font-bold">{title}</h1>
                     </div>
                 </div>
 

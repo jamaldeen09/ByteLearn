@@ -1,10 +1,9 @@
 "use client"
 import { useAppSelector } from "@/app/redux/essentials/hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import Image from "next/image";
 import { courseSchema, topicSchema } from "../../types/types";
-import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import axios from "@/app/client/utils/config/axios"
 import toast from "react-hot-toast";
@@ -38,6 +37,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
 
     const [open, setOpen] = useState<boolean>(false);
     const [clicked, setClicked] = useState<string>("")
+    const totalSkills = foundCourse?.topics.map((skill) => skill.skills).map((skill) => skill.length).reduce((acc, num) => acc + num, 0)
 
     useEffect(() => {
         if (!openClickedWork || !foundCourse) return;
@@ -117,6 +117,8 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
             setloadingAnim(false);
         }
     };
+    const currentUserId = useAppSelector(state => state.usersInformation._id)
+    const isCreator = currentUserId === foundCourse?.creator._id;
 
     if (!foundCourse) return null;
 
@@ -186,29 +188,68 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                 </div>
 
                                                 <div className="w-fit flex space-x-4 items-center">
-                                                    <button
-                                                        onClick={toggleLike}
-                                                        className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300 w-8 h-8 centered-flex"
-                                                    >
-                                                        {loadingAnim ?
-                                                            <BasicSpinner />
-                                                            : <FontAwesomeIcon icon={faHeart} className={`w-4 h-4 ${isLike && "text-red-600"}`} />}
-                                                    </button>
-                                                    {isEnrolled ? <button
-                                                        className={`bg-gray-300 text-gray-400 font-extrabold px-8 py-3 rounded-full cursor-not-allowed
-                ${enrollLoading && "centered-flex space-x-4"}`}>
-                                                        <p>Enrolled</p>
-                                                    </button> : <button onClick={() => enroll(foundCourse?._id ? foundCourse._id : "")}
-                                                        className={`bg-black text-white font-extrabold px-8 py-3 hover:cursor-pointer rounded-full hover:bg-black/90
-                ${enrollLoading && "centered-flex space-x-4"}`}>
-                                                        <p>Enroll</p>
-                                                        {enrollLoading && <WhiteSpinner />}
-                                                    </button>}
+                                                    {isCreator ? (
+
+                                                        <div className="relative group">
+                                                            {/* Main Badge */}
+                                                            <div className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1.5 rounded-full shadow-lg">
+                                                                <svg
+                                                                    className="w-4 h-4 text-white"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="text-xs font-semibold text-white tracking-wide">CREATOR</span>
+                                                            </div>
+
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={toggleLike}
+                                                                className="bg-white rounded-full p-2 hover:cursor-pointer border border-gray-300 w-8 h-8 centered-flex"
+                                                            >
+                                                                {loadingAnim ? (
+                                                                    <BasicSpinner />
+                                                                ) : (
+                                                                    <FontAwesomeIcon
+                                                                        icon={faHeart}
+                                                                        className={`w-4 h-4 ${isLike && "text-red-600"}`}
+                                                                    />
+                                                                )}
+                                                            </button>
+
+                                                            {isEnrolled ? (
+                                                                <button
+                                                                    className={`bg-gray-300 text-gray-400 font-extrabold px-8 py-3 rounded-full cursor-not-allowed
+            ${enrollLoading && "centered-flex space-x-4"}`}
+                                                                >
+                                                                    <p>Enrolled</p>
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => enroll(foundCourse?._id ? foundCourse._id : "")}
+                                                                    className={`bg-black text-white font-extrabold px-8 py-3 hover:cursor-pointer rounded-full hover:bg-black/90
+            ${enrollLoading && "centered-flex space-x-4"}`}
+                                                                >
+                                                                    <p>Enroll</p>
+                                                                    {enrollLoading && <WhiteSpinner />}
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <div className="w-full flex items-center space-x-10">
-                                                <p className="text-gray-400 text-xs">Skills: {foundCourse?.topics.map((topic) => topic.skills.length)}</p>
+                                                <p className="text-gray-400 text-xs">Skills: {totalSkills}</p>
                                                 <p className="text-gray-400 text-xs">Category: {foundCourse?.category}</p>
                                             </div>
 
@@ -246,7 +287,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                     {loadingCreatorsWork ? (
                                                         Array.from({ length: 3 }).map((_, idx) => (
                                                             <div key={idx} className="w-full max-w-[20rem] rounded-lg overflow-hidden animate-pulse space-y-2">
-                                                                <div className="w-full h-64 bg-gray-200 rounded-lg" />
+                                                                <div className="w-full h-90 md:h-64 bg-gray-200 rounded-lg" />
                                                                 <div className="flex items-center justify-between px-2">
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="w-8 h-8 bg-gray-200 rounded-full" />
@@ -268,7 +309,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
                                                                 className="w-full md:max-w-[20rem] max-lg:w-[18rem] lg:max-w-[20rem] overflow-hidden rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer"
                                                             >
                                                                 <div>
-                                                                    <div className="relative w-full h-64 group">
+                                                                    <div className="relative w-full h-90 md:h-64 group">
                                                                         <Image
                                                                             src={work?.imageUrl || "https://craftsnippets.com/articles_images/placeholder/placeholder.jpg"}
                                                                             alt={`${work?.title}'s Image URL`}

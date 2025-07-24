@@ -28,7 +28,7 @@ const CourseCardComponent = ({
       {/* Card content */}
       <div onClick={handleCardClick}>
         {/* Top: Image + Gradient Overlay */}
-        <div className="relative w-full h-72 group">
+        <div className="relative w-full h-90 md:h-76 group">
           <Image
             src={imageUrl}
             alt={title}
@@ -39,7 +39,7 @@ const CourseCardComponent = ({
           />
           {/* Gradient Overlay */}
           <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
-            <h1 className="text-xl text-white font-bold">{title}</h1>
+            <h1 className="text-md max-lg:text-xl text-white font-bold">{title}</h1>
           </div>
         </div>
 
@@ -48,13 +48,13 @@ const CourseCardComponent = ({
           <div className="flex items-center gap-2">
             <Image
               unoptimized={true}
-              src={creator.profilePicture}
+              src={creator?.profilePicture}
               alt="Instructor"
               width={30}
               height={30}
               className="rounded-full"
             />
-            <p className="text-sm">{creator.fullName}</p>
+            <p className="text-sm">{creator?.fullName}</p>
           </div>
           <div className="flex items-center gap-2">
             <FontAwesomeIcon icon={faHeart} className="text-gray-300 w-4 h-4" />

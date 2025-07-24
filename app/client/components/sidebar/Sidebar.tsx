@@ -13,6 +13,8 @@ import { events } from "../../utils/events"
 import { motion } from "framer-motion"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faMagicWandSparkles } from "@fortawesome/free-solid-svg-icons"
+import { useUnread } from "../../utils/context"
+
 
 const Sidebar = () => {
     const router = useRouter();
@@ -21,11 +23,11 @@ const Sidebar = () => {
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(state => state.notificationContainer.notifications);
     const notSeenNotifs = notifications.filter((notif) => !notif.isSeen);
-    const [unreadMessages, setUnreadMessages] = useState<number>(0);
     const usersInformation = useAppSelector(state => state.usersInformation)
     const currentTab = searchParams.get('tab');
 
     const isActiveButton = currentTab === 'course-creation';
+    const { totalUnread, setTotalUnread } = useUnread();
 
     const fetchNotifs = useCallback(() => {
         axios.get("/api/get-notifications", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
@@ -42,7 +44,8 @@ const Sidebar = () => {
 
     const fetchChatNotifications = useCallback(() => {
         axios.get("/api/unread-messages", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
-            setUnreadMessages(res.data.count);
+            console.log("🔄 Total unread from server:", res.data.totalUnread);
+            setTotalUnread(res.data.totalUnread);
         }).catch((err) => {
             console.error(err)
             if (err.response.status === 401 || err.response.status === 403) {
@@ -79,6 +82,9 @@ const Sidebar = () => {
             case "e":
                 tabParam = "?tab=inbox";
                 break;
+            case "g":
+                tabParam ="?tab=profile";
+                break;
 
             default:
                 tabParam = "";
@@ -93,6 +99,7 @@ const Sidebar = () => {
             case "c": return tab === "courses";
             case "d": return tab === "chat";
             case "e": return tab === "inbox";
+            case "g": return tab === "profile";
             default: return false;
         }
     };
@@ -157,8 +164,8 @@ const Sidebar = () => {
                                 {/* Chats Number */}
                                 {link.routeName === "Chats" && (
                                     <span className={`${tab === "chat" ? "bg-white text-black" : "text-white"} 
-                                        text-xs font-bold ${unreadMessages <= 0 ? "" : "bg-black w-4 h-4"} rounded-full absolute centered-flex top-0 left-4 unread`}>
-                                        {unreadMessages <= 0 ? "" : unreadMessages}
+                                        text-xs font-bold ${totalUnread <= 0 || isNaN(totalUnread) ? "" : "bg-black w-4 h-4"} rounded-full absolute centered-flex top-0 left-4 unread`}>
+                                        {totalUnread <= 0 ? "" : isNaN(totalUnread) ? "" : totalUnread}
                                     </span>
                                 )}
 

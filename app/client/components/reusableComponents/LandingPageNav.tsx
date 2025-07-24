@@ -1,14 +1,12 @@
 "use client"
 import Logo from "./Logo"
-import { useButtonInformation } from "../../utils/utils"
-import { ButtonProps } from "../../types/types"
+import { useRouter } from "next/navigation"
 
 
 
 const LandingPageNav = (): React.ReactElement => {
   
-  // Buttons
-  const buttonInfo: ButtonProps[] = useButtonInformation();
+  const router = useRouter()
  
   return (
     <nav
@@ -22,7 +20,8 @@ const LandingPageNav = (): React.ReactElement => {
 
         {/* Buttons (Desktop)*/}
         <div className="text-sm space-x-6 fit flex items-center">
-          <li className="hover:text-blue-500 hover:cursor-pointer" >Sign in</li>
+          <li onClick={() => router.push("/client/auth/login")}
+          className="hover:text-blue-500 hover:cursor-pointer" >Sign in</li>
         </div>
     </nav>
   )

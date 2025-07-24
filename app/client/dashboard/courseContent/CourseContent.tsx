@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { getSingleCourse } from "@/app/redux/coursesSlices/singleCourseSlice"
-import BlackSpinner from "@/app/client/components/reusableComponents/BlackSpinner"
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon } from "@radix-ui/react-icons"
 import TopicContentDisplay from "@/app/client/components/reusableComponents/TopicContentDisplay"
@@ -13,12 +12,11 @@ import { useRouter, useSearchParams } from "next/navigation"
 import SkillContent from "./SkillContent"
 import QuizResult from "./QuizResult"
 import { getCompletedSkills } from "@/app/redux/coursesSlices/completedSkillsSlice"
-import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
 import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
 import Image from 'next/image';
 import { singleCourseSchema, SkillsSchema, topicSchema } from "@/app/client/types/types"
 
-const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
+const CourseContent = ({ courseId }: MyCoursesProp) => {
   const searchParams = useSearchParams();
   const rawSingleCourseInformation = useAppSelector((state) => state.singleCourse);
 
@@ -33,7 +31,9 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   const router = useRouter();
   const [progressPercentage, setProgressPercentage] = useState<number>(10);
   const dispatch = useAppDispatch();
-
+  const [isRefreshingProgress, setIsRefreshingProgress] = useState<boolean>(false);
+  const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
+  const [enrollmentChecked, setEnrollmentChecked] = useState<boolean>(false);
 
   // Ensure progress is between 0-100
   const clampedProgress = Math.min(100, Math.max(0, progressPercentage));
@@ -63,11 +63,10 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
 
   // fetch course details with courseId
   useEffect(() => {
-
     const fetchCourse = async () => {
       try {
-        const response = await axios.get(`/api/single-course/${courseId}`, { 
-          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
+        const response = await axios.get(`/api/single-course/${courseId}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
         });
         dispatch(getSingleCourse(response.data.courseDetails));
       } catch (err: unknown) {
@@ -87,29 +86,40 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         }
       }
     };
-    
+
     fetchCourse();
   }, [courseId, dispatch]);
-
   useEffect(() => {
-    const fetchCourses = async () => {
+    const checkEnrollment = async () => {
       try {
-        const response = await axios.get("/api/courses",  { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} `} });
-        dispatch(getCourses(response.data.courses));
+        const response = await axios.get(`/api/verify-enrollment/${courseId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
+        });
+
+        if (!response.data.isEnrolled) {
+          router.push("/client/dashboard?tab=my-courses");
+          toast.error("You must enroll in this course first");
+        } else {
+          setIsEnrolled(true);
+        }
       } catch (err) {
         console.error(err);
+        router.push("/client/dashboard?tab=my-courses");
+      } finally {
+        setEnrollmentChecked(true);
       }
     };
-    fetchCourses();
-  }, [dispatch]);
+
+    if (courseId) checkEnrollment();
+  }, [courseId, router]);
 
   const completedSkillsContainer = useAppSelector(state => state.completedSkills.completedSkills);
 
   useEffect(() => {
     const fetchCompletedSkills = async () => {
       try {
-        const response = await axios.get(`/api/completed-skills/${courseId}`, { 
-          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } 
+        const response = await axios.get(`/api/completed-skills/${courseId}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
         });
         dispatch(getCompletedSkills(response.data.completedSkills));
       } catch (err: unknown) {
@@ -148,6 +158,28 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
     }
   }, [dispatch]);
 
+
+  useEffect(() => {
+    const fetchCompletedSkills = async () => {
+      try {
+        const response = await axios.get(`/api/completed-skills/${courseId}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+        });
+        dispatch(getCompletedSkills(response.data.completedSkills));
+
+        // Also fetch progress data to ensure everything is in sync
+        const progressResponse = await axios.get("/api/progress", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` },
+        });
+        dispatch(setProgress(progressResponse.data.progress));
+      } catch (err) {
+        console.error("Error fetching completed skills:", err);
+      }
+    };
+
+    fetchCompletedSkills();
+  }, [courseId, dispatch, quizResults]);
+
   useEffect(() => {
     fetchProgressData();
   }, [dispatch]);
@@ -155,45 +187,30 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   const progressData = useAppSelector(state =>
     state.progress.find(p => p.course === courseId)
   );
+  useEffect(() => {
+    const handleRouteChange = () => {
 
-  // const handleContinueLearning = async () => {
-  //   try {
-  //     if (progressData?.lastVisitedSkill) {
-  //       router.push(
-  //         `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${progressData.lastVisitedSkill}`
-  //       );
-  //       return;
-  //     }
+      const fetchCompletedSkills = async () => {
+        try {
+          const response = await axios.get(`/api/completed-skills/${courseId}`, {
+            headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+          });
+          dispatch(getCompletedSkills(response.data.completedSkills));
+        } catch (err) {
+          console.error("Error refetching completed skills:", err);
+        }
+      };
+      fetchCompletedSkills();
+    };
 
-  //     const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => ({
-  //       ...topic.skills.map((skill: SkillsSchema) => ({
-  //         skillId: skill._id,
-  //         topicId: topic._id,
-  //         isCompleted: completedSkillsContainer.some(c => c._id === skill._id)
-  //       }))
-  //     }));
+    // Set up listener for route changes
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('quizResults')) {
+      handleRouteChange();
+    }
+  }, [courseId, dispatch]);
 
-  //     const nextSkill = allSkills.find(skill => !skill.isCompleted) || allSkills[0];
 
-  //     if (nextSkill) {
-  //       router.push(
-  //         `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${nextSkill.skillId}`
-  //       );
-
-  //       await axios.post('/api/update-last-visited', {
-  //         courseId,
-  //         skillId: nextSkill.skillId,
-  //         topicId: nextSkill.topicId
-  //       }, {
-  //         headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.error(err)
-  //     toast.error("Failed to navigate to continue learning");
-  //     console.error(err);
-  //   }
-  // };
   const handleContinueLearning = useCallback(async () => {
     try {
       // If we have progress data with last visited skill, use that
@@ -203,30 +220,30 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
         );
         return;
       }
-  
+
       // Otherwise find the next skill to continue with
       if (!singleCourseInformation?.topics || !completedSkillsContainer) {
         toast.error("Course data not loaded yet");
         return;
       }
-  
+
       // Flatten all skills with completion status
-      const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) => 
+      const allSkills = singleCourseInformation.topics.flatMap((topic: topicSchema) =>
         topic.skills.map((skill: SkillsSchema) => ({
           skillId: skill._id,
           topicId: topic._id,
           isCompleted: completedSkillsContainer.some(c => c._id === skill._id)
         }))
       );
-  
+
       // Find first uncompleted skill or fall back to first skill
       const nextSkill = allSkills.find(skill => !skill.isCompleted) || allSkills[0];
-  
+
       if (!nextSkill) {
         toast.error("No skills available in this course");
         return;
       }
-  
+
       // Update last visited skill in backend
       await axios.post('/api/update-last-visited', {
         courseId,
@@ -235,12 +252,12 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` }
       });
-  
+
       // Navigate to the skill
       router.push(
         `/client/dashboard?tab=my-courses&courseId=${courseId}&skillId=${nextSkill.skillId}`
       );
-  
+
     } catch (err) {
       console.error("Continue learning error:", err);
       toast.error("Failed to navigate. Please try again.");
@@ -261,16 +278,146 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
     );
   }
 
+  if (!enrollmentChecked) {
+    return (
+      <div className="col-span-14 py-6 min-h-[90vh]">
+        {/* Centralized skeleton area */}
+        <div className="h-full flex flex-col space-y-8 justify-center items-center">
+          {/* Course overview text skeleton */}
+          <div className="w-48 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+
+          {/* Course details + topics skeleton */}
+          <div className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10 max-lg:flex-row">
+            {/* Left card skeleton */}
+            <div className="w-full max-w-sm border border-gray-200 rounded-xl hover:bg-black/10 h-fit transition-all duration-200 flex flex-col space-y-4 px-6 py-4">
+              {/* Course image skeleton */}
+              <div className="w-full centered-flex min-h-fit py-6">
+                <div className="w-32 h-20 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+
+              {/* Title + date skeleton */}
+              <div className="space-y-3">
+                <div className="w-3/4 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-1/2 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+
+              {/* Progress percentage skeleton */}
+              <div className="space-y-1">
+                <div className="w-1/4 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-1/3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+
+              {/* Progress bar skeleton */}
+              <div className="space-y-1 mt-2">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-gray-300 rounded-full animate-pulse" style={{ width: "30%" }}></div>
+                </div>
+              </div>
+
+              {/* Continue Learning button skeleton */}
+              <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+
+            {/* Right topics skeleton */}
+            <div className="overflow-y-auto h-[90vh] w-full max-w-4xl flex flex-col space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-xl p-6">
+                  {/* Topic title skeleton */}
+                  <div className="w-1/2 h-6 bg-gray-200 rounded-full animate-pulse mb-4"></div>
+
+                  {/* Skills list skeleton */}
+                  <div className="space-y-3 pl-4">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="flex items-center space-x-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="w-3/4 h-4 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isEnrolled) {
+    return;
+  }
+
   if (skillId || (quiz === "true" && topicId)) {
     return <SkillContent skillId={skillId ?? ""} />;
   }
-  
+
   if (quizResults) {
     return <QuizResult />;
   }
 
   if (!singleCourseInformation || !singleCourseInformation.topics) {
-    return <BlackSpinner />;
+    return (
+      <div className="col-span-14 py-6 min-h-[90vh]">
+        {/* Centralized skeleton area */}
+        <div className="h-full flex flex-col space-y-8 justify-center items-center">
+          {/* Course overview text skeleton */}
+          <div className="w-48 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+
+          {/* Course details + topics skeleton */}
+          <div className="w-full flex justify-center space-y-10 max-lg:space-x-6 px-6 lg:space-x-10 max-lg:flex-row">
+            {/* Left card skeleton */}
+            <div className="w-full max-w-sm border border-gray-200 rounded-xl hover:bg-black/10 h-fit transition-all duration-200 flex flex-col space-y-4 px-6 py-4">
+              {/* Course image skeleton */}
+              <div className="w-full centered-flex min-h-fit py-6">
+                <div className="w-32 h-20 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+
+              {/* Title + date skeleton */}
+              <div className="space-y-3">
+                <div className="w-3/4 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-1/2 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+
+              {/* Progress percentage skeleton */}
+              <div className="space-y-1">
+                <div className="w-1/4 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="w-1/3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+
+              {/* Progress bar skeleton */}
+              <div className="space-y-1 mt-2">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-gray-300 rounded-full animate-pulse" style={{ width: "30%" }}></div>
+                </div>
+              </div>
+
+              {/* Continue Learning button skeleton */}
+              <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+
+            {/* Right topics skeleton */}
+            <div className="overflow-y-auto h-[90vh] w-full max-w-4xl flex flex-col space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-xl p-6">
+                  {/* Topic title skeleton */}
+                  <div className="w-1/2 h-6 bg-gray-200 rounded-full animate-pulse mb-4"></div>
+
+                  {/* Skills list skeleton */}
+                  <div className="space-y-3 pl-4">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="flex items-center space-x-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="w-3/4 h-4 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!singleCourseInformation) {
@@ -289,7 +436,7 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
   }
 
   return (
-    <div className="col-span-14 min-h-[90vh]">
+    <div className="col-span-14 py-6 min-h-[90vh]">
       {/* Centralized course display area */}
       <div className="h-full flex flex-col space-y-8 justify-center items-center ">
         {/* course overview text */}
@@ -336,13 +483,24 @@ const CourseContent = ({ courseId }: MyCoursesProp): React.ReactElement => {
             {/* Progress bar */}
             <div className="space-y-1 mt-2">
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
+                {/* <div
                   className={cn(
                     "h-full rounded-full transition-all duration-700",
                     progressColor
                   )}
                   style={{ width: `${clampedProgress}%` }}
-                />
+                /> */}
+                {isRefreshingProgress ? (
+                  <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
+                ) : (
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-700",
+                      progressColor
+                    )}
+                    style={{ width: `${clampedProgress}%` }}
+                  />
+                )}
               </div>
             </div>
 

@@ -81,7 +81,7 @@ const MyCoursesCard = ({
             {/* Card content */}
             <div>
                 {/* Top: Image + Gradient Overlay */}
-                <div className="relative w-full h-72 group">
+                <div className="relative w-full h-90 md:h-72 group">
                     <Image
                         src={imgUrl}
                         alt={title}
@@ -92,7 +92,7 @@ const MyCoursesCard = ({
                     />
                     {/* Gradient Overlay */}
                     <div className="absolute bottom-0 left-0 w-full h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-lg flex justify-between px-4 items-center">
-                        <h1 className="text-xl text-white font-bold">{title}</h1>
+                        <h1 className="text-md max-lg:text-xl  text-white font-bold">{title}</h1>
                     </div>
                 </div>
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast"
 import ReduxProvider from "./redux/essentials/ReduxProvider";
 import ToastProvider from "./client/utils/ToastContainer";
+import { UnreadProvider } from "./client/utils/context";
 
 
 const poppins = Poppins({
@@ -11,6 +12,7 @@ const poppins = Poppins({
   subsets: ['latin'],
   display: 'swap',
 });
+
 
 export const metadata: Metadata = {
   title: "Online Learning Platform",
@@ -26,9 +28,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={poppins.className}>
         <ReduxProvider>
+        <UnreadProvider>
           <Toaster />
-          {children}
+         
+            {children}
+       
           <ToastProvider />
+        </UnreadProvider>
         </ReduxProvider>
       </body>
     </html>

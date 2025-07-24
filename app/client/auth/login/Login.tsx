@@ -52,7 +52,7 @@ const Login = (): React.ReactElement => {
     e.preventDefault()
 
     setLoading(true)
-    axios.post("/api/login", {
+    axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/login`, {
       email,
       password
     }).then((res) => {
@@ -65,6 +65,7 @@ const Login = (): React.ReactElement => {
       console.error(err)
       setLoading(false)
       if (err.response.status === 404) {
+        console.log(err.response.data)
         setPasswordError("Account was not found. Please sign up");
         refresh(setEmail, setEmail, setEmail, setPassword, true)
         return;

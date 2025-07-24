@@ -139,6 +139,7 @@ export type topicSchema = {
 };
 
 export type CreatorSchema = {
+  _id?: string,
   fullName: string;
   email: string;
   profilePicture: string;
@@ -159,10 +160,17 @@ export type feedBackMsgSchema = {
   sender: {
     fullName: string;
     profilePicture: string;
+    _id: string,
   };
   text: string;
   createdAt: string;
+  isEdited: boolean;
+  editedAt?: Date | null;
+  editWindow?: Date | null;
+  likes: number,
+  likedBy: string[];
 };
+
 export type courseSchema = {
   _id: string;
   title: string;
@@ -170,12 +178,20 @@ export type courseSchema = {
   category: string;
   imageUrl: string;
   topics: topicSchema[];
-  dateCreated: string;
+  dateCreated?: Date;
   creator: CreatorSchema;
   isPublished: boolean;
   likes?: number;
   feedbackMessages: feedBackMsgSchema[];
   likedByCurrentUser?: boolean;
+  createdCourses?: courseSchema[];
+  peopleEnrolled: {
+    fullName: string,
+    avatar: string,
+    bio: string,
+  },
+  enrollments: number,
+  enrolledAt: Date,
 };
 export interface MyCourseWithProgress extends courseSchema {
   progressData?: {
@@ -297,6 +313,8 @@ export type GroupMembersProps = {
   setIsAdded: React.Dispatch<React.SetStateAction<boolean>>;
   id: string;
   isAdded: boolean;
+  add: (id: string) => void | never;
+  remove: (id: string) => void | never
 };
 
 export type FriendSchema = {
@@ -328,7 +346,7 @@ export type NotificationSchema = {
     avatar: string;
     email: string;
   };
-  isSeen: boolean; // Changed from Boolean to boolean
+  isSeen: boolean;
   sentAt: Date;
   briefContent: string;
 };

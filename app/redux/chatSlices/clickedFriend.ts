@@ -4,7 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: ClickedFriendState = {
     id: "",
-    information: null
+    information: { _id: "", fullName: "", avatar: "",  isOnline: false, bio: "", }
 }
 
 const clickedFriendReducer = createSlice({
@@ -16,9 +16,19 @@ const clickedFriendReducer = createSlice({
         },
         getClickedFriendId: (state, action: PayloadAction<string>) => {
             state.id = action.payload
-        }
+        },
+        resetClickedFriend: (state) => {
+            state.id = "",
+            state.information = {
+                _id: "",
+                fullName: "", 
+                avatar: "",  
+                isOnline: false, 
+                bio: "",
+            }
+        },
     }
 })
 
-export const { getClickedFriendInformation, getClickedFriendId } = clickedFriendReducer.actions;
+export const { getClickedFriendInformation, getClickedFriendId, resetClickedFriend } = clickedFriendReducer.actions;
 export default clickedFriendReducer.reducer;

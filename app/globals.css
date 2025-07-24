@@ -63,6 +63,78 @@
   @apply border border-black bg-black/10 backdrop-blur-md
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Sharp "spike" shape for bars */
+.chartjs-render-monitor .bar {
+  clip-path: polygon(
+    0% 20%, 
+    50% 0%, 
+    100% 20%, 
+    100% 80%, 
+    50% 100%, 
+    0% 80%
+  );
+}
+
+
+.like-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.like-count {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* .heart-icon {
+  color: #ccc;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.heart-icon.liked {
+  color: red;
+  fill: red;
+} */
+
+.heart-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.heart-icon:hover {
+  transform: scale(1.1);
+}
+[data-radix-scope="Select"] [data-state="checked"]::before {
+  content: none !important;
+}
+
+/* @keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
+  50% { transform: translate(50px, 50px) rotate(180deg); opacity: 0.4; }
+  100% { transform: translate(0, 0) rotate(360deg); opacity: 0.7; }
+} */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); opacity: 0.8; }
+  50% { transform: translate(50px, 50px); opacity: 0.3; }
+}
+
 /* Screens */
 @theme {
 
@@ -103,6 +175,30 @@
 
 .reject-btn::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z'/%3E%3C/svg%3E");
+}
+
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  background: #6b7280;
+  border-radius: 50%;
+  margin: 0 1px;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
 }
 
 @keyframes toast-bounce {

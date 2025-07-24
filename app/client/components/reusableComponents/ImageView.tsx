@@ -20,6 +20,8 @@ type ImagesViewProps = {
 const ImageView = ({ trigger, setTrigger, galleryTrigger, setGalleryTrigger, profileView, setProfileView }: ImagesViewProps) => {
     const messages = useAppSelector(state => state.messages.messages)
     const dispatch = useAppDispatch()
+
+    const getOnlyImages = messages.filter((msg) => msg.imageUrl)
     return (
         <AnimatePresence>
             {trigger && (
@@ -50,7 +52,7 @@ const ImageView = ({ trigger, setTrigger, galleryTrigger, setGalleryTrigger, pro
                         </div>
                         <div className="overflow-y-auto flex-grow">
                             <div className="grid grid-cols-2 gap-4 justify-items-center">
-                                {messages.map((msg: IMessage, index: number) => (
+                                {getOnlyImages.map((msg: IMessage, index: number) => (
                                     <Image
                                         key={index}
                                         src={msg?.imageUrl || "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg"}
