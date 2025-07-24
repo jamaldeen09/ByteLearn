@@ -43,7 +43,7 @@ const QuizResult = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 col-span-16">
       <div className="max-w-4xl mx-auto">
         {/* Header with back button */}
-        <button 
+        <button
           onClick={() => router.push(`/client/dashboard?tab=my-courses&courseId=${courseId}`)}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-8 transition-colors"
         >
@@ -52,7 +52,7 @@ const QuizResult = () => {
         </button>
 
         {/* Main result card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -127,16 +127,16 @@ const QuizResult = () => {
             {quizResults.passed ? (
               <div className="bg-green-50 border border-green-100 rounded-lg p-4">
                 <p className="text-green-800">
-                  <span className="font-medium">Congratulations!</span> You've demonstrated excellent 
-                  understanding of the material. This performance shows your dedication 
+                  <span className="font-medium">Congratulations!</span> You&apos;ve demonstrated excellent
+                  understanding of the material. This performance shows your dedication
                   to learning. Keep up the great work!
                 </p>
               </div>
             ) : (
               <div className="bg-red-50 border border-red-100 rounded-lg p-4">
                 <p className="text-red-800">
-                  <span className="font-medium">Don't worry!</span> This is just a learning opportunity. 
-                  Review the material and try again. Every expert was once a beginner - 
+                  <span className="font-medium">Don&apos;t worry!</span> This is just a learning opportunity.
+                  Review the material and try again. Every expert was once a beginner -
                   persistence is key to mastery.
                 </p>
               </div>

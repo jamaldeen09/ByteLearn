@@ -3,7 +3,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useAppSelector } from "@/app/redux/essentials/hooks"
 import { quizComponentprops } from "@/app/client/types/types"
-import QuizComponentItem from "@/app/client/components/reusableComponents/QuizComponentItem"
 import { ArrowLeftIcon, ArrowRightIcon, BookmarkIcon, TrophyIcon } from "lucide-react"
 import QuizOptionCard from "../../components/reusableComponents/QuizOptionCard"
 
