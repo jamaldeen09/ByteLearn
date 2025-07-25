@@ -356,7 +356,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
 
                                     {/* Feedback sidebar - appears below content on mobile */}
                                     <div className="w-full lg:hidden">
-                                        <FeedBackSidebar courseId={foundCourse?._id} />
+                                      <FeedBackSidebar courseId={foundCourse?._id} />
                                     </div>
                                 </div>
 

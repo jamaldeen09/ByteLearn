@@ -8,7 +8,6 @@ import AddFriendSidebar from "./AddFriendSidebar"
 import { useState, useEffect, useCallback } from "react"
 import NewFriendSidebar from "./NewFriendSidebar"
 import axios from "../../utils/config/axios"
-import { useRedirect } from "../../utils/utils"
 import toast from "react-hot-toast"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { getFriends } from "@/app/redux/informationSlices/friendInformation"
@@ -46,7 +45,6 @@ const formatTime = (date?: Date | string) => {
 
 const ChatSidebar = (): React.ReactElement => {
   const [addfriendTrigger, setAddFriendTrigger] = useState<boolean>(false)
-  const { redirectTo } = useRedirect()
   const dispatch = useAppDispatch()
   const friends = useAppSelector(state => state.friendsContainer.friends)
 
@@ -86,7 +84,7 @@ const ChatSidebar = (): React.ReactElement => {
             err.response?.status === 403 ||
             err.response?.status === 404
           ) {
-            redirectTo("/client/auth/login");
+            router.push("/client/auth/login");
           } else {
             toast.error("Server Error");
           }
@@ -99,7 +97,7 @@ const ChatSidebar = (): React.ReactElement => {
     };
 
     fetchFriends();
-  }, [dispatch, redirectTo]);
+  }, [dispatch, router]);
 
   const fetchChatNotifications = useCallback(() => {
     axios.get("/api/unread-messages", {
