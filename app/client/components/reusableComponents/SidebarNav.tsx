@@ -28,15 +28,18 @@ const SidebarNav = () => {
                 </div>
 
                 <div className="flex items-center space-x-2 sm:space-x-4 relative w-full justify-end">
-                    <Image 
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" 
-                        src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"} 
-                        alt={`${usersInformation.fullName}'s profile picture`}
-                        width={40}
-                        height={40}
-                        unoptimized={true}
-                    />
-                    <p className="text-[0.6rem] sm:text-[0.8rem]">{usersInformation.fullName}</p>
+
+                    <div className="flex items-center space-x-4">
+                        <Image
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
+                            src={usersInformation.avatar ? usersInformation.avatar : "https://thumbs.dreamstime.com/b/black-school-icon-shadow-logo-design-white-157312165.jpg"}
+                            alt={`${usersInformation.fullName}'s profile picture`}
+                            width={40}
+                            height={40}
+                            unoptimized={true}
+                        />
+                        <p className="text-[0.6rem] sm:text-[0.8rem]">{usersInformation.fullName}</p>
+                    </div>
                 </div>
             </div>
         </nav>

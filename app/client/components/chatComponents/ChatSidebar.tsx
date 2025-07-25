@@ -57,7 +57,6 @@ const ChatSidebar = (): React.ReactElement => {
   const [unreadMessages, setUnreadMessages] = useState<Record<string, number>>({});
 
   const [isLoadingFriends, setIsLoadingFriends] = useState<boolean>(true);
-  const [showFriends, setShowFriends] = useState<boolean>(true);
   const router = useRouter()
 
 
@@ -257,23 +256,7 @@ const ChatSidebar = (): React.ReactElement => {
         <span className="text-gray-400 absolute text-sm top-7 left-9">{searchIcon}</span>
       </div>
 
-      {/* Filters */}
-      {/* Modern Filter Buttons with Active States */}
-      <div className="w-full flex items-center space-x-2 px-4 pb-2 py-3">
-        <button
-          onClick={() => {
-            setShowFriends(true);
-
-          }}
-          className={`text-sm font-medium rounded-full px-4 py-1.5 transition-all duration-200 whitespace-nowrap ${showFriends
-            ? 'bg-black dark:bg-white text-white dark:text-black'
-            : 'hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:text-black dark:hover:text-white'
-            }`}
-        >
-          Friends
-        </button>
-
-      </div>
+      
 
       {/* Chats Area */}
       <div className="w-full flex flex-col h-full overflow-hidden overflow-y-auto px-2 gap-4 py-4">

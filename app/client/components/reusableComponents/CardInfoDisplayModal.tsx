@@ -111,10 +111,6 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
 
             // Update UI state
             setIsLike(!isLike);
-
-            toast.success(
-                `${foundCourse?.title} has been ${isLike ? "unliked" : "liked"}`
-            );
         } catch (err) {
             console.error(err);
             toast.error("A server error occurred, please try again.");
@@ -276,8 +272,8 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                             <div className="w-full flex flex-col gap-4 mt-2 ">
                                                 <div className="w-full">Topics</div>
                                                 {foundCourse?.topics.map((topic: topicSchema) => (
-                                                    <li key={topic._id} className="list-decimal sm:
-                                                    ml-4 max-lg:m-0">
+                                                    <li key={topic._id} className="list-decimal
+                                                    max-lg:m-0">
                                                         {topic.title}
                                                     </li>
                                                 ))}

@@ -18,7 +18,11 @@ import DeepseekSpinner from "../../components/reusableComponents/DeepseekSpinner
 import { Trash } from "lucide-react";
 import BasicSpinner from "../../components/reusableComponents/BasicSpinner";
 import CourseDetailsModal from "../../components/reusableComponents/CreatedCourseDetails";
+import { useSearchParams } from "next/navigation";
+import CourseEditorPage  from "./EditorPage";
 const CourseCreation = (): React.ReactElement => {
+
+
 
     // local states
     const [disabledBtn, setDisabledBtn] = useState<boolean>(true);
@@ -39,10 +43,9 @@ const CourseCreation = (): React.ReactElement => {
     const [courseGettingPublished, setCourseGettingPublished] = useState<string>("")
     const [deletingCourse, setDeletingCourse] = useState<boolean>(false)
     const [deletedCourse, setDeletedCourse] = useState<string>("");
-
     const [seeCreatedCourseDetails, setSeeCreatedCourseDetails] = useState<boolean>(false);
-
     const [getCourseToView, setGetCourseToView] = useState<courseSchema | null>(null)
+
 
     // Validation constants
     const COURSE_NAME_MIN = 5;
@@ -182,6 +185,10 @@ const CourseCreation = (): React.ReactElement => {
                 toast.error("Error occurred in getting creator's work");
             })
     }, [usersinfo.fullName]);
+    const searchParams = useSearchParams();
+    const subTab = searchParams.get('subTab');
+
+    if (subTab === "edit-course") return <CourseEditorPage/>
     return (
         <>
             <div className="col-span-16 min-h-screen p-6 flex flex-col">
@@ -385,23 +392,26 @@ const CourseCreation = (): React.ReactElement => {
                             </div>
                         ) : usersCreatedCourse.map((course: courseSchema) => (
                             <div
-                                onClick={() => {
-                                    setGetCourseToView(course)
-                                    setSeeCreatedCourseDetails(true);
-                                }}
+                               
                                 key={course._id}
                                 className="w-full md:max-w-[27rem] max-lg:max-w-[30rem] mx-auto md:mx-0 h-[27rem] group overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-gray-900/10"
                             >
                                 {/* Card Container */}
                                 <div className="relative flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden">
                                     {/* Image with Gradient Overlay */}
-                                    <div className="relative w-full h-64 overflow-hidden">
+                                    <div 
+                                     onClick={() => {
+                                        setGetCourseToView(course)
+                                        setSeeCreatedCourseDetails(true);
+                                    }}
+                                    className="relative w-full h-64 overflow-hidden hover:cursor-pointer">
                                         <Image
                                             src={course.imageUrl}
                                             alt={course.title}
                                             fill
                                             className="object-cover transition-transform duration-500 group-hover:scale-105 h-64"
                                             unoptimized
+                                           
                                         />
 
                                         {/* Status Badge */}
@@ -476,6 +486,15 @@ const CourseCreation = (): React.ReactElement => {
                                                         <DeepseekSpinner />
                                                     )}
                                                 </button>)}
+                                                <button
+                                                    onClick={() => {
+                                                        router.push(`/client/dashboard?tab=course-creation&subTab=edit-course&courseId=${course._id}`)
+                                                    }}
+                                                    className={`px-3 py-1 text-xs font-medium bg-black text-white rounded-full hover:bg-gray-800 transition-all
+        hover:cursor-pointer hover:scale-105 duration-300`}
+                                                >
+                                                    <p>Edit</p>
+                                                </button>
                                                 <button
                                                     onClick={() => {
                                                         deleteCreatedCourse(course._id)

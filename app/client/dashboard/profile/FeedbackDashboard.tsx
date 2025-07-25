@@ -186,7 +186,6 @@ const FeedbackDashboard = () => {
           {/* Course Filter */}
 
           <div className="relative">
-
             <Select
               value={selectedCourse}
               onValueChange={(value) => setSelectedCourse(value)}
@@ -197,7 +196,7 @@ const FeedbackDashboard = () => {
               <SelectContent className="iphone:w-[90vw] sm:w-fit">
                 <SelectItem
                   value="All"
-                  className="data-[state=checked]:bg-transparent"
+                  className="text-xs"
                 >
                   All Courses
                 </SelectItem>
@@ -205,7 +204,7 @@ const FeedbackDashboard = () => {
                   <SelectItem
                     key={course}
                     value={course}
-                    className="data-[state=checked]:bg-transparent"
+                    className=""
                   >
                     {course}
                   </SelectItem>
