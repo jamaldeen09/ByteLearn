@@ -12,7 +12,6 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line } from 'react-chartjs-2';
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
-import { useAppSelector } from "@/app/redux/essentials/hooks"
 import { AxiosError } from "axios"
 
 ChartJS.register(
