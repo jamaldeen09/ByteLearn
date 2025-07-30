@@ -326,7 +326,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                                 No Other Courses Yet
                                                             </h3>
                                                             <p className="text-gray-500 text-center max-w-md">
-                                                                {foundCourse?.creator.fullName} hasn't published additional courses yet.
+                                                                {foundCourse?.creator.fullName} has not published additional courses yet.
                                                             </p>
                                                         </div>
                                                     ) : (

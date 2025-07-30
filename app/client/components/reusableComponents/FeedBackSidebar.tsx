@@ -101,7 +101,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
 
     useEffect(() => {
         setupFeedbackSentListener();
-    }, [courseId]);
+    }, [courseId, setupFeedbackSentListener]);
 
 
     // Load Feedback History
