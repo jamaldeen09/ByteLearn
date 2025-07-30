@@ -75,7 +75,7 @@ const MyCoursesCard = ({
     return (
         <motion.div
             onClick={handleContinueCourse}
-            className="w-full md:max-w-[27rem] max-lg:max-w-[30rem] rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
+            className="w-full mt-6 sm:m-0 h-[40vh] sm:h-full md:max-w-[27rem] max-lg:max-w-[30rem] rounded-lg transition-all duration-300 flex flex-col hover:cursor-pointer">
             {/* Card content */}
             <div>
                 {/* Top: Image + Gradient Overlay */}

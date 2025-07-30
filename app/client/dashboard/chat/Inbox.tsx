@@ -15,11 +15,15 @@ import { generateFriendRequest } from '../../utils/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import NotificationViewSkeleton from '../../components/reusableComponents/NotificationViewSkeleton'
+import { AxiosError } from 'axios'
+import { Button } from '@/components/ui/button'
+import DeepseekSpinner from '../../components/reusableComponents/DeepseekSpinner'
 
 const Inbox = () => {
   const notifications = useAppSelector(state => state.notificationContainer.notifications)
   const [isNotifClicked, setIsNotifClicked] = useState<string | null>("")
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [clearingNotifications, setClearingNotifications] = useState<boolean>(false);
   const dispatch = useAppDispatch()
   const router = useRouter()
 
@@ -203,31 +207,62 @@ const Inbox = () => {
     }
   }, [isNotifClicked])
 
+
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024)
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const clearNotifications = async () => {
+    if (notifications.length <= 0) return;
+
+    setClearingNotifications(true)
+    try {
+      const res = await axios.delete("/api/clear-notifications", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`
+        }
+      })
+      setClearingNotifications(false)
+      fetchNotifs();
+      setIsNotifClicked("");
+      toast.success(res.data.msg)
+      return;
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        setClearingNotifications(false)
+        console.error(err)
+        if (err.response?.status === 401 || err.response?.status === 404) {
+          router.push("/client/auth/login");
+          return;
+        } else {
+          toast.error(err.response?.data.msg)
+          return;
+        }
+      }
     }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
+  }
   return (
     <div className="col-span-14 h-[90vh] grid grid-cols-1 md:grid-cols-16 gap-1  relative overflow-hidden">
       <AnimatePresence>
         {(!isMobile || !isNotifClicked) && (
           <motion.div
-
             className={`h-full py-4 rounded-xl overflow-hidden md:col-span-7 lg:col-span-6 bg-gray-50 flex flex-col gap-4 border border-gray-200`}
-            initial={isMobile ? { x: -300 } : { opacity: 0 }}
-            animate={isMobile ? { x: 0 } : { opacity: 1 }}
-            exit={isMobile ? { x: -300 } : {}}
+            initial={{ x: isMobile ? -300 : 0 }}
+            animate={{ x: isMobile ? (isNotifClicked ? -300 : 0) : 0 }}
+            exit={{ x: -300 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             key="sidebar"
+
           >
             {/* Search Header */}
-            <div className="px-4">
+            <div className="px-4 flex flex-col space-y-2">
               <div className="relative">
                 <Input
                   value={filter}
@@ -252,6 +287,34 @@ const Inbox = () => {
                     />
                   </svg>
                 </div>
+              </div>
+
+              <div onClick={clearNotifications}
+                className="w-full">
+                {clearingNotifications ? (
+
+                  <Button
+                    className="hover:cursor-pointer text-xs bg-red-200 text-red-600 hover:bg-red-200 hover:text-red-500 hover:brightness-95 rounded-full"
+                    disabled={clearingNotifications}>
+
+                    <div className="flex flex-auto flex-col justify-center items-center">
+                      <div className="flex justify-center">
+                        <div className={`animate-spin inline-block size-4 border-3 border-current border-t-transparent text-red-600 rounded-full dark:text-red-500" role="status" aria-label="loading`}>
+                          <span className="sr-only">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                    clearing...
+                  </Button>
+
+                ) : (
+                  <Button className="hover:cursor-pointer text-xs bg-red-200 text-red-600 hover:bg-red-200 hover:text-red-500 hover:brightness-95 rounded-full">
+                    <span className="text-red-600">
+                      <Trash2Icon />
+                    </span>
+                    Clear Notifications
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -380,12 +443,12 @@ const Inbox = () => {
                               <h3 className={`text-sm font-semibold truncate ${isClicked ? 'text-white' : 'text-gray-900'}`}>
                                 {notification.sender.fullName}
                               </h3>
-                              <span className={`text-xs ${isClicked ? 'text-gray-300' : 'text-gray-500'}`}>
+                              <span className={`text-[0.6rem] max-lg:text-xs ${isClicked ? 'text-gray-300' : 'text-gray-500'}`}>
                                 {getTimeAgo(notification.sentAt)}
                               </span>
                             </div>
 
-                            <p className={`text-sm mt-1 ${isClicked ? 'text-gray-200' : 'text-gray-600'}`}>
+                            <p className={`text-xs truncate lg:text-sm mt-1 ${isClicked ? 'text-gray-200' : 'text-gray-600'}`}>
                               {notification.briefContent}
                             </p>
 
@@ -412,15 +475,17 @@ const Inbox = () => {
       {/* Notification Content Area */}
       <AnimatePresence>
         <motion.div
-          // className={`h-full lg:col-span-10 bg-white ${isMobile ? 'absolute inset-0' : ''}`}
-          className={`h-full md:col-span-9 lg:col-span-10 bg-white ${isMobile ? 'absolute inset-0' : ''}`}
-          initial={isMobile ? { x: '100%' } : { opacity: 0 }}
-          animate={isMobile ? { x: isNotifClicked ? 0 : '100%' } : { opacity: 1 }}
+          className={`h-full md:col-span-9 lg:col-span-10 bg-white ${isMobile ? 'absolute inset-0 z-10' : ''
+            }`}
+          initial={{ x: isMobile ? '100%' : 0 }}
+          animate={{ x: isMobile ? (isNotifClicked ? 0 : '100%') : 0 }}
+          exit={{ x: '100%' }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           key="content"
         >
           {!isNotifClicked ? (
-            <div className="hidden lg:flex h-full flex-col items-center justify-center p-8 text-center">
+      
+            <div className="hidden max-lg:flex h-full flex-col items-center justify-center p-8 text-center">
               <div className="w-24 h-24 mb-6 rounded-full bg-gray-100 flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -448,7 +513,7 @@ const Inbox = () => {
               {isMobile && (
                 <button
                   onClick={() => setIsNotifClicked("")}
-                  className="lg:hidden flex items-center gap-2 p-4 text-gray-600 hover:text-gray-900"
+                  className="flex items-center gap-2 p-4 text-gray-600 hover:text-gray-900"
                 >
                   <ArrowLeftIcon className="w-5 h-5" />
                   <span>Back</span>

@@ -41,6 +41,7 @@
     "input-otp": "^1.4.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.525.0",
+    "monaco-tailwindcss": "^0.6.1",
     "mongoose": "^8.16.1",
     "next": "15.3.4",
     "node-mailer": "^0.1.1",

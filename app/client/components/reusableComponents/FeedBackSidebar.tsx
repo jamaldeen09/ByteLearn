@@ -49,25 +49,6 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
             return;
         }
 
-        // const isLiked = likedMessages[messageId];
-        // const newLikeStatus = !isLiked;
-        // const likeCount = messageLikes[messageId] || 0;
-
-        // // Optimistic UI update
-
-        // setLikedMessages(prev => ({ ...prev, [messageId]: newLikeStatus }));
-        // setMessageLikes(prev => ({
-        //     ...prev,
-        //     [messageId]: newLikeStatus ? (prev[messageId] || 0) + 1 : Math.max(0, (prev[messageId] || 1) - 1)
-        // }));
-
-        // // Emit socket event
-        // socket.emit(events.LIKE_FEEDBACK_MESSAGE, {
-        //     messageId,
-        //     courseId,
-        //     userId,
-        //     like: newLikeStatus
-        // });
         const currentLikeStatus = likedMessages[messageId];
         const newLikeStatus = !currentLikeStatus;
 
@@ -85,7 +66,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
             messageId,
             courseId,
             userId,
-            like: newLikeStatus // false when unliking
+            like: newLikeStatus
         });
     };
 
@@ -129,26 +110,28 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
         setLoadingMessages(true);
         const data = { room: courseId };
         socket.emit(events.JOIN_ROOM, data);
-        socket.emit(events.GET_FEEDBACK_HISTORY, { courseId });
+        setTimeout(() => {
+            socket.emit(events.GET_FEEDBACK_HISTORY, { courseId });
 
-        const handleHistory = (payload: feedBackMsgSchema[]) => {
-            // setLocalMessages(payload);
-            // setLoadingMessages(false);
-            const initialLikes: Record<string, number> = {};
-            const initialLikedStatus: Record<string, boolean> = {};
+            const handleHistory = (payload: feedBackMsgSchema[]) => {
+                console.log("Received feedback history:", payload.length);
 
-            payload.forEach((msg: feedBackMsgSchema) => {
-                initialLikes[msg._id] = msg.likes;
-                initialLikedStatus[msg._id] = msg.likedBy?.includes(userId) || false;
-            });
+                const initialLikes: Record<string, number> = {};
+                const initialLikedStatus: Record<string, boolean> = {};
 
-            setMessageLikes(initialLikes);
-            setLikedMessages(initialLikedStatus);
-            setLocalMessages(payload);
-            setLoadingMessages(false);
-        };
+                payload.forEach((msg: feedBackMsgSchema) => {
+                    initialLikes[msg._id] = msg.likes;
+                    initialLikedStatus[msg._id] = msg.likedBy?.includes(userId) || false;
+                });
 
-        socket.on(events.FEEDBACK_HISTORY_SENT, handleHistory);
+                setMessageLikes(initialLikes);
+                setLikedMessages(initialLikedStatus);
+                setLocalMessages(payload);
+                setLoadingMessages(false);
+            };
+
+            socket.on(events.FEEDBACK_HISTORY_SENT, handleHistory);
+        }, 2000)
         return () => {
             socket.off(events.FEEDBACK_HISTORY_SENT);
             socket.off(events.JOIN_ROOM)
@@ -161,11 +144,9 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
 
         const room = `feedback-${courseId}`;
         socket.emit(events.JOIN_COURSE_ROOM, { room });
-        console.log("✅ Joined feedback room:", room);
 
         return () => {
             socket.emit(events.LEAVE_COURSE_ROOM, { room });
-            console.log("👋 Left feedback room:", room);
         };
     }, [courseId]);
 
@@ -183,7 +164,6 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
             setTriggerMessageDeletion(false);
             toast.success(msg);
 
-            // Directly fetch new messages without intermediate loading state
             socket.emit(events.GET_FEEDBACK_HISTORY, { courseId }, (payload: feedBackMsgSchema[]) => {
                 setLocalMessages(payload);
             });
@@ -276,7 +256,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
                 {isCreator ? <div
                     className="w-full h-full centered-flex"
                 >
-                  <p className="text-gray-400 text-xs">As the creator, you can&apos;t review your own course</p>
+                    <p className="text-gray-400 text-xs">As the creator, you can&apos;t review your own course</p>
                 </div> : <>
                     <h1 className="font-extrabold text-xl">Write a Feedback</h1>
                     <div className="flex flex-col gap-2">

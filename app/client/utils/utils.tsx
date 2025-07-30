@@ -11,6 +11,7 @@ import {
   profileIcon,
 } from "@/app/icons/Icons";
 import { EnvelopeClosedIcon } from '@radix-ui/react-icons';
+import { EnrolledCourse } from "@/app/client/types/types";
 
 
 
@@ -382,3 +383,27 @@ export const generateFriendRequest = (
   // Combine all parts
   return notificationContent + buttonsHTML + closingHTML
 }
+
+
+
+export const calculateCourseProgress = (course: EnrolledCourse): number => {
+    if (!course?.topics || course.topics.length === 0) return 0;
+    if (!course.progressData) return 0;
+
+    const courseToUse = course.progressData.snapshottedCourse || course;
+    const completedSet = new Set(course.progressData.completedSkills);
+
+    let totalSkills = 0;
+    let completedCount = 0;
+
+    courseToUse.topics.forEach(topic => {
+        topic.skills.forEach(skill => {
+            totalSkills++;
+            if (completedSet.has(String(skill._id))) {
+                completedCount++;
+            }
+        });
+    });
+
+    return totalSkills > 0 ? Math.round((completedCount / totalSkills) * 100) : 0;
+};

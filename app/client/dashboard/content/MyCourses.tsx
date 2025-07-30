@@ -2,7 +2,7 @@
 import { motion } from "framer-motion"
 import { container, item } from "./MainDashboard"
 import MyCoursesCard from "@/app/client/components/reusableComponents/MyCoursesCard"
-import { courseSchema, MyCoursesProp, MyCourseWithProgress } from "@/app/client/types/types"
+import { EnrolledCourse, MyCoursesProp } from "@/app/client/types/types"
 import CourseContent from "../courseContent/CourseContent"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { useCallback, useEffect, useState } from "react"
@@ -13,28 +13,28 @@ import { useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 
+
 const MyCourses = ({ courseId }: MyCoursesProp) => {
     const [isLoading, setIsLoading] = useState(true)
-    const enrolledCourses = useAppSelector(state => state.enrolledCourses.enrolledCourses)
+    const enrolledCourses = useAppSelector(state => state.enrolledCourses.enrolledCourses) as EnrolledCourse[]
     const router = useRouter()
     const [category, setCategory] = useState<string>("")
     const [searchTerm, setSearchTerm] = useState<string>("")
     const [noResults, setNoResults] = useState<boolean>(false);
-    const [searchedCourses, setSearchedCourses] = useState<courseSchema[]>([]);
+    const [searchedCourses, setSearchedCourses] = useState<EnrolledCourse[]>([]);
     const [hasSearched, setHasSearched] = useState<boolean>(false);
 
-
-    const calculateCourseProgress = useCallback((course: MyCourseWithProgress): number => {
+    const calculateCourseProgress = useCallback((course: EnrolledCourse): number => {
         if (!course?.topics || course.topics.length === 0) return 0;
-
         if (!course.progressData) return 0;
 
+        const courseToUse = course.progressData.snapshottedCourse || course;
         const completedSet = new Set(course.progressData.completedSkills);
 
         let totalSkills = 0;
         let completedCount = 0;
 
-        course.topics.forEach(topic => {
+        courseToUse.topics.forEach(topic => {
             topic.skills.forEach(skill => {
                 totalSkills++;
                 if (completedSet.has(String(skill._id))) {
@@ -73,15 +73,16 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
         fetchData()
     }, [fetchData])
 
+
     const uniqueCategories = Array.from(
         new Set(
             enrolledCourses
-                .map((enrolledCourse: courseSchema) => enrolledCourse?.category)
+                .map((enrolledCourse) => enrolledCourse?.category)
                 .filter((category): category is string => Boolean(category))
         )
     );
 
-    const foundCourses: courseSchema[] = enrolledCourses.filter((course) => course.category === category)
+    const foundCourses = enrolledCourses.filter((course) => course.category === category);
 
     const handleSearch = () => {
         if (searchTerm.trim() === "") {
@@ -271,9 +272,9 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
                             Clear Search
                         </button>
                     </div>
-                ) : <div className="lg:col-span-16 overflow-y-auto h-full flex flex-col space-y-6">
+                ) : 
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-12 ">
+                    <div className="grid col-span-16 md:grid-cols-2 lg:grid-cols-3 gap-60 sm:gap-4 px-4 sm:py-12">
                         <motion.div
                             variants={container}
                             initial="hidden"
@@ -286,6 +287,7 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
                                         imgUrl={course.imageUrl || "https://i.pinimg.com/736x/9d/3b/e7/9d3be76d616a58069ccadd8d949cca72.jpg"}
                                         title={course.title}
                                         progress={calculateCourseProgress(course)}
+                                        
                                         courseId={course._id}
                                         instructorsName={course.creator.fullName}
                                         instructorImg={course.creator.profilePicture}
@@ -294,7 +296,7 @@ const MyCourses = ({ courseId }: MyCoursesProp) => {
                             ))}
                         </motion.div>
                     </div>
-                </div>}
+                }
             </>
     )
 }

@@ -1,38 +1,55 @@
-
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAppSelector } from '@/app/redux/essentials/hooks';
-import { ArrowLeft, ArrowRight, Check, Bookmark, Trophy } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/app/redux/essentials/hooks';
+import { ArrowLeft, ArrowRight, Check, Bookmark, Trophy, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import axios from "../../utils/config/axios"
 import QuizComponent from './QuizComponent';
 import { AxiosError } from 'axios';
+import { markSkillAsCompleted, unmarkSkillCompleted } from '@/app/redux/coursesSlices/completedSkillsSlice';
+
+
 
 const SkillContent = ({ skillId }: { skillId: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
+
+
   const currentTab = searchParams.get('tab') || 'my-courses';
-  const quiz = searchParams.get('quiz');
-  const topicId = searchParams.get('topicId');
-  const contentContainerRef = useRef<HTMLDivElement>(null);
-  const [activateRef, setActivateRef] = useState<boolean>(false);
+  const showQuiz = searchParams.get('quiz');
+  const [isMarkingComplete, setIsMarkingComplete] = useState<boolean>(false);
+
 
   // Get all skills from all topics
-  const topics = useAppSelector(state => state.singleCourse.topics) || [];
+  const course = useAppSelector(state => state.singleCourse);
+  const topics = course?.topics || [];
   const allSkills = topics.flatMap(topic => topic.skills || []);
   const currentIndex = allSkills.findIndex(skill => skill._id === skillId);
   const totalSkills = allSkills.length;
   const currentSkill = allSkills[currentIndex];
+  const topRef = useRef<HTMLDivElement>(null);
+
 
   // Progress calculation
   const progressPercentage = Math.round(((currentIndex + 1) / totalSkills) * 100);
   const clampedProgress = Math.min(100, Math.max(0, progressPercentage));
+  const dispatch = useAppDispatch()
 
   const [completed, setCompleted] = useState(false);
 
+
+
   const markSkillCompleted = async () => {
+
+    if (!courseId) {
+      toast.error("Course ID is missing");
+      return;
+    }
+    setIsMarkingComplete(true);
+    dispatch(markSkillAsCompleted({ courseId, skillId }))
+  
     try {
       await axios.post("/api/mark-skill-as-completed", {
         courseId: courseId,
@@ -40,11 +57,11 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
       }, {
         headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
       });
-      setCompleted(true);
     } catch (err: unknown) {
       console.error(err);
+      dispatch(unmarkSkillCompleted({ courseId, skillId }));
 
-      if (err instanceof AxiosError ){
+      if (err instanceof AxiosError) {
         if (err.response?.status === 401) {
           toast.error("Please login again");
         } else if (err.response?.status === 404) {
@@ -53,52 +70,53 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
           toast.error("Couldn't mark as completed");
         }
       }
+    } finally {
+      setIsMarkingComplete(false);
+      setCompleted(true);
     }
   };
 
   const goToNextSkill = () => {
     setCompleted(false);
-    setActivateRef(true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+
+
 
     if (currentIndex < totalSkills - 1) {
       const nextSkillId = allSkills[currentIndex + 1]._id;
       router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&skillId=${nextSkillId}`);
     } else {
-      const parentTopic = topics.find(topic => topic.skills.some(skill => skill._id === skillId));
-      if (parentTopic?._id) {
-        router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&topicId=${parentTopic._id}&quiz=true`);
-      } else {
-        toast.error("Couldn't find topic for quiz");
-      }
+      router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&quiz=true`);
     }
   };
 
   const goToPrevSkill = () => {
     setCompleted(false);
-    setActivateRef(true);
+
+
+
     if (currentIndex > 0) {
       const prevSkillId = allSkills[currentIndex - 1]._id;
       router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}&skillId=${prevSkillId}`);
     } else {
       router.push(`/client/dashboard?tab=${currentTab}&courseId=${courseId}`);
     }
+
   };
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (contentContainerRef.current && activateRef) {
-      contentContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-      setActivateRef(false);
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [skillId, activateRef]);
+  }, [skillId]);
 
-  if (quiz === "true" && topicId) {
-    return <QuizComponent topicId={topicId} />;
+
+  if (showQuiz === "true" && courseId) {
+    return <QuizComponent courseId={courseId} />
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 col-span-16">
+    <div ref={topRef} className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 col-span-16">
       <div className="w-full mx-auto">
         {/* Header with progress */}
         <div className="mb-8">
@@ -131,7 +149,7 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
                 animate={{ width: `${clampedProgress}%` }}
                 transition={{ duration: 0.8, type: 'spring' }}
                 className={`h-full rounded-full ${clampedProgress >= 70 ? 'bg-green-500' :
-                    clampedProgress >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  clampedProgress >= 40 ? 'bg-yellow-500' : 'bg-red-500'
                   }`}
               />
             </div>
@@ -150,7 +168,6 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
 
         {/* Content - Horizontal scroll only on mobile */}
         <div
-          ref={contentContainerRef}
           className="sm:overflow-x-auto md:overflow-x-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mb-8"
         >
           <div
@@ -166,23 +183,27 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
             whileTap={{ scale: 0.95 }}
             onClick={goToPrevSkill}
             disabled={currentIndex === 0}
-            className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+            className={`flex items-center space-x-2 px-4 py-3 rounded-lg  hover:cursor-pointer transition-all ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
               }`}
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
             <span className="font-medium text-gray-600">Previous</span>
           </motion.button>
 
+
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: completed ? 1 : 1.05 }}
+            whileTap={{ scale: completed ? 1 : 0.95 }}
             onClick={markSkillCompleted}
+            disabled={isMarkingComplete}
             className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${completed
-                ? 'bg-green-100 text-green-700'
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              }`}
+              ? 'bg-green-100 text-green-700'
+              : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+              } ${isMarkingComplete ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'}`}
           >
-            {completed ? (
+            {isMarkingComplete ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : completed ? (
               <>
                 <Check className="w-5 h-5" />
                 <span>Completed</span>
@@ -201,10 +222,10 @@ const SkillContent = ({ skillId }: { skillId: string }) => {
             onClick={goToNextSkill}
             disabled={!completed}
             className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all ${!completed
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : currentIndex === totalSkills - 1
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg'
-                  : 'bg-black text-white hover:bg-gray-800'
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : currentIndex === totalSkills - 1
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg'
+                : 'bg-black text-white hover:bg-gray-800  hover:cursor-pointer'
               }`}
           >
             {currentIndex === totalSkills - 1 ? (

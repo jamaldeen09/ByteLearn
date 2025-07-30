@@ -102,17 +102,20 @@
   font-size: 0.8rem;
   color: #666;
 }
-
-/* .heart-icon {
-  color: #ccc;
-  transition: all 0.2s;
-  cursor: pointer;
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-.heart-icon.liked {
-  color: red;
-  fill: red;
-} */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
 
 .heart-icon {
   transition: all 0.2s ease-in-out;
@@ -125,11 +128,14 @@
   content: none !important;
 }
 
-/* @keyframes float {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
-  50% { transform: translate(50px, 50px) rotate(180deg); opacity: 0.4; }
-  100% { transform: translate(0, 0) rotate(360deg); opacity: 0.7; }
-} */
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) {
+    .modal {
+      -webkit-backdrop-filter: blur(4px);
+    }
+  }
+}
+
 @keyframes float {
   0%, 100% { transform: translate(0, 0); opacity: 0.8; }
   50% { transform: translate(50px, 50px); opacity: 0.3; }
@@ -144,7 +150,7 @@
   --breakpoint-lg:1400px;
   --breakpoint-max-lg:1024px;
   --breakpoint-max-sm:350px;
-  /* --breakpoint-lg:1300px; */
+
 }
 
 /* styles/globals.css */
@@ -236,6 +242,22 @@
 
 .cardDiv:hover .darkOverlay  {
   @apply block transition-all duration-300
+}
+
+.slide-transition {
+  transition: transform 0.3s ease-in-out;
+}
+
+@layer utilities {
+  .slide-in {
+    transform: translateX(0);
+  }
+  .slide-out {
+    transform: translateX(-100%);
+  }
+  .slide-in-from-right {
+    transform: translateX(100%);
+  }
 }
 
 @theme inline {

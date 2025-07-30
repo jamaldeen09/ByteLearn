@@ -16,6 +16,7 @@ import messagesSlice from "./chatSlices/messagesSlice"
 import isFriendsReducer from "./triggers/isFriendsTrigger";
 import imagePreviewReducer from "./triggers/imagePreviewTrigger"
 import groupSlice from "./chatSlices/groupReducer"
+import isLikedReducer from "./coursesSlices/likedStateSlice"
 
 export const store = configureStore({
   reducer: {
@@ -35,7 +36,8 @@ export const store = configureStore({
     messages: messagesSlice,
     isFriends: isFriendsReducer,
     imagePreview: imagePreviewReducer,
-    groupsContainer: groupSlice
+    groupsContainer: groupSlice,
+    likedState: isLikedReducer,
   }
 })
 

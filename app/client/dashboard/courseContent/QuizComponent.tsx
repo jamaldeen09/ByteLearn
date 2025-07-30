@@ -1,20 +1,57 @@
 "use client"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
-import { useAppSelector } from "@/app/redux/essentials/hooks"
-import { quizComponentprops } from "@/app/client/types/types"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { useAppDispatch } from "@/app/redux/essentials/hooks"
 import { ArrowLeftIcon, ArrowRightIcon, BookmarkIcon, TrophyIcon } from "lucide-react"
 import QuizOptionCard from "../../components/reusableComponents/QuizOptionCard"
+import axios from "../../utils/config/axios"
+import toast from "react-hot-toast"
+import { singleCourseSchema } from "../../types/types"
+import QuizLoader from "../../components/reusableComponents/QuizLoader"
 
-const QuizComponent = ({ topicId }: quizComponentprops) => {
+const QuizComponent = ({ courseId }: { courseId: string }) => {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const courseId = searchParams.get("courseId")
-
-  const findTopic = useAppSelector((state) => state.singleCourse.topics).find(topic => topic._id === topicId)
-  const quiz = findTopic?.quiz || []
+  const dispatch = useAppDispatch()
 
 
+  // Get course quiz instead of topic quiz
+  const [course, setCourse] = useState<singleCourseSchema | null>(null)
+  const [loadingCourse, setLoadingCourse] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoadingCourse(true)
+    const fetchCourse = async () => {
+      try {
+        const response = await axios.get(`/api/single-course/${courseId}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+        });
+        setCourse(response.data.courseDetails)
+        setLoadingCourse(false)
+      } catch (err: unknown) {
+        setLoadingCourse(false)
+        if (err instanceof Error && 'response' in err && typeof err.response === 'object' && err.response !== null) {
+          const response = err.response as { status?: number, data?: { msg?: string } };
+          if (response.status === 401 || response.status === 403) {
+            router.push("/client/auth/login");
+          } else if (response.status === 404) {
+            toast.error(response.data?.msg || "Not found");
+          } else {
+            console.error(err);
+            toast.error("A server error occurred. Please bear with us");
+          }
+        } else {
+          console.error(err);
+          toast.error("An unexpected error occurred");
+        }
+      }
+    };
+
+    fetchCourse();
+  }, [courseId, dispatch, router]);
+
+
+
+  const quiz = course?.quiz || []
 
   // State management
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -80,7 +117,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
         passed,
         attempts: Object.values(attempts),
         finalAnswers: selectedAnswers,
-        questions: quiz // Include all questions for review
+        questions: quiz
       }))
 
       router.push(`/client/dashboard?tab=my-courses&courseId=${courseId}&quizResults=true`)
@@ -93,12 +130,43 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
     }
   }
 
-  if (!currentQuestion) {
-    return <div className="col-span-14 centered-flex h-[90vh]">No quiz questions available</div>
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8 col-span-16 centered-flex">
+    loadingCourse ? <QuizLoader /> : !currentQuestion ? (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 col-span-16">
+        <div className="max-w-md w-full text-center">
+          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-gray-400"
+            >
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+            </svg>
+          </div>
+
+          <h3 className="text-2xl font-medium text-gray-900 mb-2">No Quiz Available</h3>
+          <p className="text-gray-600 mb-6">
+            This course doesn't have any quiz questions yet. Check back later or continue learning.
+          </p>
+
+          <button
+            onClick={() => router.push("")}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Back to Course
+          </button>
+        </div>
+      </div>
+    ) : <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8 col-span-16 centered-flex">
       {/* Quiz Header */}
       <div className="w-full max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
@@ -154,7 +222,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
           <button
             onClick={goToPrevQuestion}
             disabled={currentQuestionIndex === 0}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all ${currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+            className={`flex items-center space-x-2 px-6 py-3  hover:cursor-pointer rounded-lg transition-all ${currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
           >
             <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
             <span className="font-medium text-gray-600">Previous</span>
@@ -163,7 +231,7 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
           <button
             onClick={goToNextQuestion}
             disabled={!isQuestionAnswered}
-            className={`px-8 py-3 rounded-lg font-medium text-white transition-all transform hover:scale-105 ${!isQuestionAnswered ? 'bg-gray-300 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg'}`}
+            className={`px-8 py-3 rounded-lg hover:cursor-pointer font-medium text-white transition-all transform hover:scale-105 ${!isQuestionAnswered ? 'bg-gray-300 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg'}`}
           >
             {currentQuestionIndex < quiz.length - 1 ? (
               <div className="flex items-center space-x-2">
@@ -180,8 +248,6 @@ const QuizComponent = ({ topicId }: quizComponentprops) => {
         </div>
       </div>
     </div>
-
-
   )
 }
 

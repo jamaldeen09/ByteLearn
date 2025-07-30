@@ -64,7 +64,8 @@ export type onGoingCoursesProps = {
   progress: number;
   countinueLearningLink: string;
   courseId: string;
-
+  isPublished: boolean | undefined;
+  likedByCurrentUser: boolean | undefined
 };
 
 export type NewCourseCardProps = {
@@ -127,13 +128,13 @@ export type singleCourseSchema = {
   dateCreated: string;
   creator: CreatorSchema;
   isPublished: boolean;
+  quiz: quizSchema[]
 };
 
 export type topicSchema = {
   _id: string;
   title: string;
   skills: SkillsSchema[];
-  quiz: quizSchema[];
 };
 
 export type CreatorSchema = {
@@ -188,8 +189,10 @@ export type courseSchema = {
     avatar: string,
     bio: string,
   },
+  quiz: quizSchema[];
   enrollments: number,
   enrolledAt: Date,
+  isArchived?: boolean;
 };
 export interface MyCourseWithProgress extends courseSchema {
   progressData?: {
@@ -230,16 +233,65 @@ export type QuizItemProps = {
   showResult?: boolean;
 };
 
-export type ProgressState = {
+export interface Skill {
+  _id: string;
+  skillTitle: string;
+  content: string;
+}
+
+export interface Topic {
+  _id: string;
+  title: string;
+  skills: Skill[];
+  quiz?: quizSchema[]; // Add proper quiz type if needed
+}
+
+export interface CourseBase {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  topics: Topic[];
+  creator: {
+    fullName: string;
+    email: string;
+    profilePicture: string;
+  };
+  dateCreated?: Date;
+  isPublished?: boolean;
+  likes?: number;
+  feedbackRoom?: string;
+  enrollments?: number;
+  peopleEnrolled?: string[];
+  version?: number;
+  publishedVersion?: number | null;
+}
+
+export interface ProgressData {
+  completedSkills: string[];
+  isCompleted: boolean;
+  lastVisitedSkill: string | null;
+  snapshottedCourse: CourseBase;
+}
+
+export interface EnrolledCourse extends CourseBase {
+  progressData: ProgressData;
+}
+
+export interface ProgressState {
   course: string;
   lastVisitedSkill: string | null;
   completedSkills: string[];
   isCompleted: boolean;
-};
+  snapshottedCourse?: CourseBase; // Add this to match backend
+  completionRate?: number;
+  lastVisitedTopic?: string;
+}
 
-export type ProgressRootState = {
+export interface ProgressRootState {
   progress: ProgressState[];
-};
+}
 
 export type SidebarDropdownLinks = {
   name: string;

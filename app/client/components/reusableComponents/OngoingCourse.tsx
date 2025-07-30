@@ -1,31 +1,35 @@
 import { onGoingCoursesProps } from "../../types/types"
-import { cn } from "@/lib/utils"
-import Image from 'next/image'
-import { ArrowRightIcon } from "@radix-ui/react-icons"
-import { useRouter } from "next/navigation"
-import axios from "../../utils/config/axios"
+import { ArrowRight, Heart, Trash2 } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks"
 import { setEnrolledCourses } from "@/app/redux/coursesSlices/enrolledCoursesSlice"
-import toast from "react-hot-toast"
 import { getCourses } from "@/app/redux/coursesSlices/courseSlice"
+import axios from "../../utils/config/axios"
 import { useState } from "react"
+import toast from "react-hot-toast"
+import { changeState } from "@/app/redux/coursesSlices/likedStateSlice"
 import BasicSpinner from "./BasicSpinner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faHeart } from "@fortawesome/free-solid-svg-icons"
 
-
-const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, countinueLearningLink, courseId }: onGoingCoursesProps
-) => {
-  // Ensure progress is between 0-100
-  const clampedProgress = Math.min(100, Math.max(0, progress));
-  const router = useRouter()
+const OngoingCourse = ({
+  courseImgURL,
+  courseName,
+  currentTopic,
+  progress = 0,
+  countinueLearningLink,
+  courseId,
+  isPublished
+}: onGoingCoursesProps) => {
   const dispatch = useAppDispatch()
   const courses = useAppSelector(state => state.coursesSlice.courses)
   const foundCourse = courses.find(course => course?._id === courseId)
-  const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
   const [loadingAnim, setloadingAnim] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [itemBeingDeleted, setItemBeingDeleted] = useState<string>(courseId)
+
+  const likedMap = useAppSelector(state => state.likedState.likedMap);
+  const isLike = likedMap[courseId] ?? foundCourse?.likedByCurrentUser ?? false;
+
 
   const toggleLike = async () => {
     if (loadingAnim) return;
@@ -42,11 +46,7 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
       });
 
       // Update UI state
-      setIsLike(!isLike);
-
-      toast.success(
-        `${courseName} has been ${isLike ? "unliked" : "liked"}`
-      );
+      dispatch(changeState({ courseId, isLiked: !isLike }));
     } catch (err) {
       console.error(err);
       toast.error("A server error occurred, please try again.");
@@ -56,145 +56,136 @@ const OngoingCourse = ({ courseImgURL, courseName, currentTopic, progress = 0, c
   };
 
 
-  const progressColor = clampedProgress >= 70
-    ? "bg-green-500"
-    : clampedProgress >= 40
-      ? "bg-yellow-500"
-      : "bg-red-500";
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsDeleting(true)
 
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    setItemBeingDeleted(courseId)
     try {
-      const token = localStorage.getItem("bytelearn_token");
+      const token = localStorage.getItem("bytelearn_token")
       await axios.delete(`/api/enrolled-courses/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      })
 
       // Update both enrolled courses AND main courses list
       const [enrolledRes, coursesRes] = await Promise.all([
         axios.get("/api/enrolled-courses", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get("/api/courses", { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")} ` } })
-      ]);
+        axios.get("/api/courses", {
+          headers: { "Authorization": `Bearer ${token}` }
+        })
+      ])
 
-      setIsDeleting(false);
-      dispatch(setEnrolledCourses(enrolledRes.data.courses));
-      dispatch(getCourses(coursesRes.data.courses));
-      toast.success("Course deleted successfully");
+      dispatch(setEnrolledCourses(enrolledRes.data.courses))
+      dispatch(getCourses(coursesRes.data.courses))
+      toast.success("Successfully unenrolled from course")
     } catch (err) {
-      setIsDeleting(false);
-      console.error("Failed to unenroll:", err);
-      toast.error("Failed to delete course");
+      console.error("Failed to unenroll:", err)
+      toast.error("Failed to unenroll from course")
+    } finally {
+      setIsDeleting(false)
     }
-  };
+  }
 
+  // Ensure progress is between 0-100
+  const clampedProgress = Math.min(100, Math.max(0, progress))
 
   return (
-    <div className="w-full flex lg:items-center gap-4 p-2 rounded-lg transition-colors flex-col md:flex-row">
-      <Image
-        src={courseImgURL || "https://miro.medium.com/v2/resize:fit:1400/1*fhtqKw_QQB8o0tj2OXCjlA.png"}
-        alt="Course thumbnail"
-        className="w-24 h-24 rounded-lg object-cover"
-        width={96}
-        height={96}
-        unoptimized={true}
-      />
-
-      {/* Information */}
-      <div className="w-full space-y-2">
-        {/* Header */}
-        <div className="w-full flex sm:items-center sm:flex-row justify-between iphone:flex-col iphone:gap-4 sm:gap-0">
-          <h1 className="font-extrabold text-lg line-clamp-1">{courseName || "Art History"}</h1>
-
-          <div className="flex items-center gap-2">
-            <span onClick={toggleLike}
-              className="hover:cursor-pointer hover:text-red-500 transition-colors">
-
-              {loadingAnim ? <BasicSpinner /> : <FontAwesomeIcon icon={faHeart} className={`text-xl ${isLike && "text-red-600"}`} />}
-            </span>
-            <span onClick={() => router.push(countinueLearningLink)}
-              className="bg-green-500 text-white p-2 rounded-full hover:cursor-pointer hover:scale-105 duration-300">
-              <ArrowRightIcon />
-            </span>
-            <span
-              onClick={
-                handleDelete
-              }
-              className="group relative p-2 rounded-full transition-all duration-200 hover:bg-red-50 active:bg-red-50/50 hover:cursor-pointer"
-              aria-label="Delete"
-            >
-              {itemBeingDeleted === courseId && isDeleting ? (
-                <div className="relative w-4 h-4">
-                  {/* Smooth subtle spinner */}
-                  <svg
-                    className="w-4 h-4 animate-spin text-red-300"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeOpacity="0.25"
-                      strokeWidth="4"
-                    />
-                    <path
-                      d="M12 2C14.5013 2 16.8411 3.05357 18.5001 4.83706"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeOpacity="0.75"
-                    />
-                  </svg>
-                </div>
-              ) : (
-                <svg
-
-                  className="w-4 h-4 text-red-400 group-hover:text-red-500 transition-colors duration-200"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+    <motion.div>
+      <div className="group hover:shadow-md transition-shadow duration-200 border border-gray-200 rounded-lg overflow-hidden">
+        <div className="p-5 flex items-start gap-4 flex-col sm:flex-row">
+          <div className="flex-shrink-0 relative">
+            <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+              <Image
+                src={courseImgURL || "/placeholder-course.jpg"}
+                alt={courseName}
+                width={80}
+                height={80}
+                className="object-cover w-full h-full"
+                unoptimized
+              />
+            </div>
+          </div>
+          <div className="flex-grow">
+            <div className="flex justify-between items-start">
+              <h3 className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors
+              text-xs sm:text-sm">
+                {courseName}
+              </h3>
+              {/* Like Button - Only shown if published */}
+              {foundCourse?.isPublished && (
+                <button
+                  className="text-gray-400 hover:text-red-500 transition-colors hover:cursor-pointer"
+                  onClick={toggleLike}
+                  disabled={loadingAnim}
                 >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  <line x1="10" y1="11" x2="10" y2="17" />
-                  <line x1="14" y1="11" x2="14" y2="17" />
-                </svg>
+
+                  {loadingAnim ? <div className="flex flex-auto flex-col justify-center items-center">
+                    <div className="flex justify-center">
+                      <div className={`animate-spin inline-block size-6 border-3 border-current border-t-transparent text-red-600 rounded-full dark:text-red-500" role="status" aria-label="loading`}>
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </div>
+                  </div> : (
+                    <Heart
+                      className={`w-5 sh-5 ${isLike ? 'fill-red-500 text-red-500' : ''}`}
+                    />
+                  )}
+                </button>
               )}
-            </span>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              Currently on: {currentTopic}
+            </p>
+
+            {/* Progress Bar */}
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-medium text-gray-700">
+                  Progress: {clampedProgress}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-indigo-600 h-2.5 rounded-full"
+                  style={{ width: `${clampedProgress}%` }}
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Current topic */}
-        <p className="text-sm text-gray-500 line-clamp-1">
-          {currentTopic || "Unit 1. Renaissance art in a unit"}
-        </p>
-
-        {/* Progress bar with percentage */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs">
-            <span className="font-medium">{clampedProgress}%</span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={cn(
-                "h-full rounded-full transition-all duration-700",
-                progressColor
-              )}
-              style={{ width: `${clampedProgress}%` }}
-            />
-          </div>
+        <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+          <button
+            className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1 hover:cursor-pointer"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <div className="flex justify-center">
+                  <div className={`animate-spin inline-block size-4 mr-2 border-3 border-current border-t-transparent text-red-600 rounded-full dark:text-red-500" role="status" aria-label="loading`}>
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                </div>
+                Processing...
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-3 h-3" />
+                Unenroll
+              </>
+            )}
+          </button>
+          <Link
+            href={countinueLearningLink}
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+          >
+            {clampedProgress > 0 ? "Continue" : "Start"}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

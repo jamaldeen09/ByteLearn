@@ -1,5 +1,5 @@
 "use client"
-import { useAppSelector } from "@/app/redux/essentials/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
@@ -14,7 +14,7 @@ import WhiteSpinner from "./WhiteSpinner";
 import FeedBackSidebar from "./FeedBackSidebar";
 import OtherWork from "./OtherWork";
 import BasicSpinner from "./BasicSpinner";
-
+import { changeState } from "@/app/redux/coursesSlices/likedStateSlice";
 
 
 type cardInfoDisplayProps = {
@@ -43,6 +43,10 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
     const isEnrolled = enrolledCourses.some(course => course._id === foundCourse?._id);
     const filteredCreatorsWork: courseSchema[] = creatorsWork.filter((work: courseSchema) => work._id !== courseId)
 
+    const likedMap = useAppSelector(state => state.likedState.likedMap);
+    const isLike = likedMap[courseId] ?? foundCourse?.likedByCurrentUser ?? false;
+    const dispatch = useAppDispatch()
+
     useEffect(() => {
         if (!open || !foundCourse) return;
         setLoadingCreatorsWork(true);
@@ -61,9 +65,9 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
     }, [open, courseId, foundCourse]);
 
     const enroll = (id: string) => {
-       
+
         setEnrollLoading(true);
-        axios.post("/api/enroll", { courseId: id }, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
+        axios.post("/api/enroll", { courseId: id } , { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } }).then((res) => {
             setEnrollLoading(false);
             router.push(`/client/dashboard?tab=my-courses&courseId=${id}`);
             toast.success(res.data.msg);
@@ -89,11 +93,11 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
         })
     }
 
-    const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
     const [loadingAnim, setloadingAnim] = useState(false);
     const currentUserId = useAppSelector(state => state.usersInformation._id)
     const isCreator = currentUserId === foundCourse?.creator._id;
     const totalSkills = foundCourse?.topics.map((skill) => skill.skills).map((skill) => skill.length).reduce((acc, num) => acc + num, 0)
+
 
 
     const toggleLike = async () => {
@@ -110,7 +114,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
             });
 
             // Update UI state
-            setIsLike(!isLike);
+            dispatch(changeState({ courseId: foundCourse!._id, isLiked: !isLike }));
         } catch (err) {
             console.error(err);
             toast.error("A server error occurred, please try again.");
@@ -224,6 +228,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                                         className={`w-4 h-4 ${isLike && "text-red-600"}`}
                                                                     />
                                                                 )}
+
                                                             </button>
 
                                                             {isEnrolled ? (
@@ -269,13 +274,13 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                                 ></div>
                                             </div>
 
-                                            <div className="w-full flex flex-col gap-4 mt-2 ">
+                                            <div className="w-full flex flex-col gap-4 mt-2">
                                                 <div className="w-full">Topics</div>
-                                                {foundCourse?.topics.map((topic: topicSchema) => (
-                                                    <li key={topic._id} className="list-decimal
+                                                {foundCourse?.topics.map((topic: topicSchema, index: number) => (
+                                                    <ol key={topic._id} className="list-decimal
                                                     max-lg:m-0">
-                                                        {topic.title}
-                                                    </li>
+                                                        {index + 1}. {topic.title}
+                                                    </ol>
                                                 ))}
                                             </div>
 
@@ -352,7 +357,7 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
 
                                     {/* Feedback sidebar - appears below content on mobile */}
                                     <div className="w-full lg:hidden">
-                                      <FeedBackSidebar courseId={foundCourse?._id} />
+                                        <FeedBackSidebar courseId={foundCourse?._id} />
                                     </div>
                                 </div>
 
@@ -362,7 +367,6 @@ const CardInfoDisplayModal = ({ open, setOpen, courseId }: cardInfoDisplayProps)
                                 </div>
 
                             </motion.div>
-
                         </motion.div>
                     </>
                 )}

@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import SkillContent from "./SkillContent"
 import QuizResult from "./QuizResult"
 import { getCompletedSkills } from "@/app/redux/coursesSlices/completedSkillsSlice"
-import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
+import { setProgress, updateSnapshottedCourse } from "@/app/redux/coursesSlices/progressSlice"
 import Image from 'next/image';
 import { singleCourseSchema, SkillsSchema, topicSchema } from "@/app/client/types/types"
 
@@ -25,9 +25,10 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     [rawSingleCourseInformation]
   );
   const skillId = searchParams.get("skillId");
-  const quiz = searchParams.get("quiz");
-  const topicId = searchParams.get("topicId");
+  const showQuiz = searchParams.get("quiz");
   const quizResults = searchParams.get("quizResults");
+
+
   const router = useRouter();
   const [progressPercentage, setProgressPercentage] = useState<number>(10);
   const dispatch = useAppDispatch();
@@ -43,6 +44,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     : clampedProgress >= 40
       ? "bg-yellow-500"
       : "bg-red-500";
+
 
   const calculateCourseProgress = (course: singleCourseSchema, completedSkills: string[]) => {
     const completedSet = new Set(completedSkills);
@@ -69,6 +71,8 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
           headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
         });
         dispatch(getSingleCourse(response.data.courseDetails));
+  
+
       } catch (err: unknown) {
         if (err instanceof Error && 'response' in err && typeof err.response === 'object' && err.response !== null) {
           const response = err.response as { status?: number, data?: { msg?: string } };
@@ -89,6 +93,8 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
 
     fetchCourse();
   }, [courseId, dispatch, router]);
+
+  
   useEffect(() => {
     const checkEnrollment = async () => {
       try {
@@ -136,12 +142,13 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     fetchCompletedSkills();
   }, [courseId, dispatch]);
 
-  // Calculate progress whenever course or completed skills change
+
   useEffect(() => {
     if (singleCourseInformation && singleCourseInformation.topics && completedSkillsContainer) {
+      const completedSkillIds = completedSkillsContainer.map(skill => skill._id.toString());
       const calculatedProgress = calculateCourseProgress(
         singleCourseInformation,
-        completedSkillsContainer.map(skill => skill._id.toString())
+        completedSkillIds
       );
       setProgressPercentage(calculatedProgress);
     }
@@ -266,6 +273,38 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     }
   }, [courseId, progressData, singleCourseInformation, completedSkillsContainer, router]);
 
+  useEffect(() => {
+    const handleRouteChange = () => {
+      // Refresh completed skills and progress when route changes
+      const fetchData = async () => {
+        try {
+          const [skillsResponse, progressResponse] = await Promise.all([
+            axios.get(`/api/completed-skills/${courseId}`, {
+              headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
+            }),
+            axios.get("/api/progress", {
+              headers: { Authorization: `Bearer ${localStorage.getItem("bytelearn_token")}` },
+            })
+          ]);
+
+          dispatch(getCompletedSkills(skillsResponse.data.completedSkills));
+          dispatch(setProgress(progressResponse.data.progress));
+        } catch (err) {
+          console.error("Error refreshing data:", err);
+        }
+      };
+
+      fetchData();
+    };
+
+    // Set up the listener
+    window.addEventListener('popstate', handleRouteChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [courseId, dispatch]);
+
   if (!courseId) {
     return (
       <div className="h-[90vh] centered-flex">
@@ -282,7 +321,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
 
   if (!enrollmentChecked) {
     return (
-       <LoadingSkeleton />
+      <LoadingSkeleton />
     )
   }
 
@@ -290,8 +329,8 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     return;
   }
 
-  if (skillId || (quiz === "true" && topicId)) {
-    return <SkillContent skillId={skillId ?? ""} />;
+  if (skillId) {
+    return <SkillContent skillId={skillId} />;
   }
 
   if (quizResults) {
@@ -302,6 +341,10 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     return (
       <LoadingSkeleton />
     );
+  }
+
+  if (showQuiz === "true") {
+    return <SkillContent skillId="" />; // The SkillContent component will handle showing the quiz
   }
 
   if (!singleCourseInformation) {
@@ -323,6 +366,7 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
     <div className="col-span-14 py-6 min-h-[90vh]">
       {/* Centralized course display area */}
       <div className="h-full flex flex-col space-y-8 justify-center items-center ">
+
         {/* course overview text */}
         <div className="w-full max-w-xs sm:max-w-sm mx-auto py-6">
           <p className="text-gray-400 text-xs">{`${singleCourseInformation.title}`}</p>
@@ -415,65 +459,65 @@ const CourseContent = ({ courseId }: MyCoursesProp) => {
 const LoadingSkeleton = () => {
   return (
     <div className="col-span-14 py-6 min-h-[90vh]">
-    {/* Centralized skeleton area */}
-    <div className="h-full flex flex-col space-y-8 justify-center items-center">
-      {/* Course overview text skeleton */}
-      <div className="w-48 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+      {/* Centralized skeleton area */}
+      <div className="h-full flex flex-col space-y-8 justify-center items-center">
+        {/* Course overview text skeleton */}
+        <div className="w-48 h-3 bg-gray-200 rounded-full animate-pulse"></div>
 
-      {/* Responsive course details + topics skeleton */}
-      <div className="w-full flex flex-col lg:flex-row justify-center gap-6 px-4 lg:px-6">
-        {/* Left card skeleton - grows on larger screens */}
-        <div className="w-full lg:max-w-sm border border-gray-200 rounded-xl h-fit transition-all duration-200 flex flex-col space-y-4 p-4 md:p-6">
-          {/* Course image skeleton */}
-          <div className="w-full flex justify-center min-h-fit py-4 md:py-6">
-            <div className="w-24 h-16 md:w-32 md:h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-          </div>
-
-          {/* Title + date skeleton */}
-          <div className="space-y-3">
-            <div className="w-3/4 h-4 md:h-5 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="w-1/2 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-          </div>
-
-          {/* Progress percentage skeleton */}
-          <div className="space-y-1">
-            <div className="w-1/4 h-6 md:h-8 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="w-1/3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-          </div>
-
-          {/* Progress bar skeleton */}
-          <div className="space-y-1 mt-2">
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-gray-300 rounded-full animate-pulse" style={{ width: "30%" }}></div>
+        {/* Responsive course details + topics skeleton */}
+        <div className="w-full flex flex-col lg:flex-row justify-center gap-6 px-4 lg:px-6">
+          {/* Left card skeleton - grows on larger screens */}
+          <div className="w-full lg:max-w-sm border border-gray-200 rounded-xl h-fit transition-all duration-200 flex flex-col space-y-4 p-4 md:p-6">
+            {/* Course image skeleton */}
+            <div className="w-full flex justify-center min-h-fit py-4 md:py-6">
+              <div className="w-24 h-16 md:w-32 md:h-20 bg-gray-200 rounded-lg animate-pulse"></div>
             </div>
-          </div>
 
-          {/* Continue Learning button skeleton */}
-          <div className="w-full h-10 md:h-12 bg-gray-200 rounded-md animate-pulse mt-4"></div>
-        </div>
+            {/* Title + date skeleton */}
+            <div className="space-y-3">
+              <div className="w-3/4 h-4 md:h-5 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-1/2 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
 
-        {/* Right topics skeleton - takes remaining space */}
-        <div className="w-full lg:max-w-4xl overflow-y-auto h-[70vh] lg:h-[80vh] flex flex-col space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="border border-gray-200 rounded-xl p-4 md:p-6">
-              {/* Topic title skeleton */}
-              <div className="w-1/2 h-5 md:h-6 bg-gray-200 rounded-full animate-pulse mb-3 md:mb-4"></div>
+            {/* Progress percentage skeleton */}
+            <div className="space-y-1">
+              <div className="w-1/4 h-6 md:h-8 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-1/3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
 
-              {/* Skills list skeleton */}
-              <div className="space-y-2 md:space-y-3 pl-2 md:pl-4">
-                {[...Array(4)].map((_, j) => (
-                  <div key={j} className="flex items-center space-x-2 md:space-x-3">
-                    <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-200 rounded-full animate-pulse"></div>
-                    <div className="w-2/3 md:w-3/4 h-3 md:h-4 bg-gray-200 rounded-full animate-pulse"></div>
-                  </div>
-                ))}
+            {/* Progress bar skeleton */}
+            <div className="space-y-1 mt-2">
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gray-300 rounded-full animate-pulse" style={{ width: "30%" }}></div>
               </div>
             </div>
-          ))}
+
+            {/* Continue Learning button skeleton */}
+            <div className="w-full h-10 md:h-12 bg-gray-200 rounded-md animate-pulse mt-4"></div>
+          </div>
+
+          {/* Right topics skeleton - takes remaining space */}
+          <div className="w-full lg:max-w-4xl overflow-y-auto h-[70vh] lg:h-[80vh] flex flex-col space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="border border-gray-200 rounded-xl p-4 md:p-6">
+                {/* Topic title skeleton */}
+                <div className="w-1/2 h-5 md:h-6 bg-gray-200 rounded-full animate-pulse mb-3 md:mb-4"></div>
+
+                {/* Skills list skeleton */}
+                <div className="space-y-2 md:space-y-3 pl-2 md:pl-4">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} className="flex items-center space-x-2 md:space-x-3">
+                      <div className="w-4 h-4 md:w-5 md:h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="w-2/3 md:w-3/4 h-3 md:h-4 bg-gray-200 rounded-full animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 };
 

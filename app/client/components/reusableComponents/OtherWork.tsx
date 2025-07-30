@@ -1,5 +1,5 @@
 "use client"
-import { useAppSelector } from "@/app/redux/essentials/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/redux/essentials/hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
@@ -14,6 +14,7 @@ import WhiteSpinner from "./WhiteSpinner";
 import FeedBackSidebar from "./FeedBackSidebar";
 import CardInfoDisplayModal from "./CardInfoDisplayModal";
 import BasicSpinner from "./BasicSpinner";
+import { changeState } from "@/app/redux/coursesSlices/likedStateSlice";
 
 type cardInfoDisplayProps = {
     openClickedWork: boolean;
@@ -32,6 +33,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
     );
     const isEnrolled = enrolledCourses.some(course => course._id === foundCourse?._id);
     const router = useRouter()
+    const dispatch = useAppDispatch()
 
     const filteredCreatorsWork: courseSchema[] = creatorsWork.filter((work: courseSchema) => work._id !== courseId)
 
@@ -86,7 +88,8 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
         })
     }
 
-    const [isLike, setIsLike] = useState<boolean>(foundCourse?.likedByCurrentUser || false);
+    const likedMap = useAppSelector(state => state.likedState.likedMap);
+    const isLike = likedMap[courseId] ?? foundCourse?.likedByCurrentUser ?? false;
     const [loadingAnim, setloadingAnim] = useState(false);
 
     const toggleLike = async () => {
@@ -103,7 +106,7 @@ const OtherWork = ({ openClickedWork, setOpenClickedWork, courseId }: cardInfoDi
             });
 
             // Update UI state
-            setIsLike(!isLike);
+            dispatch(changeState({ courseId: foundCourse!._id, isLiked: !isLike }));
         } catch (err) {
             console.error(err);
             toast.error("A server error occurred, please try again.");

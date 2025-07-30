@@ -10,19 +10,17 @@ import toast from "react-hot-toast";
 import { courseSchema } from "../../types/types";
 import GeneratedCoursePreview from "./GeneratedCoursePreview";
 import BlackOrbitalLoader from "../../components/reusableComponents/OrbitalLoader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import { useAppSelector } from "@/app/redux/essentials/hooks";
-import DeepseekSpinner from "../../components/reusableComponents/DeepseekSpinner";
-import { Trash } from "lucide-react";
-import BasicSpinner from "../../components/reusableComponents/BasicSpinner";
+import { Archive, ArchiveRestore, BarChart2, Pencil, Users } from "lucide-react";
 import CourseDetailsModal from "../../components/reusableComponents/CreatedCourseDetails";
 import { useSearchParams } from "next/navigation";
-import CourseEditorPage  from "./EditorPage";
+import CourseEditorPage from "./EditorPage";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import DeepseekSpinner from "../../components/reusableComponents/DeepseekSpinner";
+import { AxiosError } from "axios";
+import BlackSpinner from "../../components/reusableComponents/BlackSpinner";
 const CourseCreation = (): React.ReactElement => {
-
-
 
     // local states
     const [disabledBtn, setDisabledBtn] = useState<boolean>(true);
@@ -41,11 +39,20 @@ const CourseCreation = (): React.ReactElement => {
     const [isDrafting, setIsDrafting] = useState<boolean>(false);
     const [courseGettingDrafted, setCourseGettingDrafted] = useState<string>('');
     const [courseGettingPublished, setCourseGettingPublished] = useState<string>("")
-    const [deletingCourse, setDeletingCourse] = useState<boolean>(false)
-    const [deletedCourse, setDeletedCourse] = useState<string>("");
     const [seeCreatedCourseDetails, setSeeCreatedCourseDetails] = useState<boolean>(false);
     const [getCourseToView, setGetCourseToView] = useState<courseSchema | null>(null)
+    const [filter, setFilter] = useState<'active' | 'archived'>('active');
+    const [archivingCourse, setArchivingCourse] = useState<boolean>(false);
+    const [courseBeingArchived, setCourseBeingArchived] = useState<string>("")
+    const [restoringCourse, setRestoringCourse] = useState<boolean>(false)
+    const [courseBeingRestored, setCourseBeingRestored] = useState<string>("");
 
+    const [action, setAction] = useState<"none" | "archive" | "restore">("none")
+
+    // Filter courses based on selection
+    const filteredCourses = usersCreatedCourse.filter(course =>
+        filter === 'active' ? !course.isArchived : course.isArchived
+    );
 
     // Validation constants
     const COURSE_NAME_MIN = 5;
@@ -71,7 +78,6 @@ const CourseCreation = (): React.ReactElement => {
 
     const generateCourse = () => {
         setCourseGenerationLoader(true);
-
         axios.post("/api/create-course", { promptCourseName: courseName, promptCourseDescription: briefDescription, promptCategory: courseCategory }, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
             .then((res) => {
                 setCourseGenerationLoader(false);
@@ -149,32 +155,85 @@ const CourseCreation = (): React.ReactElement => {
         })
     }
 
-    const deleteCreatedCourse = (id: string) => {
-        setDeletingCourse(true);
-        axios.delete(`/api/delete-createdCourse/${id}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
+    const fetchCreatedCourses = () => {
+        setLoadingUsersCreatedCourse(true)
+        axios
+            .get(`/api/get-createdCourses`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
             .then((res) => {
-                setDeletingCourse(false);
-                toast.success(res.data.msg)
-                return;
-            }).catch((err) => {
-                setDeletingCourse(false);
+                setUsersCreatedCourses(res.data.data);
+                setLoadingUsersCreatedCourse(false);
+            })
+            .catch((err) => {
+                setLoadingUsersCreatedCourse(false);
+                console.error(err);
+                toast.error("Error occurred in getting creator's work");
+            })
+    }
+
+    const archiveCourse = (id: string) => {
+        setAction("archive")
+        setArchivingCourse(true);
+        setCourseBeingArchived(id);
+        axios.patch(`/api/archive-course/${id}`, {}, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`
+            }
+        }).then((res) => {
+            setArchivingCourse(false);
+            toast.success(`${res.data.msg} has been arhived`)
+
+            fetchCreatedCourses();
+            setCourseBeingArchived("");
+            return;
+        }).catch((err: unknown) => {
+            setArchivingCourse(false);
+            setCourseBeingArchived("");
+            if (err instanceof AxiosError) {
                 console.error(err)
-                if (err.response.status === 401 || err.response.status == 403) {
-                    router.push("/client/auth/login")
-                    return;
-                } else if (err.response.status === 404) {
-                    toast.error(err.response.data.msg);
+
+                if (err.response?.status === 401 || err.response?.status === 404) {
+                    router.push("/client/auth/login");
                     return;
                 } else {
-                    toast.error("A server error occured please bare with us")
-                    return;
+                    toast.error("A server error occured please bare with us.")
                 }
-            })
+            }
+        })
+    }
+
+    const restoreCourse = (id: string) => {
+        setAction("restore")
+        setRestoringCourse(true)
+        setCourseBeingRestored(id);
+
+        axios.patch(`/api/restore-course/${id}`, {}, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`
+            }
+        }).then((res) => {
+            toast.success(res.data.msg);
+            fetchCreatedCourses();
+            setRestoringCourse(false)
+            setCourseBeingRestored("");
+        }).catch((err) => {
+            setRestoringCourse(false);
+            setCourseBeingRestored("");
+            if (err instanceof AxiosError) {
+                console.error(err)
+
+                if (err.response?.status === 401 || err.response?.status === 404) {
+                    router.push("/client/auth/login");
+                    return;
+                } else {
+                    toast.error("A server error occured please bare with us.")
+                }
+            }
+        })
     }
     useEffect(() => {
         setLoadingUsersCreatedCourse(true);
         axios
-            .get(`/api/creators-work/${usersinfo.fullName}`)
+            .get(`/api/get-createdCourses`, { headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` } })
             .then((res) => {
                 setUsersCreatedCourses(res.data.data);
                 setLoadingUsersCreatedCourse(false);
@@ -188,15 +247,15 @@ const CourseCreation = (): React.ReactElement => {
     const searchParams = useSearchParams();
     const subTab = searchParams.get('subTab');
 
-    if (subTab === "edit-course") return <CourseEditorPage/>
+    if (subTab === "edit-course") return <CourseEditorPage />
     return (
         <>
-            <div className="col-span-16 min-h-screen p-6 flex flex-col">
+            <div className="col-span-16 min-h-screen p-6 flex flex-col overflow-hidden">
                 {/* Top Section */}
                 <div className="flex flex-col lg:flex-row gap-6 h-full">
                     {/* Left: Course Input - Modern Monochrome Card */}
                     <div className="flex-1">
-                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-200 shadow-lg overflow-hidden">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-200 shadow-lg overflow-hidden ">
                             {/* Card Header */}
                             <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-6">
                                 <h2 className="text-2xl font-bold text-white">Create New Course</h2>
@@ -334,38 +393,83 @@ const CourseCreation = (): React.ReactElement => {
 
                 {/* Created Courses Section */}
                 <div className="w-full min-h-fit flex flex-col gap-4 py-10">
-                    <div className="w-full md:max-w-[440px] sm:mx-auto md:m-0 md:w-full">
-                        <h1 className="text-xl max-lg:text-2xl">Manage Courses</h1>
+
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
+                        <h1 className="text-2xl font-bold text-gray-900">Manage Courses</h1>
+
+                        <div className="flex items-center gap-4">
+                            {/* Archive Filter */}
+                            <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setFilter('active')}
+                                    className={`px-3 py-1 text-sm rounded-md transition-colors ${filter === 'active' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                >
+                                    Active Courses
+                                </button>
+                                <button
+                                    onClick={() => setFilter('archived')}
+                                    className={`px-3 py-1 text-sm rounded-md transition-colors ${filter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                >
+                                    Archived
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div className={`w-full h-fit grid md:grid-cols-2 lg:grid-cols-3 py-10 gap-6`}>
                         {loadingUsersCreatedCourse ? (
-                            Array.from([1, 2, 3, 4, 5, 6]).map((i) => {
-                                return (
-                                    <div key={i} className="w-full max-w-[27rem] mx-auto md:mx-0 h-[27rem] animate-pulse bg-white border border-gray-100 rounded-xl overflow-hidden">
-                                        <div className="relative w-full h-64 bg-gray-200" />
-                                        <div className="p-4 flex flex-col h-[calc(100%-16rem)]">
-                                            <div className="flex-grow space-y-2">
-                                                <div className="w-3/4 h-4 bg-gray-300 rounded" />
-                                                <div className="w-full h-3 bg-gray-200 rounded" />
-                                                <div className="w-5/6 h-3 bg-gray-200 rounded" />
+
+                            [...Array(6)].map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="w-full max-w-[27rem] mx-auto md:mx-0 h-[27rem] bg-white border border-gray-200 rounded-xl overflow-hidden"
+                                >
+                                    {/* Image Skeleton - Responsive height */}
+                                    <div className="relative w-full h-48 bg-gray-200 animate-pulse">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-300/20 to-transparent" />
+                                    </div>
+
+                                    {/* Content Skeleton */}
+                                    <div className="p-5 flex flex-col h-[calc(100%-12rem)]">
+                                        {/* Title */}
+                                        <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-3" />
+
+                                        {/* Description */}
+                                        <div className="space-y-2 mb-4">
+                                            <div className="h-3 w-full bg-gray-200 rounded animate-pulse" />
+                                            <div className="h-3 w-5/6 bg-gray-200 rounded animate-pulse" />
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div className="flex justify-between mb-4">
+                                            <div className="flex items-center space-x-2">
+                                                <div className="h-4 w-4 bg-gray-200 rounded-full animate-pulse" />
+                                                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <div className="h-4 w-4 bg-gray-200 rounded-full animate-pulse" />
+                                                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+                                            </div>
+                                        </div>
+
+                                        {/* Footer - Responsive layout */}
+                                        <div className="flex items-center justify-between border-t pt-4 mt-auto">
+                                            <div className="flex items-center space-x-2">
+                                                <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse" />
+                                                <div className="hidden sm:block h-3 w-20 bg-gray-200 rounded animate-pulse" />
                                             </div>
 
-                                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 rounded-full bg-gray-300" />
-                                                    <div className="w-20 h-3 bg-gray-200 rounded" />
-                                                </div>
-
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-3 bg-gray-200 rounded" />
-                                                    <div className="w-16 h-6 bg-gray-300 rounded-full" />
-                                                    <div className="w-8 h-8 bg-gray-200 rounded-full" />
-                                                </div>
+                                            <div className="flex items-center space-x-2">
+                                                {/* Buttons - Responsive sizing */}
+                                                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
+                                                <div className="h-8 w-20 bg-gray-200 rounded-full animate-pulse hidden sm:block" />
+                                                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
                                             </div>
                                         </div>
                                     </div>
-                                )
-                            })
+                                </div>
+                            ))
                         ) : usersCreatedCourse.length <= 0 ? (
                             <div className="flex flex-col items-center justify-center h-64 rounded-lg bg-gray-50 p-6">
                                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4 ">
@@ -390,126 +494,199 @@ const CourseCreation = (): React.ReactElement => {
                                     You haven&apos;t created any courses. Get started by following the instructions to generate a course.
                                 </p>
                             </div>
-                        ) : usersCreatedCourse.map((course: courseSchema) => (
-                            <div
-                               
-                                key={course._id}
-                                className="w-full md:max-w-[27rem] max-lg:max-w-[30rem] mx-auto md:mx-0 h-[27rem] group overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-gray-900/10"
-                            >
-                                {/* Card Container */}
-                                <div className="relative flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden">
-                                    {/* Image with Gradient Overlay */}
-                                    <div 
-                                     onClick={() => {
-                                        setGetCourseToView(course)
-                                        setSeeCreatedCourseDetails(true);
-                                    }}
-                                    className="relative w-full h-64 overflow-hidden hover:cursor-pointer">
-                                        <Image
-                                            src={course.imageUrl}
-                                            alt={course.title}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-105 h-64"
-                                            unoptimized
-                                           
-                                        />
+                        ) :
+                            <div className="min-h-screen py-6 col-span-14 flex flex-col mx-auto">
+                                {/* Filter Controls */}
 
-                                        {/* Status Badge */}
-                                        <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium ${course.isPublished
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {course.isPublished ? 'Published' : 'Draft'}
+                                {filter === 'archived' && filteredCourses.length === 0 ? (
+                                    <div className="col-span-full flex flex-col items-center justify-center py-16">
+                                        <div className="bg-gray-100 p-6 rounded-full mb-6">
+                                            <Archive className="w-10 h-10 text-gray-400" />
                                         </div>
+                                        <h3 className="text-xl font-medium text-gray-800 mb-2">No Archived Courses</h3>
+                                        <p className="text-gray-500 text-center max-w-md mb-6">
+                                            You haven't archived any courses yet. Archive courses to keep them out of your active list while preserving them for future use.
+                                        </p>
+                                        <div className="flex flex-col sm:flex-row gap-3">
+                                            <button
+                                                onClick={() => setFilter('active')}
+                                                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors hover:cursor-pointer"
+                                            >
+                                                View Active Courses
+                                            </button>
 
-                                        {/* Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    </div>
-
-                                    {/* Card Content */}
-                                    <div className="p-4 flex flex-col flex-grow">
-                                        <div className="flex-grow">
-                                            <h3 className="text-lg font-bold text-gray-900 line-clamp-2 mb-1">
-                                                {course.title}
-                                            </h3>
-                                            <p className="text-sm text-gray-500 line-clamp-2 mb-3">
-                                                {course.description}
-                                            </p>
                                         </div>
+                                    </div>) :
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredCourses.map((course) => (
+                                            <div
+                                                key={course._id}
+                                                className={`relative group rounded-xl overflow-hidden overflow-x-hidden border transition-all duration-300 hover:shadow-lg ${course.isArchived ? 'border-gray-200 bg-gray-50' : 'border-gray-200 bg-white'
+                                                    }`}
+                                            >
+                                                {/* Archive Ribbon */}
+                                                {course.isArchived && (
+                                                    <div className="hover:cursor-pointer absolute top-0 right-0 bg-gray-300 text-gray-700 px-3 py-1 text-xs font-medium z-10 rounded-bl-lg">
+                                                        Archived
+                                                    </div>
+                                                )}
 
-                                        {/* Footer */}
-                                        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
-                                            <div className="flex items-center flex-col gap-2 max-lg:gap-0 max-lg:flex-row space-x-2">
-                                                <Image
-                                                    src={course.creator.profilePicture}
-                                                    alt={course.creator.fullName}
-                                                    width={28}
-                                                    height={28}
-                                                    className="rounded-full border border-gray-200"
-                                                    unoptimized
-                                                />
-                                                <span className="text-xs sm:text-sm font-medium text-gray-700">
-                                                    {course.creator.fullName}
-                                                </span>
-                                            </div>
+                                                {/* Course Image */}
+                                                <div
+                                                    onClick={() => {
+                                                        setGetCourseToView(course)
+                                                        setSeeCreatedCourseDetails(true);
+                                                    }}
+                                                    className="relative h-48 w-full overflow-hiddenn overflow-x-hidden hover:cursor-pointer
+                                            ">
+                                                    <Image
+                                                        src={course.imageUrl}
+                                                        alt={course.title}
+                                                        fill
+                                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                                        unoptimized
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-                                            <div className="flex items-center space-x-3">
-                                                <div className="flex items-center space-x-1 text-gray-400">
-                                                    <FontAwesomeIcon icon={faHeart} className="w-4 h-4" />
-                                                    <span className="text-xs">{course.likes}</span>
+                                                    {/* Status Badge */}
+                                                    <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-medium ${course.isPublished
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                        {course.isPublished ? 'Published' : 'Draft'}
+                                                    </div>
                                                 </div>
 
-                                                {!course.isPublished ? (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            publishCourse(course._id)
-                                                        }}
-                                                        className={`px-3 py-1 text-xs font-medium bg-black text-white rounded-full hover:bg-gray-800 transition-all
-                hover:cursor-pointer hover:scale-105 duration-300 ${(isPublishing && courseGettingPublished === course._id) && "centered-flex space-x-4"}`}
-                                                    >
-                                                        <p>Publish</p>
-                                                        {(isPublishing && courseGettingPublished === course._id) && (
-                                                            <DeepseekSpinner />
-                                                        )}
-                                                    </button>
-                                                ) : (<button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        draftCourse(course._id)
-                                                    }}
-                                                    className={`px-3 py-1 text-xs font-medium bg-black text-white rounded-full hover:bg-gray-800 transition-all
-        hover:cursor-pointer hover:scale-105 duration-300 ${(isDrafting && courseGettingDrafted === course._id) && "centered-flex space-x-4"}`}
-                                                >
-                                                    <p>Draft</p>
-                                                    {(isDrafting && courseGettingDrafted === course._id) && (
-                                                        <DeepseekSpinner />
-                                                    )}
-                                                </button>)}
-                                                <button
-                                                    onClick={() => {
-                                                        router.push(`/client/dashboard?tab=course-creation&subTab=edit-course&courseId=${course._id}`)
-                                                    }}
-                                                    className={`px-3 py-1 text-xs font-medium bg-black text-white rounded-full hover:bg-gray-800 transition-all
-        hover:cursor-pointer hover:scale-105 duration-300`}
-                                                >
-                                                    <p>Edit</p>
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        deleteCreatedCourse(course._id)
-                                                        setDeletedCourse(course._id)
-                                                    }}
-                                                    className="p-2 rounded-full bg-red-50 text-red-600  hover:cursor-pointer hover:scale-105 transition-all duration-300"
-                                                >
-                                                    {deletedCourse === course._id && deletingCourse ? <BasicSpinner /> : <Trash className="w-3 h-3" />}
-                                                </button>
+                                                {/* Course Content */}
+                                                <div className="p-5">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
+                                                            {course.title}
+                                                        </h3>
+
+                                                    </div>
+
+                                                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-4">
+                                                        {course.description}
+                                                    </p>
+
+                                                    {/* Stats */}
+                                                    <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Users className="w-4 h-4" />
+                                                            <span>{course.enrollments || 0} enrollments</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <BarChart2 className="w-4 h-4" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Action Buttons */}
+                                                    <div className="flex items-center justify-between border-t pt-4">
+                                                        <div className="flex items-center space-y-1 sm:space-y-0 sm:space-x-2 flex-col text-center sm:text-start sm:flex-row">
+                                                            <Image
+                                                                src={course.creator.profilePicture}
+                                                                alt={course.creator.fullName}
+                                                                width={24}
+                                                                height={24}
+                                                                className="rounded-full border border-gray-200"
+                                                                unoptimized
+                                                            />
+                                                            <span className="text-xs text-gray-600">
+                                                                {course.creator.fullName}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center space-x-2">
+
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <button
+                                                                        onClick={() => {
+
+                                                                            if (course.isArchived) {
+                                                                                restoreCourse(course._id);
+                                                                            }
+
+                                                                            else {
+                                                                                archiveCourse(course._id);
+                                                                            }
+                                                                        }}
+                                                                        className="p-2 rounded-full hover:bg-gray-100 transition-colors hover:cursor-pointer"
+                                                                    >
+                                                                        {courseBeingArchived === course._id && archivingCourse ? (
+                                                                            <BlackSpinner />
+                                                                        ) : courseBeingRestored === course._id && restoringCourse ? (
+                                                                            <BlackSpinner />
+                                                                        ) : course.isArchived ? (
+                                                                            <ArchiveRestore className="w-4 h-4 text-gray-600" />
+                                                                        ) : (
+                                                                            <Archive className="w-4 h-4 text-gray-600" />
+                                                                        )}
+                                                                    </button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {course.isArchived ? 'Restore course' : 'Archive course'}
+                                                                </TooltipContent>
+                                                            </Tooltip>
+
+                                                            {!course.isPublished ? (
+                                                                !course.isArchived && (
+                                                                    <button
+                                                                        onClick={() => publishCourse(course._id)}
+                                                                        className={`px-3 hover:cursor-pointer py-1 text-xs bg-black text-white rounded-full hover:bg-gray-800 transition-colors
+                                                                ${isPublishing && "centered-flex space-x-4"}`}
+                                                                    >
+                                                                        <p>Publish</p>
+                                                                        {isPublishing && courseGettingPublished === course._id && (
+                                                                            <span className="mt-1">
+                                                                                <DeepseekSpinner />
+                                                                            </span>
+                                                                        )}
+                                                                    </button>
+                                                                )
+                                                            ) : (
+                                                                !course.isArchived && (
+                                                                    <button
+                                                                        onClick={() => draftCourse(course._id)}
+                                                                        className={`px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors hover:cursor-pointer
+                                                            ${isDrafting && "centered-flex space-x-4"}`}
+                                                                    >
+                                                                        <p>Draft</p>
+                                                                        {isDrafting && courseGettingDrafted === course._id && (
+                                                                            <span className="mt-1">
+                                                                                <DeepseekSpinner />
+                                                                            </span>
+                                                                        )}
+                                                                    </button>
+                                                                )
+                                                            )}
+
+
+                                                            {!course.isPublished && (
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            onClick={() => router.push(`/client/dashboard?tab=course-creation&subTab=edit-course&courseId=${course._id}`)}
+                                                                            className="p-2 rounded-full hover:bg-gray-100 transition-colors hover:cursor-pointer"
+                                                                        >
+                                                                            <Pencil className="w-4 h-4 text-gray-600" />
+
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        Edit course
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                        ))}
+                                    </div>}
                             </div>
-                        ))}
+                        }
                     </div>
                 </div>
             </div>
