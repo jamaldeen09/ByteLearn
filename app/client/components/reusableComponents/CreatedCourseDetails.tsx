@@ -4,7 +4,6 @@ import { XIcon } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { courseSchema } from "../../types/types"
-import { getTimeAgo } from "../../utils/utils"
 import { Clock, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,6 +12,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line } from 'react-chartjs-2';
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
+import { useAppSelector } from "@/app/redux/essentials/hooks"
+import { AxiosError } from "axios"
 
 ChartJS.register(
     CategoryScale,
@@ -47,11 +48,6 @@ interface CourseFeedbackMetrics {
     };
 }
 
-interface CourseFeedbackGraphProps {
-    courseId: string;
-}
-
-
 
 const CourseDetailsModal = ({
     open,
@@ -63,9 +59,6 @@ const CourseDetailsModal = ({
     course: courseSchema | null
 }) => {
     const [activeTab, setActiveTab] = useState<"details" | "feedback">("details")
-    const [stats, setStats] = useState({
-        enrollments: 0,
-    })
     const [metrics, setMetrics] = useState<CourseFeedbackMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter()
@@ -100,15 +93,17 @@ const CourseDetailsModal = ({
         const fetchCourseMetrics = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`/api/single-course-feedback-metrics/${course?._id}`,{
+                const response = await axios.get(`/api/single-course-feedback-metrics/${course?._id}`, {
                     headers: { "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}` }
                 });
                 setMetrics(response.data.metrics);
-            } catch (err: any) {
-                console.error(err);
-                toast.error(err.response?.data?.msg || "Failed to load course feedback");
-                if (err.response?.status === 401 || err.response?.status === 404) {
-                    router.push("/client/auth/login");
+            } catch (err: unknown) {
+                if (err instanceof AxiosError) {
+                    console.error(err);
+                    toast.error(err.response?.data?.msg || "Failed to load course feedback");
+                    if (err.response?.status === 401 || err.response?.status === 404) {
+                        router.push("/client/auth/login");
+                    }
                 }
             } finally {
                 setLoading(false);
@@ -186,9 +181,9 @@ const CourseDetailsModal = ({
                                             <div className="p-3 rounded-full bg-blue-100 text-blue-600">
                                                 <Users className="w-5 h-5" />
                                             </div>
-                                            <div>
+                                            <div className="">
                                                 <p className="text-sm text-gray-500">Enrollments</p>
-                                                <p className="text-xl font-semibold">{stats.enrollments}</p>
+                                                <p className="text-xl font-semibold">{course.enrollments}</p>
                                             </div>
                                         </div>
 

@@ -249,10 +249,7 @@ const CourseEditorPage = () => {
       setInitialCourseData(initialData);
       setHasUnsavedChanges(false);
     }
-  }, [courseToEdit]);
-
-
-
+  }, [courseToEdit, initialCourseData]);
 
   useEffect(() => {
     const originalQuiz = courseDetails.quiz || []
@@ -342,7 +339,7 @@ const CourseEditorPage = () => {
         "Authorization": `Bearer ${localStorage.getItem("bytelearn_token")}`,
         "Content-Type": "multipart/form-data",
       }
-    }).then((res) => {
+    }).then(() => {
       setIsSaving(false)
       setActiveTab("course")
 
@@ -654,7 +651,7 @@ const CourseEditorPage = () => {
                   <FileText className="w-10 h-10 text-gray-400" />
                   <h3 className="text-lg font-medium text-gray-800">Course Editor</h3>
                   <p className="text-gray-500 text-xs max-w-md">
-                    You're currently editing {courseToEdit?.title || "this course"}.
+                    You&apos;re currently editing {courseToEdit?.title || "this course"}.
                     Any unsaved changes will be lost if you exit now.
                   </p>
                   <AlertTriangle className="w-3 h-3 text-red-600" />
@@ -1497,8 +1494,9 @@ const CourseEditorPage = () => {
                                 <Code className="w-8 h-8 text-gray-400" />
                               </div>
                               <h3 className="text-lg font-medium text-gray-800 mb-2">No Skills Yet</h3>
+
                               <p className="text-gray-500 text-sm mb-6">
-                                This topic doesn't contain any skills yet. Add your first skill to start editing content.
+                                This topic doesn&apos;t contain any skills yet. Add your first skill to start editing content.
                               </p>
                               <Button
                                 variant="outline"

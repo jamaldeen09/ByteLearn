@@ -117,7 +117,7 @@ const MainDashboard = () => {
         return totalSkills > 0 ? Math.round((completedCount / totalSkills) * 100) : 0
     }, [])
 
-    
+
     return (
         <div className="lg:col-span-14 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent py-10">
             <div className="min-h-[91vh] px-4 sm:px-6 flex flex-col space-y-10">
@@ -150,7 +150,7 @@ const MainDashboard = () => {
                                 </div>
                                 <h3 className="text-xl font-medium text-gray-800 mb-2">No Active Courses</h3>
                                 <p className="text-gray-500 mb-6 max-w-md">
-                                    You haven't enrolled in any courses yet. Explore our catalog to start learning.
+                                    You haven&apos;t enrolled in any courses yet. Explore our catalog to start learning.
                                 </p>
                                 <button
                                     onClick={() => router.push('/client/dashboard?tab=courses')}

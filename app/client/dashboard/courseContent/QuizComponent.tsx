@@ -155,7 +155,7 @@ const QuizComponent = ({ courseId }: { courseId: string }) => {
 
           <h3 className="text-2xl font-medium text-gray-900 mb-2">No Quiz Available</h3>
           <p className="text-gray-600 mb-6">
-            This course doesn't have any quiz questions yet. Check back later or continue learning.
+            This course doesn&apos;t have any quiz questions yet. Check back later or continue learning.
           </p>
 
           <button

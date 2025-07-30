@@ -17,7 +17,6 @@ import Image from 'next/image'
 import NotificationViewSkeleton from '../../components/reusableComponents/NotificationViewSkeleton'
 import { AxiosError } from 'axios'
 import { Button } from '@/components/ui/button'
-import DeepseekSpinner from '../../components/reusableComponents/DeepseekSpinner'
 
 const Inbox = () => {
   const notifications = useAppSelector(state => state.notificationContainer.notifications)

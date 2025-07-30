@@ -10,7 +10,7 @@ import axios from "../../utils/config/axios"
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { changeState } from "@/app/redux/coursesSlices/likedStateSlice"
-import BasicSpinner from "./BasicSpinner"
+
 
 const OngoingCourse = ({
   courseImgURL,
@@ -19,7 +19,6 @@ const OngoingCourse = ({
   progress = 0,
   countinueLearningLink,
   courseId,
-  isPublished
 }: onGoingCoursesProps) => {
   const dispatch = useAppDispatch()
   const courses = useAppSelector(state => state.coursesSlice.courses)

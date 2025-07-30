@@ -47,7 +47,6 @@ const CourseCreation = (): React.ReactElement => {
     const [restoringCourse, setRestoringCourse] = useState<boolean>(false)
     const [courseBeingRestored, setCourseBeingRestored] = useState<string>("");
 
-    const [action, setAction] = useState<"none" | "archive" | "restore">("none")
 
     // Filter courses based on selection
     const filteredCourses = usersCreatedCourse.filter(course =>
@@ -171,7 +170,7 @@ const CourseCreation = (): React.ReactElement => {
     }
 
     const archiveCourse = (id: string) => {
-        setAction("archive")
+
         setArchivingCourse(true);
         setCourseBeingArchived(id);
         axios.patch(`/api/archive-course/${id}`, {}, {
@@ -202,7 +201,6 @@ const CourseCreation = (): React.ReactElement => {
     }
 
     const restoreCourse = (id: string) => {
-        setAction("restore")
         setRestoringCourse(true)
         setCourseBeingRestored(id);
 
@@ -505,7 +503,7 @@ const CourseCreation = (): React.ReactElement => {
                                         </div>
                                         <h3 className="text-xl font-medium text-gray-800 mb-2">No Archived Courses</h3>
                                         <p className="text-gray-500 text-center max-w-md mb-6">
-                                            You haven't archived any courses yet. Archive courses to keep them out of your active list while preserving them for future use.
+                                            You haven&apos;t archived any courses yet. Archive courses to keep them out of your active list while preserving them for future use.
                                         </p>
                                         <div className="flex flex-col sm:flex-row gap-3">
                                             <button

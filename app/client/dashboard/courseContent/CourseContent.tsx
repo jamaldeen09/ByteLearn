@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import SkillContent from "./SkillContent"
 import QuizResult from "./QuizResult"
 import { getCompletedSkills } from "@/app/redux/coursesSlices/completedSkillsSlice"
-import { setProgress, updateSnapshottedCourse } from "@/app/redux/coursesSlices/progressSlice"
+import { setProgress } from "@/app/redux/coursesSlices/progressSlice"
 import Image from 'next/image';
 import { singleCourseSchema, SkillsSchema, topicSchema } from "@/app/client/types/types"
 
