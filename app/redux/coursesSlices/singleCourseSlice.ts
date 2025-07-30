@@ -15,7 +15,8 @@ const initialState: singleCourseSchema = {
         email: "",
         profilePicture: ""
     },
-    isPublished: false
+    isPublished: false,
+    quiz: [],
 }
 
 const singleCourseSlice = createSlice({
