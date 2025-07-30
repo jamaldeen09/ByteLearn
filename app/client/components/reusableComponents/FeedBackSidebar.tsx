@@ -35,7 +35,6 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
 
 
     const [triggerMessageDeletion, setTriggerMessageDeletion] = useState<boolean>(false);
-    const [handleMsgEditing, setHandleMsgEditing] = useState<boolean>(false);
     const [clickedMsg, setClickedMsg] = useState<{
         msgId?: string,
         msgContent: string,
@@ -82,27 +81,28 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
     };
     const isCreator = existingCourseData?.creator._id === userId;
 
-    // Listen for feedback response
-    useEffect(() => {
+    const setupFeedbackSentListener = () => {
         const handleFeedbackSent = (payload: feedBackMsgSchema) => {
-            ;
+
             setLocalMessages((prev) => [payload, ...prev]);
             setFeedback("");
             setDisableButton(true);
             setLoading(false);
-            setTimeout(() => toast.success("Feedback sent!"), 1000)
+            toast.success("Feedback sent!");
 
             socket.emit(events.GET_FEEDBACK_HISTORY, { courseId }, (payload: feedBackMsgSchema[]) => {
                 setLocalMessages(payload);
             });
         };
 
+        socket.off(events.FEEDBACK_SENT);
         socket.on(events.FEEDBACK_SENT, handleFeedbackSent);
+    };
 
-        return () => {
-            socket.off(events.FEEDBACK_SENT);
-        };
+    useEffect(() => {
+        setupFeedbackSentListener();
     }, [courseId]);
+
 
     // Load Feedback History
     useEffect(() => {
@@ -184,39 +184,38 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
         };
     }, [triggerMessageDeletion, courseId]);
 
-    useEffect(() => {
-        if (!handleMsgEditing || clickedMsg?.msgContent.trim() === "" || clickedMsg?.msgId?.trim() === "") return;
-        const data = { msgToEdit: clickedMsg?.msgId, courseId, newContent: clickedMsg?.msgContent }
-        setLoading(true)
-        socket.emit(events.EDIT_MESSAGE, data);
+    const handleEditMessage = () => {
+        if (!clickedMsg?.msgContent.trim() || !clickedMsg?.msgId?.trim()) return;
 
-        socket.on(events.MESSAGE_EDITED, ({ msg }) => {
-            setLoading(false)
+        const data = {
+            msgToEdit: clickedMsg.msgId,
+            courseId,
+            newContent: clickedMsg.msgContent
+        };
+
+        setLoading(true);
+
+        const handleMessageEdited = ({ msg }: { msg: string }) => {
             setLoadingMessages(true);
             setIsEditing(false);
-            setClickedMsg(null)
-
+            setClickedMsg(null);
             toast.success(msg);
-            const data = { room: courseId };
-            socket.emit(events.JOIN_ROOM, data);
+            setLoading(false);
             socket.emit(events.GET_FEEDBACK_HISTORY, { courseId });
+        };
 
-            const handleHistory = (payload: feedBackMsgSchema[]) => {
-                setLocalMessages(payload);
-                setLoadingMessages(false);
-            };
-            socket.on(events.FEEDBACK_HISTORY_SENT, handleHistory);
-            return;
-        })
+        const handleHistory = (payload: feedBackMsgSchema[]) => {
+            setLocalMessages(payload);
+            setLoadingMessages(false);
+        };
 
-        return () => {
-            socket.off(events.EDIT_MESSAGE)
-            socket.off(events.MESSAGE_EDITED)
-            socket.off(events.JOIN_ROOM);
-            socket.off(events.GET_FEEDBACK_HISTORY);
-            socket.off(events.FEEDBACK_HISTORY_SENT);
-        }
-    }, [handleMsgEditing, clickedMsg?.msgContent, clickedMsg?.msgId, courseId])
+        socket.once(events.MESSAGE_EDITED, handleMessageEdited);
+        socket.once(events.FEEDBACK_HISTORY_SENT, handleHistory);
+
+        socket.emit(events.EDIT_MESSAGE, data);
+    };
+
+
 
     useEffect(() => {
         const handleFeedbackLiked = ({ messageId, likes, liked }: { messageId: string, likes: number, liked: boolean }) => {
@@ -287,7 +286,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
 
                     </div>
                     <button
-                        onClick={isEditing ? () => setHandleMsgEditing(true) : sendFeedback}
+                        onClick={isEditing ? handleEditMessage : sendFeedback}
                         disabled={disableButton || loading}
                         className={`px-6 py-3 rounded-full hover:cursor-pointer transition-all duration-300 flex items-center justify-center ${disableButton || loading
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -459,7 +458,7 @@ const FeedBackSidebar = ({ courseId }: { courseId: string | undefined }) => {
 
                                         {/* Edit/Delete - Only shown for own messages */}
                                         {isOwnMessage && (
-                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex gap-2">
                                                 <button
                                                     onClick={() => {
                                                         setTriggerMessageDeletion(true);
